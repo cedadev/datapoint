@@ -1,0 +1,10 @@
+scipy==1.12.0
+xarray==2024.6.0
+cf-python==3.16.2
+cfdm==1.11.1.0
+netCDF4==1.6.5
+h5py==3.11.0
+dask==2024.7.0
+cftime==1.6.4
+cfunits==3.3.7
+pytest==7.2.0
