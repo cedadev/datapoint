@@ -42,7 +42,7 @@ class DataPointClient:
             print(f'{coll}:')
             items = list(search.items())
             if len(items) > 0:
-                print(' - ' + ', '.join(items[0].properties()))
+                print(' - ' + ', '.join(items[0].get_attributes()))
             else:
                 print(' < No Items >')
 

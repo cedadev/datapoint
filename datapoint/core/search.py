@@ -16,7 +16,7 @@ class DataPointSearch:
 
     def info(self):
         print('Search terms:')
-        for term, searched in enumerate(self._search_terms):
+        for term, searched in self._search_terms.items():
             print(f' - {term}: {searched}')
     
     def __getitem__(self, index):
@@ -25,7 +25,7 @@ class DataPointSearch:
     def cloud_assets(self, max_items=-1):
         for item in self.items(max_items=max_items):
             assets = item.cloud_assets()
-            print(f'{item.id}: ')
+            print(f'{item}: ')
             print(' - ' + ', '.join(assets))
 
     def _get_items(self):

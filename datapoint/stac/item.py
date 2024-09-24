@@ -9,7 +9,12 @@ from .properties import ItemPropertiesMixin
 class DataPointItem(ItemPropertiesMixin):
 
     def __init__(self, item_stac):
-        self._stac = item_stac.to_dict()
+        self._meta = {}
+        for key, value in item_stac.to_dict().items():
+            if key == 'properties':
+                self._stac = value
+            else:
+                self._meta[key] = value
 
         self._cloud_assets = None
         self._collection = item_stac.get_collection().id
@@ -25,6 +30,9 @@ class DataPointItem(ItemPropertiesMixin):
         Programmer representation, identical to string representation
         for this class."""
         return self.__str__()
+    
+    def __dict__(self):
+        return self.get_attributes()
         
     @property
     def collection(self):
@@ -39,7 +47,7 @@ class DataPointItem(ItemPropertiesMixin):
         known_assets = ['reference_file']
 
         assets = []
-        asset_dict = self._stac.get_assets()
+        asset_dict = self._meta['assets']
         for asset in asset_dict.keys():
             if asset in known_assets:
                 assets.append(asset)
@@ -58,9 +66,9 @@ class DataPointItem(ItemPropertiesMixin):
         if combine:
             raise NotImplementedError
         
-        assets = self._stac.get_assets()
+        assets = self._meta['assets']
 
         if 'reference_file' in assets.keys():
             rf = assets['reference_file']
 
-            return open_kerchunk(**rf.to_dict())
+            return open_kerchunk(**rf)

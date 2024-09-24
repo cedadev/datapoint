@@ -10,7 +10,7 @@ class ItemPropertiesMixin:
         Attempt to get the stac id, or use the string
         representation of the source stac object."""
 
-        return self._multiple_options(['id', 'instance_id'])
+        return self._meta['id']
     
     @property
     def assets(self):
@@ -29,7 +29,11 @@ class ItemPropertiesMixin:
         return self._stac['end_datetime']
     
     def _multiple_options(self, options):
+        attr = None
         for option in options:
+            if option in self._stac:
+                attr = self._stac[option]
+                continue
             if hasattr(self._stac, option):
                 attr = getattr(self._stac, option)
                 continue
@@ -55,4 +59,8 @@ class ItemPropertiesMixin:
         )
     
     def get_attributes(self):
+        return self._stac
+
+    @property
+    def attributes(self):
         return self._stac
