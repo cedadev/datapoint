@@ -24,31 +24,36 @@ class DataPointClient:
         self._client = pystac_client.Client.open(url)
 
     def __str__(self):
-        pass
+        return 'Client for DataPoint searches.'
 
     def __repr__(self):
-        pass
+        return self.__str__()
 
     def __getitem__(self, collection):
         """
         Routine for getting a collection from this client
         """
         return DataPointSearch(self.search(collections=[collection]))
-    
-    @property
-    def description(self):
-        pass
+        
+    def list_search_terms(self, collection=None):
 
-    @property
-    def id(self):
-        pass
+        def search_terms(search, coll):
 
-    @property
-    def title(self):
-        pass
+            print(f'{coll}:')
+            items = list(search.items())
+            if len(items) > 0:
+                print(' - ' + ', '.join(items[0].properties()))
+            else:
+                print(' < No Items >')
 
-    def links(self):
-        pass
+        if collection is not None:
+            dps = self.search(collections=[collection], max_items=1)
+            search_terms(dps, collection)
+
+        else:
+            for coll in self._client.get_collections():
+                c = self.search(collections=[coll.id], max_items=1)
+                search_terms(c, coll.id)
 
     def list_collections(self):
         """
@@ -62,4 +67,4 @@ class DataPointClient:
     def search(self, **kwargs):
         
         search = self._client.search(**kwargs)
-        return DataPointSearch(search, **kwargs)
+        return DataPointSearch(search, search_terms=kwargs)

@@ -7,47 +7,41 @@ from datapoint.dataset import DataPointCluster
 
 class DataPointSearch:
 
-    def __init__(self, pystac_search, **kwargs):
+    def __init__(self, pystac_search, search_terms=None):
+
+        self._search_terms = search_terms or None
 
         self._search = pystac_search
+        self._items  = None
 
-    def __str__(self):
-        return '<DataPointSearch>'
+    def info(self):
+        print('Search terms:')
+        for term, searched in enumerate(self._search_terms):
+            print(f' - {term}: {searched}')
     
-    def __repr__(self):
-        return '\n'.join(
-            [str(self)] + [str(self._search.items())]
-        )
-    
-    def get_spatial_extent(self):
-        pass
+    def __getitem__(self, index):
+        return self.items()[index]
 
-    def get_temporal_extent(self):
-        pass
+    def cloud_assets(self, max_items=-1):
+        for item in self.items(max_items=max_items):
+            assets = item.cloud_assets()
+            print(f'{item.id}: ')
+            print(' - ' + ', '.join(assets))
 
-    def get_dimension_info(self):
-        pass
-
-    def item_collections(self):
-        pass
-
-    def get_items(self):
+    def _get_items(self):
         item_list = []
         for item in self._search.items():
             item_list.append(
                 DataPointItem(item)
             )
-        return item_list
+        self._items = item_list
 
-    def items(self):
-        item_list = []
-        for item in self._search.items():
-            item_list.append(
-                DataPointItem(item)
-            )
-        yield item_list
+    def items(self, max_items=-1):
+        if self._items is None:
+            self._get_items()
+        return self._items
     
-    def to_dataset(
+    def open_dataset(
             self,
             mode='xarray',
             combine=False,
@@ -58,7 +52,7 @@ class DataPointSearch:
         for item in self._search.items():
             it = DataPointItem(item)
             ids.append(it.id)
-            ds = it.to_dataset(mode=mode, combine=combine, priority=priority)
+            ds = it.open_dataset(mode=mode, combine=combine, priority=priority)
             dset.append(ds)
 
         if len(dset) > 1:
