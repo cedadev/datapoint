@@ -3,14 +3,14 @@ requires = ["setuptools>=40.8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-requires-python=">=3.7"
+requires-python=">=3.11"
 name="DataPoint"
 version="1.0"
 dynamic = ["dependencies"]
 authors = [{name = "Daniel Westwood", email = "daniel.westwood@stfc.ac.uk"}]
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["requirements_alpha.txt"]}
+dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools]
 packages = ["datapoint"]
