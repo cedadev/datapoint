@@ -46,13 +46,14 @@ class DataPointSearch:
             mode='xarray',
             combine=False,
             priority=[],
+            **kwargs,
         ):
 
         dset, ids = [],[]
         for item in self._search.items():
             it = DataPointItem(item)
             ids.append(it.id)
-            ds = it.open_dataset(mode=mode, combine=combine, priority=priority)
+            ds = it.open_dataset(mode=mode, combine=combine, priority=priority, **kwargs)
             dset.append(ds)
 
         if len(dset) > 1:

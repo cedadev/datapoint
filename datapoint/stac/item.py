@@ -2,7 +2,7 @@ __author__    = "Daniel Westwood"
 __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
-from datapoint.dataset import open_kerchunk
+from datapoint.dataset import open_kerchunk, open_cfa
 
 from .properties import ItemPropertiesMixin
 
@@ -44,7 +44,7 @@ class DataPointItem(ItemPropertiesMixin):
         return self._cloud_assets
 
     def _get_cloud_assets(self):
-        known_assets = ['reference_file']
+        known_assets = ['reference_file','reference_file_2']
 
         assets = []
         asset_dict = self._meta['assets']
@@ -57,8 +57,16 @@ class DataPointItem(ItemPropertiesMixin):
             self,
             mode='xarray',
             combine=False,
-            priority=[],
+            priority=None,
+            **kwargs,
         ):
+
+        known_methods = {
+            'reference_file': open_kerchunk,
+            'reference_file_2': open_cfa,
+        }
+
+        priority = priority or list(known_methods.keys())
 
         if mode != 'xarray':
             raise NotImplementedError
@@ -68,7 +76,18 @@ class DataPointItem(ItemPropertiesMixin):
         
         assets = self._meta['assets']
 
-        if 'reference_file' in assets.keys():
-            rf = assets['reference_file']
+        for cloud_type in priority:
+            if cloud_type in assets.keys():
 
-            return open_kerchunk(**rf)
+                try:
+                    func = known_methods[cloud_type]
+                    rf   = assets[cloud_type] | kwargs
+                    return func(**rf)
+                except KeyError:
+                    # Future raise warning
+                    continue
+
+        raise ValueError(
+            'Priority list does not include a valid cloud format'
+            f'Available format options: {tuple(known_methods.keys())}'
+        )
