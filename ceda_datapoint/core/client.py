@@ -4,22 +4,176 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import pystac_client
 from pystac_client.stac_api_io import StacApiIO
+import logging
 
+from ceda_datapoint.mixins import DataPointMixin
 from .cloud import DataPointCluster
 from .item import DataPointItem
-
 from .utils import urls
 
-class DataPointClient:
+logger = logging.getLogger(__name__)
 
-    def __init__(self, org='CEDA', url=None):
+class DataPointSearch:
+    """
+    Search instance created upon searching using the client."""
+
+    def __init__(
+            self, 
+            pystac_search: object, 
+            search_terms: dict = None, 
+            meta: dict = None
+        ):
+
+        self._search_terms = search_terms or None
+        self._meta = meta or None
+
+        self._search = pystac_search
+        self._item_set  = None
+
+        self._meta['search_terms'] = self._search_terms
+
+    def __str__(self) -> str:
+        """
+        String representation of this search.
+        """
+
+        org_url = self._org or self._url
+        terms = {k: v for k, v in self._search_terms.items() if k != 'query'}
+
+        if 'query' in self._search_terms:
+            terms['query'] = len(self._search_terms['query'])
+        return f'<DataPointSearch: {org_url} ({terms})'
+    
+    def __getitem__(self, index) -> DataPointItem:
+        """
+        Public method to index the dict of items.
+        """
+
+        if not self._item_set:
+            self._load_item_set()
+
+        if isinstance(index, str):
+            if index not in self._item_set:
+                logger.warning(
+                    f'Item "{index}" not present in the set of items.'
+                )
+                return None
+            return self._item_set[index]
+        elif isinstance(index, int):
+            if index > len(self._item_set.keys()):
+                logger.warning(
+                    f'Could not return item "{index}" from the set '
+                    f'of {len(self._item_set)} items.'
+                )
+                return None
+            key = list(self._item_set.keys())[index]
+            return self._item_set[key]
+        else:
+            logger.warning(
+                f'Unrecognised index type for {index} - '
+                f'must be one of ("int","str")'
+            )
+            return None
+
+    def get_items(self) -> dict:
+        """
+        Public method to get the set of 
+        DataPointItem objects.
+        """
+
+        if not self._item_set:
+            self._load_item_set()
+
+        return self._item_set
+
+    def info(self) -> None:
+        """
+        Provide information about this search
+        """
+        print(self)
+        print('Search terms:')
+        for term, searched in self._search_terms.items():
+            print(f' - {term}: {searched}')
+
+    def open_cluster(
+            self,
+            mode='xarray',
+            combine=False,
+            priority=[],
+            **kwargs,
+        ) -> DataPointCluster:
+
+        """
+        Open a DataPointCluster object from the cloud assets for 
+        each item in this search.
+        """
+
+        if combine:
+            raise NotImplementedError(
+                '"Combine" feature has not yet been implemented'
+            )
+        
+        if not self._item_set:
+            self._load_item_set()
+        
+        assets = []
+        for item in self._item_set:
+            assets.append(item.get_cloud_assets(mode=mode, combine=combine, priority=priority))
+
+        return DataPointCluster(assets, meta=self._meta, combine=combine)
+    
+    def display_assets(self, max_items: int = -1) -> None:
+        """
+        Display the number of assets attributed to each item in
+        the itemset.
+        """
+        if not self._item_set:
+            self._load_item_set()
+
+        for item in self._item_set.values()[:max_items]:
+            assets = item.get_assets()
+            print(item)
+            print(' - ' + ', '.join(assets.keys()))
+
+    def display_cloud_assets(self, max_items: int = -1) -> None:
+        """
+        Display the cloud assets attributed to each item in
+        the itemset.
+        """
+        if not self._item_set:
+            self._load_item_set()
+
+        for item in self._item_set.values()[:max_items]:
+            assets = item.list_cloud_formats()
+            print(item)
+            print(' - ' + ', '.join(assets))
+
+    def _load_item_set(self) -> None:
+        """
+        Load the set of items for this search into 
+        self-describing DataPointItem instances.
+        """
+        items = {}
+        for item in self._search.items():
+            items[item.id] = DataPointItem(item, meta=self._meta)
+        self._item_set = items
+    
+class DataPointClient(DataPointMixin):
+    """
+    Client for searching STAC collections, returns self-describing 
+    components at all points."""
+
+    def __init__(
+            self, 
+            org: str = 'CEDA', 
+            url: str = None
+        ) -> None:
+
+        self._url = url
 
         if url and org != 'CEDA':
-            # url and org saved
-            self._url = url
             self._org = org
         elif url:
-            self._url = url
             self._org = None
         else:
             # Not provided a url so just use the org
@@ -38,7 +192,10 @@ class DataPointClient:
             'organisation': self._org
         }
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        String representation of this class.
+        """
         msg = ''
         if self._org:
             msg = f'{self._org}: '
@@ -50,11 +207,15 @@ class DataPointClient:
 
     def __getitem__(self, collection):
         """
-        Routine for getting a collection from this client
+        Public method for getting a collection from this client
         """
         return DataPointSearch(self.search(collections=[collection]))
         
-    def list_search_terms(self, collection=None):
+    def list_query_terms(self, collection=None):
+        """
+        List the possible query terms for all or
+        a particular collection.
+        """
 
         def search_terms(search, coll):
 
@@ -78,75 +239,14 @@ class DataPointClient:
         """
         Return a list of the names of collections for this Client
         """
-        # Might need a custom Collection class if we want to do anything fancy.
-        #return self._client.get_collections(**kwargs)
         for coll in self._client.get_collections():
             print(f"{coll.id}: {coll.description}")
 
-    def search(self, **kwargs):
+    def search(self, **kwargs) -> DataPointSearch:
+        """
+        Perform a search operation, creates a ``DataPointSearch``
+        object which is also self-describing."""
         
         search = self._client.search(**kwargs)
         return DataPointSearch(search, search_terms=kwargs, meta=self._meta)
 
-class DataPointSearch:
-
-    def __init__(self, pystac_search, search_terms=None, meta=None):
-
-        self._search_terms = search_terms or None
-        self._meta = meta or None
-
-        self._search = pystac_search
-        self._items  = None
-
-        self._meta['search_terms'] = self._search_terms
-
-    def __str__(self):
-        msg = ''
-        if self._org:
-            msg = f'{self._org}: '
-
-        return msg + f'Client for DataPoint searches via {self._url}'
-
-    def info(self):
-        print('Search terms:')
-        for term, searched in self._search_terms.items():
-            print(f' - {term}: {searched}')
-    
-    def __getitem__(self, index):
-        return self.items()[index]
-
-    def cloud_assets(self, max_items=-1):
-        for item in self.items(max_items=max_items):
-            assets = item.cloud_assets()
-            print(f'{item}: ')
-            print(' - ' + ', '.join(assets))
-
-    def _get_items(self):
-        item_list = []
-        for item in self._search.items():
-            item_list.append(DataPointItem(item))
-        self._items = item_list
-
-    def items(self, max_items=-1):
-        if self._items is None:
-            self._get_items()
-        return self._items
-    
-    def open_cluster(
-            self,
-            mode='xarray',
-            combine=False,
-            priority=[],
-            **kwargs,
-        ):
-
-        if combine:
-            raise NotImplementedError(
-                '"Combine" feature has not yet been implemented'
-            )
-        
-        assets = []
-        for item in self.items():
-            assets.append(item.get_cloud_assets(priority=priority))
-
-        return DataPointCluster(assets, meta=self._meta)
