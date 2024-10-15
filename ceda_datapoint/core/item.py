@@ -2,20 +2,34 @@ __author__    = "Daniel Westwood"
 __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
-from datapoint.mixins.properties import ItemPropertiesMixin
+import logging
 
+from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from .cloud import DataPointCloudProduct, DataPointCluster
-
 from .utils import method_format
 
-class DataPointItem(ItemPropertiesMixin):
+logger = logging.getLogger(__name__)
 
-    def __init__(self, item_stac):
+class DataPointItem(PropertiesMixin, UIMixin):
+    """
+    Class to represent a self-describing Item object from 
+    the STAC collection."""
+
+    def __init__(
+            self, 
+            item_stac: object, 
+            meta: dict = None
+        ):
+
+        meta = meta or {}
 
         self._properties   = None
-        self._cloud_assets = None
         self._assets       = None
-        self._attrs = {}
+        self._stac_attrs = {}
+
+        self._id = 'N/A'
+        if hasattr(item_stac,'id'):
+            self._id = item_stac.id
 
         for key, value in item_stac.to_dict().items():
             if key == 'properties':
@@ -23,142 +37,136 @@ class DataPointItem(ItemPropertiesMixin):
             elif key == 'assets':
                 self._assets = value
             else:
-                self._attrs[key] = value
+                self._stac_attrs[key] = value
 
         self._collection = item_stac.get_collection().id
+
+        self._meta = meta | {
+            'collection': self._collection,
+            'item': self._id,
+            'assets': len(self._assets),
+            'properties': len(self._properties.keys()),
+            'stac_attrs': len(self._stac_attrs.keys()),
+        }
+
+        self._cloud_assets = self._identify_cloud_assets()
 
     def __str__(self):
         """
         String based representation of this instance.
         """
-        return f'<Item: {self.id}>'
+        return f'Collection: {self._collection}, Item: {self._id}'
 
-    def __repr__(self):
+    def __array__(self):
         """
-        Programmer representation, identical to string representation
-        for this class."""
-        return self.__str__()
+        Return an array representation for this item, equating to the
+        list of assets.
+        """
+        return list(self._assets.values())
     
-    def __dict__(self):
-        return self.get_attributes()
-        
-    @property
-    def collection(self):
-        return self._collection
+    def __getitem__(self, index) -> dict:
+        """
+        Public method to index the dict of assets.
+        """
+        if isinstance(index, str):
+            if index not in self._assets:
+                logger.warning(
+                    f'Asset "{index}" not present in the set of assets.'
+                )
+                return None
+            return self._assets[index]
+        elif isinstance(index, int):
+            if index > len(self._assets.keys()):
+                logger.warning(
+                    f'Could not return asset "{index}" from the set '
+                    f'of {len(self._assets)} assets.'
+                )
+                return None
+            key = list(self._assets.keys())[index]
+            return self._assets[key]
+        else:
+            logger.warning(
+                f'Unrecognised index type for {index} - '
+                f'must be one of ("int","str")'
+            )
+    
+    def info(self):
+        """
+        Information about this item.
+        """
+        print(self.__str__())
+        for k, v in self._meta:
+            print(f' - {k}: {v}')
 
     def get_cloud_assets(
             self,
-            mode='xarray',
-            combine=False,
             priority=None,
-            **kwargs,
-        ):
+        ) -> DataPointCluster:
         """
         Returns a cluster of DataPointCloudProduct objects representing the cloud assets
         as requested."""
 
-        if mode != 'xarray':
-            raise NotImplementedError(
-                'Only "xarray" mode currently implemented - cf-python is a future option'
-            )
-        
-        if combine:
-            raise NotImplementedError(
-                '"Combine" feature has not yet been implemented'
-            )
+        return self._load_cloud_assets(self, priority=priority)
 
-        if self._cloud_assets is None:
-            self._load_cloud_assets(self, mode=mode, combine=combine, priority=priority)
+    def get_assets(self) -> dict:
+        """
+        Get the set of assets (in dict form) for this item."""
+        return self._assets
 
-        return self._cloud_assets
+    def list_cloud_formats(self) -> list:
+        """
+        Return the list of cloud formats identified from the set
+        of cloud assets."""
+
+        return [i[1] for i in self._cloud_assets]
+
+    def _identify_cloud_assets(
+            self
+        ) -> None:
+        """
+        Create the tuple set of asset names and cloud formats
+        which acts as a set of pointers to the asset list, rather
+        than duplicating assets.
+        """
+
+        rf_titles = list(method_format.keys())
+
+        cloud_list = []
+        for id, asset in self._assets.items():
+            cf = None
+            if 'cloud_format' in asset:
+                cf = asset['cloud_format']
+            elif id in rf_titles:
+                cf = method_format[id]
+
+            if cf is not None:
+                cloud_list.append((id, cf))
+
+        # Pointer to cloud assets in the main assets list.
+        return cloud_list
 
     def _load_cloud_assets(
             self,
-            mode='xarray',
-            combine=False,
-            priority=None,
-            **kwargs,
-        ):
+            priority: list = None,
+        ) -> DataPointCluster:
 
         """
         Sets the cloud assets property with a cluster of DataPointCloudProducts or a 
-        single DataPointCloudProduct if only one is present."""
+        single DataPointCloudProduct if only one is present.
+        """
 
-        # priority: kerchunk, CFA etc.
-
-        # Determine the assets within this item that match 'reference_file'
-        # For each asset
-        # If the asset has a 'cloud_format' attribute, check it against priority
-          # If priority is None we don't need to check
-          # Otherwise if the format is not in the priority we can ignore it.
-          # At this stage open both priority things to pass to a cluster later.
-        # No cloud format, match the asset name to `method format` in utils.
-
-        rf_titles = list(method_format.keys())
         file_formats = list(method_format.values())
 
         priority = priority or file_formats
 
         asset_list = []
-        for id, asset in self._assets.items():
-            ignore = False
-            if 'cloud_format' in asset:
-
-                cf = asset['cloud_format']
-                if cf not in priority:
-                    ignore = True
-
-            else:
-                if id in rf_titles:
-                    cf = method_format[id]
-                    if cf not in priority:
-                        ignore = True
-
-            if not ignore:
+        for id, cf in self._cloud_assets:
+            asset = self._assets[id]
+            
+            if cf in priority:
                 # Register this asset as a DataPointCloudProduct
                 order = priority.index(cf)
-                asset_list.append(DataPointCloudProduct(asset, order=order, mode=mode))
+                asset_list.append(DataPointCloudProduct(asset, id=id, cf=cf, order=order, mode=mode))
 
-        return DataPointCluster(asset_list, combine=combine)
-
-        funcs = {}
-
-        reached_file = False
-        count = 1
-        while not reached_file and count < 10:
-            ref_file = 'reference_file'
-            if count > 2:
-                ref_file += f'_{count}'
-
-            if ref_file in assets:
-                asset = assets[ref_file]
-
-                if 'cloud_format' in asset:
-                    if asset['cloud_format'] in known_formats:
-                        funcs[asset['cloud_format']] = (known_formats[asset['cloud_format']], ref_file)
-                    else:
-                        print('Unrecognised cloud format')
-                else:
-                    print('No cloud format detected')
-                    if ref_file in known_methods:
-                        funcs[method_format[ref_file]] = (known_methods[ref_file], ref_file)
-                    else:
-                        print('Unknown reference file type')
-            count += 1
-
-        for cloud_type in priority:
-            if cloud_type in funcs:
-
-                try:
-                    (func, rf) = funcs[cloud_type]
-                    rf   = assets[rf] | kwargs
-                    return func(**rf)
-                except KeyError:
-                    # Future raise warning
-                    continue
-
-        raise ValueError(
-            'Priority list does not include a valid cloud format'
-            f'Available format options: {tuple(known_methods.keys())}'
-        )
+        return DataPointCluster(asset_list, combine=combine, meta=self._meta)
     
