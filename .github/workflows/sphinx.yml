@@ -1,0 +1,57 @@
+name: Sphinx build
+
+on:
+  # Push/Pull for main branch.
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  # Run workflow manually from actions tab.
+  workflow_dispatch:
+    
+jobs:
+  build:
+    # Specify an OS for the runner
+    runs-on: ubuntu-latest
+
+    #Define steps
+    steps:
+
+      # Firstly, checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # Set up Python env
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      # Install dependencies
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install poetry
+          poetry install
+
+      - name: Build documentation
+        run: |
+          mkdir gh-pages
+          touch gh-pages/.nojekyll
+          pushd docs/source/
+          poetry run sphinx-build -b html . _build
+          popd
+          cp -r docs/source/_build/* gh-pages/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs
+          path: gh-pages
+      # Deploys to the gh-pages branch if the commit was made to main, the 
+      # gh-pages then takes over serving the html
+      - name: Deploy documentation
+        if: ${{ github.event_name == 'push' }}
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: gh-pages
