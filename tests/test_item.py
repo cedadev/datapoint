@@ -16,8 +16,7 @@ class TestItem:
 def test_main():
 
     test_item = TestItem()
-    test_meta = {
-        
-    }
+    test_meta = {}
 
     item = DataPointItem(test_item, meta=test_meta)
+    assert hasattr(item, 'meta')
