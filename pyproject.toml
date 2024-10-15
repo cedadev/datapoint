@@ -1,16 +1,20 @@
+[tool.poetry]
+name = "ceda-datapoint"
+version = "0.1.0"
+description = "DataPoint provides python-based search/access tools for using data primarily from the CEDA Archive."
+authors = ["Daniel Westwood <daniel.westwood@stfc.ac.uk>"]
+license = "LICENSE"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fsspec = "2024.9.0"
+xarray = "2024.6.0"
+pystac-client = "0.8.3"
+kerchunk = "0.2.6"
+cfapyx = "2024.10.11"
+
+
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-requires-python=">=3.11"
-name="DataPoint"
-version="1.0"
-dynamic = ["dependencies"]
-authors = [{name = "Daniel Westwood", email = "daniel.westwood@stfc.ac.uk"}]
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-
-[tool.setuptools]
-packages = ["datapoint"]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
