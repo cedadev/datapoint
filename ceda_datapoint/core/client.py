@@ -6,14 +6,14 @@ import pystac_client
 from pystac_client.stac_api_io import StacApiIO
 import logging
 
-from ceda_datapoint.mixins import DataPointMixin
+from ceda_datapoint.mixins import UIMixin
 from .cloud import DataPointCluster
 from .item import DataPointItem
-from .utils import urls
+from .utils import urls, generate_id
 
 logger = logging.getLogger(__name__)
 
-class DataPointSearch:
+class DataPointSearch(UIMixin):
     """
     Search instance created upon searching using the client."""
 
@@ -21,7 +21,8 @@ class DataPointSearch:
             self, 
             pystac_search: object, 
             search_terms: dict = None, 
-            meta: dict = None
+            meta: dict = None,
+            parent_id: str = None
         ):
 
         self._search_terms = search_terms or None
@@ -32,17 +33,18 @@ class DataPointSearch:
 
         self._meta['search_terms'] = self._search_terms
 
+        self._id = f'{parent_id}-{generate_id()}'
+
     def __str__(self) -> str:
         """
         String representation of this search.
         """
 
-        org_url = self._org or self._url
         terms = {k: v for k, v in self._search_terms.items() if k != 'query'}
 
         if 'query' in self._search_terms:
             terms['query'] = len(self._search_terms['query'])
-        return f'<DataPointSearch: {org_url} ({terms})'
+        return f'<DataPointSearch: {self._id} ({terms})>'
     
     def __getitem__(self, index) -> DataPointItem:
         """
@@ -74,6 +76,15 @@ class DataPointSearch:
                 f'must be one of ("int","str")'
             )
             return None
+
+    def help(self):
+        print('DataPointSearch Help:')
+        print(' > search.get_items() - fetch the set of items as a list of DataPointItems')
+        print(' > search.info() - General information about this search')
+        print(' > search.open_cluster() - Open cloud datasets represented in this search')
+        print(' > search.display_assets() - List the names of assets for each item in this search')
+        print(' > search.display_cloud_assets() - List the cloud format types for each item in this search')
+        super().help()
 
     def get_items(self) -> dict:
         """
@@ -117,12 +128,12 @@ class DataPointSearch:
             self._load_item_set()
         
         assets = []
-        for item in self._item_set:
-            assets.append(item.get_cloud_assets(mode=mode, combine=combine, priority=priority))
+        for item in self._item_set.values():
+            assets.append(item.get_cloud_assets(priority=priority))
 
-        return DataPointCluster(assets, meta=self._meta, combine=combine)
+        return DataPointCluster(assets, meta=self._meta, parent_id=self._id)
     
-    def display_assets(self, max_items: int = -1) -> None:
+    def display_assets(self) -> None:
         """
         Display the number of assets attributed to each item in
         the itemset.
@@ -130,12 +141,12 @@ class DataPointSearch:
         if not self._item_set:
             self._load_item_set()
 
-        for item in self._item_set.values()[:max_items]:
+        for item in self._item_set.values():
             assets = item.get_assets()
             print(item)
             print(' - ' + ', '.join(assets.keys()))
 
-    def display_cloud_assets(self, max_items: int = -1) -> None:
+    def display_cloud_assets(self) -> None:
         """
         Display the cloud assets attributed to each item in
         the itemset.
@@ -143,10 +154,14 @@ class DataPointSearch:
         if not self._item_set:
             self._load_item_set()
 
-        for item in self._item_set.values()[:max_items]:
+        for item in self._item_set.values():
             assets = item.list_cloud_formats()
-            print(item)
-            print(' - ' + ', '.join(assets))
+            if not assets:
+                print(item)
+                print(' <No Cloud Assets>')
+            else:
+                print(item)
+                print(' - ' + ', '.join(assets))
 
     def _load_item_set(self) -> None:
         """
@@ -158,7 +173,7 @@ class DataPointSearch:
             items[item.id] = DataPointItem(item, meta=self._meta)
         self._item_set = items
     
-class DataPointClient(DataPointMixin):
+class DataPointClient(UIMixin):
     """
     Client for searching STAC collections, returns self-describing 
     components at all points."""
@@ -185,25 +200,44 @@ class DataPointClient(DataPointMixin):
             self._url = urls[org]
             self._org = org
 
-        self._client = pystac_client.Client.open(url)
+        if self._url is None:
+            raise ValueError(
+                'API URL could not be resolved'
+            )
+
+        self._client = pystac_client.Client.open(self._url)
 
         self._meta = {
             'url' : self._url,
             'organisation': self._org
         }
 
+        self._id = self._org or ''
+        self._id += f'-{generate_id()}'
+
     def __str__(self) -> str:
         """
         String representation of this class.
         """
-        msg = ''
+        org = ''
         if self._org:
-            msg = f'{self._org}: '
+            org = f'{self._org}'
 
-        return msg + f'Client for DataPoint searches via {self._url}'
+        return f'<DataPointClient: {self._id}>'
     
+    def help(self):
+        print('DataPointClient Help:')
+        print(' > client.info() - Get information about this client.')
+        print(
+            ' > client.list_query_terms() - List terms available to '
+            'query for all or a specific collection')
+        print(' > client.list_collections() - List all collections known to this client.')
+        print(' > client.search() - perform a search operation. For example syntax see the documentation.')
+        super().help()
+
     def info(self):
-        print(self)
+        print(f'{str(self)}')
+        print(f' - Client for DataPoint searches via {self._url}')
 
     def __getitem__(self, collection):
         """
@@ -219,12 +253,12 @@ class DataPointClient(DataPointMixin):
 
         def search_terms(search, coll):
 
-            print(f'{coll}:')
-            items = list(search.items())
-            if len(items) > 0:
-                print(' - ' + ', '.join(items[0].get_attributes()))
+            
+            item = search[0]
+            if item is not None:
+                print(f'{coll}: {list(item.attributes.keys())}')
             else:
-                print(' < No Items >')
+                print(f'{coll}: < No Items >')
 
         if collection is not None:
             dps = self.search(collections=[collection], max_items=1)
@@ -248,5 +282,5 @@ class DataPointClient(DataPointMixin):
         object which is also self-describing."""
         
         search = self._client.search(**kwargs)
-        return DataPointSearch(search, search_terms=kwargs, meta=self._meta)
+        return DataPointSearch(search, search_terms=kwargs, meta=self._meta, parent_id=self._id)
 

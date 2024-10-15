@@ -41,21 +41,22 @@ class DataPointItem(PropertiesMixin, UIMixin):
 
         self._collection = item_stac.get_collection().id
 
+        self._cloud_assets = self._identify_cloud_assets()
+
         self._meta = meta | {
             'collection': self._collection,
             'item': self._id,
             'assets': len(self._assets),
-            'properties': len(self._properties.keys()),
-            'stac_attrs': len(self._stac_attrs.keys()),
+            'cloud_assets': len(self._cloud_assets),
+            'attributes': len(self._properties.keys()),
+            'stac_attributes': len(self._stac_attrs.keys()),
         }
-
-        self._cloud_assets = self._identify_cloud_assets()
 
     def __str__(self):
         """
         String based representation of this instance.
         """
-        return f'Collection: {self._collection}, Item: {self._id}'
+        return f'<DataPointItem: {self._id} (Collection: {self._collection})>'
 
     def __array__(self):
         """
@@ -90,13 +91,42 @@ class DataPointItem(PropertiesMixin, UIMixin):
                 f'must be one of ("int","str")'
             )
     
+    def help(self):
+        print('DataPointItem Help:')
+        print(' > item.info() - Get information about this item')
+        print(
+            ' > item.get_cloud_assets() - Recommended way of accessing '
+            'all cloud datasets via a DataPointCluster')
+        print(' > item.open_dataset() - Open a specific dataset (default 0) attributed to this item')
+        print(' > item.list_cloud_formats() - List the cloud formats available for this item.')
+        super().help()
+
     def info(self):
         """
         Information about this item.
         """
-        print(self.__str__())
-        for k, v in self._meta:
+        print(self)
+        for k, v in self._meta.items():
             print(f' - {k}: {v}')
+
+    def open_dataset(
+            self, 
+            id: int = 0,
+            priority: list = None,
+            **kwargs
+        ):
+
+        cluster = self._load_cloud_assets(priority=priority)
+
+        if isinstance(cluster, DataPointCloudProduct):
+            return cluster.open_dataset(**kwargs)
+        elif isinstance(cluster, DataPointCluster):
+            return cluster[id].open_dataset(**kwargs)
+        else:
+            logger.warning(
+                'Item failed to retrieve a dataset'
+            )
+            return None
 
     def get_cloud_assets(
             self,
@@ -106,7 +136,7 @@ class DataPointItem(PropertiesMixin, UIMixin):
         Returns a cluster of DataPointCloudProduct objects representing the cloud assets
         as requested."""
 
-        return self._load_cloud_assets(self, priority=priority)
+        return self._load_cloud_assets(priority=priority)
 
     def get_assets(self) -> dict:
         """
@@ -166,7 +196,17 @@ class DataPointItem(PropertiesMixin, UIMixin):
             if cf in priority:
                 # Register this asset as a DataPointCloudProduct
                 order = priority.index(cf)
-                asset_list.append(DataPointCloudProduct(asset, id=id, cf=cf, order=order, mode=mode))
+                asset_id = f'{self._id}-{id}'
+                a = DataPointCloudProduct(asset, id=asset_id, cf=cf, order=order, meta=self._meta)
+                asset_list.append(a)
 
-        return DataPointCluster(asset_list, combine=combine, meta=self._meta)
+        if len(asset_list) == 0:
+            logger.warning(
+                f'No dataset from {priority} found.'
+            )
+            return None
+        elif len(asset_list) > 1:
+            return DataPointCluster(asset_list, meta=self._meta, parent_id=self._id)
+        else:
+            return asset_list[0]
     

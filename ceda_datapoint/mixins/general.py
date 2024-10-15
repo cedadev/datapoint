@@ -7,17 +7,14 @@ class UIMixin:
     Mixin for behaviours common to all User-facing classes.
     """
 
-    def help():
+    def help(self):
         """
         Link to documentation or other sources of assistance.
         """
         print('See the documentation at https://cedadev.github.io/datapoint/')
 
     def __repr__(self):
-        """
-        Representation for User-facing classes returns a dict of metadata.
-        """
-        return self._meta
+        return str(self)
     
     def __dict__(self):
         """

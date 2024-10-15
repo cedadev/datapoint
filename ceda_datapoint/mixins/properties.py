@@ -14,7 +14,7 @@ class PropertiesMixin:
         Attempt to get the stac id, or use the string
         representation of the source stac object."""
 
-        return self._meta['object']
+        return self._id
     
     @property
     def bbox(self):
