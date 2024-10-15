@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ceda_datapoint.core.client &mdash; CEDA DataPoint 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            CEDA DataPoint
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CEDA DataPoint</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ceda_datapoint.core.client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ceda_datapoint.core.client</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span>    <span class="o">=</span> <span class="s2">&quot;Daniel Westwood&quot;</span>
+<span class="n">__contact__</span>   <span class="o">=</span> <span class="s2">&quot;daniel.westwood@stfc.ac.uk&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2024 United Kingdom Research and Innovation&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pystac_client</span>
+<span class="kn">from</span> <span class="nn">pystac_client.stac_api_io</span> <span class="kn">import</span> <span class="n">StacApiIO</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">ceda_datapoint.mixins</span> <span class="kn">import</span> <span class="n">UIMixin</span>
+<span class="kn">from</span> <span class="nn">.cloud</span> <span class="kn">import</span> <span class="n">DataPointCluster</span>
+<span class="kn">from</span> <span class="nn">.item</span> <span class="kn">import</span> <span class="n">DataPointItem</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">urls</span><span class="p">,</span> <span class="n">generate_id</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataPointSearch"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch">[docs]</a><span class="k">class</span> <span class="nc">DataPointSearch</span><span class="p">(</span><span class="n">UIMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search instance created upon searching using the client.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DataPointSearch.__init__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">pystac_search</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
+            <span class="n">search_terms</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span> <span class="o">=</span> <span class="n">search_terms</span> <span class="ow">or</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span> <span class="ow">or</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_search</span> <span class="o">=</span> <span class="n">pystac_search</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span>  <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;search_terms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parent_id</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">generate_id</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.__str__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation of this search.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;query&#39;</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="s1">&#39;query&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span><span class="p">:</span>
+            <span class="n">terms</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointSearch: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">terms</span><span class="si">}</span><span class="s1">)&gt;&#39;</span></div>
+    
+<div class="viewcode-block" id="DataPointSearch.__getitem__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointItem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Public method to index the dict of items.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_item_set</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Item &quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; not present in the set of items.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Could not return item &quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; from the set &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">)</span><span class="si">}</span><span class="s1"> items.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unrecognised index type for </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1"> - &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;must be one of (&quot;int&quot;,&quot;str&quot;)&#39;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.help"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointSearch Help:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.get_items() - fetch the set of items as a list of DataPointItems&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.info() - General information about this search&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.open_cluster() - Open cloud datasets represented in this search&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.display_assets() - List the names of assets for each item in this search&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.display_cloud_assets() - List the cloud format types for each item in this search&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.get_items"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.get_items">[docs]</a>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Public method to get the set of </span>
+<span class="sd">        DataPointItem objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_item_set</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.info"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provide information about this search</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Search terms:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">searched</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">searched</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.open_cluster"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.open_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">open_cluster</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
+            <span class="n">combine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="p">[],</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointCluster</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a DataPointCluster object from the cloud assets for </span>
+<span class="sd">        each item in this search.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">combine</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;&quot;Combine&quot; feature has not yet been implemented&#39;</span>
+            <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_item_set</span><span class="p">()</span>
+        
+        <span class="n">assets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">assets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get_cloud_assets</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">DataPointCluster</span><span class="p">(</span><span class="n">assets</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="DataPointSearch.display_assets"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.display_assets">[docs]</a>    <span class="k">def</span> <span class="nf">display_assets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display the number of assets attributed to each item in</span>
+<span class="sd">        the itemset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_item_set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">assets</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get_assets</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">assets</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="DataPointSearch.display_cloud_assets"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.display_cloud_assets">[docs]</a>    <span class="k">def</span> <span class="nf">display_cloud_assets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display the cloud assets attributed to each item in</span>
+<span class="sd">        the itemset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_item_set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">assets</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">list_cloud_formats</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">assets</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &lt;No Cloud Assets&gt;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">assets</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_item_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the set of items for this search into </span>
+<span class="sd">        self-describing DataPointItem instances.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">items</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataPointItem</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span> <span class="o">=</span> <span class="n">items</span></div>
+    
+<div class="viewcode-block" id="DataPointClient"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient">[docs]</a><span class="k">class</span> <span class="nc">DataPointClient</span><span class="p">(</span><span class="n">UIMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Client for searching STAC collections, returns self-describing </span>
+<span class="sd">    components at all points.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DataPointClient.__init__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">org</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;CEDA&#39;</span><span class="p">,</span> 
+            <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="n">url</span>
+
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">and</span> <span class="n">org</span> <span class="o">!=</span> <span class="s1">&#39;CEDA&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_org</span> <span class="o">=</span> <span class="n">org</span>
+        <span class="k">elif</span> <span class="n">url</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_org</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Not provided a url so just use the org</span>
+            <span class="k">if</span> <span class="n">org</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Organisation &quot;</span><span class="si">{</span><span class="n">org</span><span class="si">}</span><span class="s1">&quot; not recognised - please select from &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">urls</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="n">org</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_org</span> <span class="o">=</span> <span class="n">org</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;API URL could not be resolved&#39;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">pystac_client</span><span class="o">.</span><span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_url</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;url&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span><span class="p">,</span>
+            <span class="s1">&#39;organisation&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_org</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_org</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;-</span><span class="si">{</span><span class="n">generate_id</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="DataPointClient.__str__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation of this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">org</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_org</span><span class="p">:</span>
+            <span class="n">org</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_org</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointClient: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1">&gt;&#39;</span></div>
+    
+<div class="viewcode-block" id="DataPointClient.help"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointClient Help:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.info() - Get information about this client.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39; &gt; client.list_query_terms() - List terms available to &#39;</span>
+            <span class="s1">&#39;query for all or a specific collection&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.list_collections() - List all collections known to this client.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.search() - perform a search operation. For example syntax see the documentation.&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - Client for DataPoint searches via </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataPointClient.__getitem__"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Public method for getting a collection from this client</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DataPointSearch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">collection</span><span class="p">]))</span></div>
+        
+<div class="viewcode-block" id="DataPointClient.list_query_terms"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_query_terms">[docs]</a>    <span class="k">def</span> <span class="nf">list_query_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List the possible query terms for all or</span>
+<span class="sd">        a particular collection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">search_terms</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
+
+            
+            <span class="n">item</span> <span class="o">=</span> <span class="n">search</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: &lt; No Items &gt;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">collection</span><span class="p">],</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">search_terms</span><span class="p">(</span><span class="n">dps</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">():</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="p">],</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">search_terms</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataPointClient.list_collections"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_collections">[docs]</a>    <span class="k">def</span> <span class="nf">list_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of the names of collections for this Client</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataPointClient.search"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointSearch</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a search operation, creates a ``DataPointSearch``</span>
+<span class="sd">        object which is also self-describing.&quot;&quot;&quot;</span>
+        
+        <span class="n">search</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DataPointSearch</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">search_terms</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2024, Centre of Environmental Data Analysis Developers,Scientific and Technical Facilities Council (STFC),UK Research and Innovation (UKRI). BSD 2-Clause License. All rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mixins &mdash; CEDA DataPoint 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CEDA DataPoint
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Mixins</a><ul>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin"><code class="docutils literal notranslate"><span class="pre">UIMixin</span></code></a><ul>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin.help"><code class="docutils literal notranslate"><span class="pre">UIMixin.help()</span></code></a></li>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin.__repr__"><code class="docutils literal notranslate"><span class="pre">UIMixin.__repr__()</span></code></a></li>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin.meta"><code class="docutils literal notranslate"><span class="pre">UIMixin.meta</span></code></a></li>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin.collection"><code class="docutils literal notranslate"><span class="pre">UIMixin.collection</span></code></a></li>
+<li><a class="reference internal" href="#ceda_datapoint.mixins.general.UIMixin.__weakref__"><code class="docutils literal notranslate"><span class="pre">UIMixin.__weakref__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CEDA DataPoint</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Mixins</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mixins.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ceda_datapoint.mixins.general">
+<span id="mixins"></span><h1>Mixins<a class="headerlink" href="#module-ceda_datapoint.mixins.general" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.mixins.general.</span></span><span class="sig-name descname"><span class="pre">UIMixin</span></span><a class="reference internal" href="_modules/ceda_datapoint/mixins/general.html#UIMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin for behaviours common to all User-facing classes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin.help">
+<span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/mixins/general.html#UIMixin.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin.help" title="Permalink to this definition"></a></dt>
+<dd><p>Link to documentation or other sources of assistance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/mixins/general.html#UIMixin.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin.meta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meta</span></span><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin.meta" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">meta</span></code> values (read-only)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin.collection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collection</span></span><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin.collection" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve the collection name (read-only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ceda_datapoint.mixins.general.UIMixin.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#ceda_datapoint.mixins.general.UIMixin.__weakref__" title="Permalink to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-ceda_datapoint.mixins.properties"></span></section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2024, Centre of Environmental Data Analysis Developers,Scientific and Technical Facilities Council (STFC),UK Research and Innovation (UKRI). BSD 2-Clause License. All rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
