@@ -14,7 +14,7 @@ Currently Supported cloud formats:
 
 .. note::
    
-   More details coming soon! Please see ``Usage`` and ``Examples`` for guidance with using DataPoint**
+   More details coming soon! Please see ``Usage`` and ``Examples`` for guidance with using DataPoint
 
 .. toctree::
    :maxdepth: 1
@@ -29,6 +29,7 @@ Currently Supported cloud formats:
 .. toctree::
    :maxdepth: 1
    :caption: API Reference
+   
    Client and Search <core_client>
    STAC Items <core_item>
    Clusters and Cloud Products <core_cloud>

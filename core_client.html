@@ -20,7 +20,9 @@
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="STAC Items" href="core_item.html" />
+    <link rel="prev" title="Example Use Cases" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -33,6 +35,7 @@
           
           <a href="index.html" class="icon icon-home">
             CEDA DataPoint
+              <img src="_static/ceda.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,35 +45,40 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Client and Search</a><ul>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch"><code class="docutils literal notranslate"><span class="pre">DataPointSearch</span></code></a><ul>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.__init__"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.__str__"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.__str__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.__getitem__"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.__getitem__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.help"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.help()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.get_items"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.get_items()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.info"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.info()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.open_cluster"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.open_cluster()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.display_assets"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.display_assets()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.display_cloud_assets"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.display_cloud_assets()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Client and Search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch"><code class="docutils literal notranslate"><span class="pre">DataPointSearch</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.help"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.help()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.get_items"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.get_items()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.info"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.open_cluster"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.open_cluster()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.display_assets"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.display_assets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointSearch.display_cloud_assets"><code class="docutils literal notranslate"><span class="pre">DataPointSearch.display_cloud_assets()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient"><code class="docutils literal notranslate"><span class="pre">DataPointClient</span></code></a><ul>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.__init__"><code class="docutils literal notranslate"><span class="pre">DataPointClient.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.__str__"><code class="docutils literal notranslate"><span class="pre">DataPointClient.__str__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.help"><code class="docutils literal notranslate"><span class="pre">DataPointClient.help()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.__getitem__"><code class="docutils literal notranslate"><span class="pre">DataPointClient.__getitem__()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.list_query_terms"><code class="docutils literal notranslate"><span class="pre">DataPointClient.list_query_terms()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.list_collections"><code class="docutils literal notranslate"><span class="pre">DataPointClient.list_collections()</span></code></a></li>
-<li><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.search"><code class="docutils literal notranslate"><span class="pre">DataPointClient.search()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient"><code class="docutils literal notranslate"><span class="pre">DataPointClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.help"><code class="docutils literal notranslate"><span class="pre">DataPointClient.help()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.list_query_terms"><code class="docutils literal notranslate"><span class="pre">DataPointClient.list_query_terms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.list_collections"><code class="docutils literal notranslate"><span class="pre">DataPointClient.list_collections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.client.DataPointClient.search"><code class="docutils literal notranslate"><span class="pre">DataPointClient.search()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="core_item.html">STAC Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_cloud.html">Clusters and Cloud Products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixins.html">Mixins</a></li>
 </ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -100,25 +108,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointSearch">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.core.client.</span></span><span class="sig-name descname"><span class="pre">DataPointSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pystac_search</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_terms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointSearch" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mixins.html#ceda_datapoint.mixins.general.UIMixin" title="ceda_datapoint.mixins.general.UIMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">UIMixin</span></code></a></p>
-<p>Search instance created upon searching using the client.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointSearch.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pystac_search</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_terms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointSearch.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointSearch.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointSearch.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointSearch.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointSearch.__str__" title="Permalink to this definition"></a></dt>
-<dd><p>String representation of this search.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointSearch.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core_item.html#ceda_datapoint.core.item.DataPointItem" title="ceda_datapoint.core.item.DataPointItem"><span class="pre">DataPointItem</span></a></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointSearch.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointSearch.__getitem__" title="Permalink to this definition"></a></dt>
-<dd><p>Public method to index the dict of items.</p>
-</dd></dl>
-
+<dd><p>Search instance created upon searching using the client.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointSearch.help">
 <span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointSearch.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointSearch.help" title="Permalink to this definition"></a></dt>
@@ -163,31 +153,13 @@ the itemset.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointClient">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.core.client.</span></span><span class="sig-name descname"><span class="pre">DataPointClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">org</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CEDA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mixins.html#ceda_datapoint.mixins.general.UIMixin" title="ceda_datapoint.mixins.general.UIMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">UIMixin</span></code></a></p>
-<p>Client for searching STAC collections, returns self-describing 
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.core.client.</span></span><span class="sig-name descname"><span class="pre">DataPointClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">org</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CEDA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient" title="Permalink to this definition"></a></dt>
+<dd><p>Client for searching STAC collections, returns self-describing 
 components at all points.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">org</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CEDA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointClient.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient.__str__" title="Permalink to this definition"></a></dt>
-<dd><p>String representation of this class.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointClient.help">
 <span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient.help" title="Permalink to this definition"></a></dt>
 <dd><p>Link to documentation or other sources of assistance.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.client.DataPointClient.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/client.html#DataPointClient.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.client.DataPointClient.__getitem__" title="Permalink to this definition"></a></dt>
-<dd><p>Public method for getting a collection from this client</p>
 </dd></dl>
 
 <dl class="py method">
@@ -217,7 +189,10 @@ object which is also self-describing.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples.html" class="btn btn-neutral float-left" title="Example Use Cases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="core_item.html" class="btn btn-neutral float-right" title="STAC Items" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

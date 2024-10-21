@@ -32,6 +32,7 @@
           
           <a href="index.html" class="icon icon-home">
             CEDA DataPoint
+              <img src="_static/ceda.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -41,8 +42,22 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core_client.html">Client and Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_item.html">STAC Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_cloud.html">Clusters and Cloud Products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixins.html">Mixins</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -70,8 +85,7 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#_"><strong>_</strong></a>
- | <a href="#C"><strong>C</strong></a>
+ <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -83,52 +97,6 @@
  | <a href="#U"><strong>U</strong></a>
  
 </div>
-<h2 id="_">_</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.__array__">__array__() (ceda_datapoint.core.item.DataPointItem method)</a>
-</li>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.__getitem__">__getitem__() (ceda_datapoint.core.client.DataPointClient method)</a>
-
-      <ul>
-        <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.__getitem__">(ceda_datapoint.core.client.DataPointSearch method)</a>
-</li>
-        <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.__getitem__">(ceda_datapoint.core.item.DataPointItem method)</a>
-</li>
-      </ul></li>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.__init__">__init__() (ceda_datapoint.core.client.DataPointClient method)</a>
-
-      <ul>
-        <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.__init__">(ceda_datapoint.core.client.DataPointSearch method)</a>
-</li>
-        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.__init__">(ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
-</li>
-        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.__init__">(ceda_datapoint.core.cloud.DataPointCluster method)</a>
-</li>
-        <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.__init__">(ceda_datapoint.core.item.DataPointItem method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mixins.html#ceda_datapoint.mixins.general.UIMixin.__repr__">__repr__() (ceda_datapoint.mixins.general.UIMixin method)</a>
-</li>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.__str__">__str__() (ceda_datapoint.core.client.DataPointClient method)</a>
-
-      <ul>
-        <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.__str__">(ceda_datapoint.core.client.DataPointSearch method)</a>
-</li>
-        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.__str__">(ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
-</li>
-        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.__str__">(ceda_datapoint.core.cloud.DataPointCluster method)</a>
-</li>
-        <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.__str__">(ceda_datapoint.core.item.DataPointItem method)</a>
-</li>
-      </ul></li>
-      <li><a href="mixins.html#ceda_datapoint.mixins.general.UIMixin.__weakref__">__weakref__ (ceda_datapoint.mixins.general.UIMixin attribute)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -287,7 +255,11 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">open_dataset() (ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
+
+      <ul>
+        <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.open_dataset">(ceda_datapoint.core.item.DataPointItem method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 

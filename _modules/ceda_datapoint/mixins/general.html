@@ -32,6 +32,7 @@
           
           <a href="../../../index.html" class="icon icon-home">
             CEDA DataPoint
+              <img src="../../../_static/ceda.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -41,8 +42,22 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../inspiration.html">Inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stac.html">STAC Catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cloud_formats.html">Cloud Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_client.html">Client and Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_item.html">STAC Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_cloud.html">Clusters and Cloud Products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixins.html">Mixins</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -77,14 +92,18 @@
 <span class="sd">    Mixin for behaviours common to all User-facing classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
 <div class="viewcode-block" id="UIMixin.help"><a class="viewcode-back" href="../../../mixins.html#ceda_datapoint.mixins.general.UIMixin.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link to documentation or other sources of assistance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;See the documentation at https://cedadev.github.io/datapoint/&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UIMixin.__repr__"><a class="viewcode-back" href="../../../mixins.html#ceda_datapoint.mixins.general.UIMixin.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">__dict__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
