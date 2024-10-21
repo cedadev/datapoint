@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ceda_datapoint.core.item &mdash; CEDA DataPoint 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            CEDA DataPoint
+              <img src="../../../_static/ceda.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../inspiration.html">Inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stac.html">STAC Catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cloud_formats.html">Cloud Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_client.html">Client and Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_item.html">STAC Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../core_cloud.html">Clusters and Cloud Products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixins.html">Mixins</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CEDA DataPoint</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ceda_datapoint.core.item</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ceda_datapoint.core.item</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span>    <span class="o">=</span> <span class="s2">&quot;Daniel Westwood&quot;</span>
+<span class="n">__contact__</span>   <span class="o">=</span> <span class="s2">&quot;daniel.westwood@stfc.ac.uk&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2024 United Kingdom Research and Innovation&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">ceda_datapoint.mixins</span> <span class="kn">import</span> <span class="n">PropertiesMixin</span><span class="p">,</span> <span class="n">UIMixin</span>
+<span class="kn">from</span> <span class="nn">.cloud</span> <span class="kn">import</span> <span class="n">DataPointCloudProduct</span><span class="p">,</span> <span class="n">DataPointCluster</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">method_format</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataPointItem"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem">[docs]</a><span class="k">class</span> <span class="nc">DataPointItem</span><span class="p">(</span><span class="n">PropertiesMixin</span><span class="p">,</span> <span class="n">UIMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to represent a self-describing Item object from </span>
+<span class="sd">    the STAC collection.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">item_stac</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
+            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="p">):</span>
+
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span>   <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span>       <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;N/A&#39;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item_stac</span><span class="p">,</span><span class="s1">&#39;id&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">item_stac</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="n">assets</span><span class="p">,</span> <span class="n">properties</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">item_stac</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;properties&#39;</span><span class="p">:</span>
+                <span class="n">properties</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;assets&#39;</span><span class="p">:</span>
+                <span class="n">assets</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span> <span class="o">=</span> <span class="n">assets</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="n">properties</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">item_stac</span><span class="o">.</span><span class="n">get_collection</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identify_cloud_assets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span> <span class="o">|</span> <span class="p">{</span>
+            <span class="s1">&#39;collection&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">,</span>
+            <span class="s1">&#39;item&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;assets&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">),</span>
+            <span class="s1">&#39;cloud_assets&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span><span class="p">),</span>
+            <span class="s1">&#39;attributes&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="s1">&#39;stac_attributes&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String based representation of this instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointItem: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Collection: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an array representation for this item, equating to the</span>
+<span class="sd">        list of assets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Public method to index the dict of assets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Asset &quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; not present in the set of assets.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Could not return asset &quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; from the set &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">)</span><span class="si">}</span><span class="s1"> assets.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unrecognised index type for </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1"> - &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;must be one of (&quot;int&quot;,&quot;str&quot;)&#39;</span>
+            <span class="p">)</span>
+    
+<div class="viewcode-block" id="DataPointItem.help"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointItem Help:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.info() - Get information about this item&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39; &gt; item.get_cloud_assets() - Recommended way of accessing &#39;</span>
+            <span class="s1">&#39;all cloud datasets via a DataPointCluster&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.open_dataset() - Open a specific dataset (default 0) attributed to this item&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.list_cloud_formats() - List the cloud formats available for this item.&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DataPointItem.info"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Information about this item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataPointItem.open_dataset"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.open_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">open_dataset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dataset represented by this item from its cluster.</span>
+<span class="sd">        The nth dataset is returned given the ``id`` parameter. Typically</span>
+<span class="sd">        items should have only 1-2 datasets attached.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cluster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cloud_assets</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">DataPointCloudProduct</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cluster</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">DataPointCluster</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cluster</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Item failed to retrieve a dataset&#39;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="DataPointItem.get_cloud_assets"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.get_cloud_assets">[docs]</a>    <span class="k">def</span> <span class="nf">get_cloud_assets</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointCluster</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a cluster of DataPointCloudProduct objects representing the cloud assets</span>
+<span class="sd">        as requested.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cloud_assets</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataPointItem.get_assets"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.get_assets">[docs]</a>    <span class="k">def</span> <span class="nf">get_assets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the set of assets (in dict form) for this item.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span></div>
+
+<div class="viewcode-block" id="DataPointItem.list_cloud_formats"><a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.list_cloud_formats">[docs]</a>    <span class="k">def</span> <span class="nf">list_cloud_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of cloud formats identified from the set</span>
+<span class="sd">        of cloud assets.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_identify_cloud_assets</span><span class="p">(</span>
+            <span class="bp">self</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the tuple set of asset names and cloud formats</span>
+<span class="sd">        which acts as a set of pointers to the asset list, rather</span>
+<span class="sd">        than duplicating assets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cloud_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cloud_list</span>
+
+        <span class="n">rf_titles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">method_format</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">asset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cf</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;cloud_format&#39;</span> <span class="ow">in</span> <span class="n">asset</span><span class="p">:</span>
+                <span class="n">cf</span> <span class="o">=</span> <span class="n">asset</span><span class="p">[</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">rf_titles</span><span class="p">:</span>
+                <span class="n">cf</span> <span class="o">=</span> <span class="n">method_format</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">cf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cloud_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">id</span><span class="p">,</span> <span class="n">cf</span><span class="p">))</span>
+
+        <span class="c1"># Pointer to cloud assets in the main assets list.</span>
+        <span class="k">return</span> <span class="n">cloud_list</span>
+
+    <span class="k">def</span> <span class="nf">_load_cloud_assets</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointCluster</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the cloud assets property with a cluster of DataPointCloudProducts or a </span>
+<span class="sd">        single DataPointCloudProduct if only one is present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">file_formats</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">method_format</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span> <span class="ow">or</span> <span class="n">file_formats</span>
+
+        <span class="n">asset_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">cf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span><span class="p">:</span>
+            <span class="n">asset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">priority</span><span class="p">:</span>
+                <span class="c1"># Register this asset as a DataPointCloudProduct</span>
+                <span class="n">order</span> <span class="o">=</span> <span class="n">priority</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
+                <span class="n">asset_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">DataPointCloudProduct</span><span class="p">(</span><span class="n">asset</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">asset_id</span><span class="p">,</span> <span class="n">cf</span><span class="o">=</span><span class="n">cf</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">)</span>
+                <span class="n">asset_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">asset_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;No dataset from </span><span class="si">{</span><span class="n">priority</span><span class="si">}</span><span class="s1"> found (id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">asset_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DataPointCluster</span><span class="p">(</span><span class="n">asset_list</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">asset_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2024, Centre of Environmental Data Analysis Developers,Scientific and Technical Facilities Council (STFC),UK Research and Innovation (UKRI). BSD 2-Clause License. All rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
