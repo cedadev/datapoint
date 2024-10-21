@@ -13,7 +13,6 @@ class ExampleItem:
     def get_collection(self):
         return ExampleItem(id='test_collection')
 
-
 def test_main():
 
     test_item = ExampleItem()
