@@ -7,7 +7,7 @@ import xarray as xr
 import logging
 
 from ceda_datapoint.mixins import UIMixin, PropertiesMixin
-from .utils import generate_id
+from .utils import hash_id
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class DataPointCluster(UIMixin):
             parent_id: str = None, 
             meta: dict = None):
         
-        self._id = f'{parent_id}-{generate_id()}'
+        self._id = f'{parent_id}-{hash_id(parent_id)}'
 
         meta = meta or {}
 
@@ -32,9 +32,9 @@ class DataPointCluster(UIMixin):
         for p in products:
             if isinstance(p, DataPointCluster):
                 for sub_p in p.products:
-                    self._products[str(sub_p)] = sub_p
-            else:
-                self._products[str(p)] = p
+                    self._products[sub_p.id] = sub_p
+            elif p is not None:
+                self._products[p.id] = p
 
         self._meta = meta
         self._meta['products'] = len(products)

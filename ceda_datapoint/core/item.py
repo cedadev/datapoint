@@ -31,13 +31,18 @@ class DataPointItem(PropertiesMixin, UIMixin):
         if hasattr(item_stac,'id'):
             self._id = item_stac.id
 
+        assets, properties = None, None
+
         for key, value in item_stac.to_dict().items():
             if key == 'properties':
-                self._properties = value
+                properties = value
             elif key == 'assets':
-                self._assets = value
+                assets = value
             else:
                 self._stac_attrs[key] = value
+
+        self._assets = assets or {}
+        self._properties = properties or {}
 
         self._collection = item_stac.get_collection().id
 
@@ -115,6 +120,11 @@ class DataPointItem(PropertiesMixin, UIMixin):
             priority: list = None,
             **kwargs
         ):
+        """
+        Returns a dataset represented by this item from its cluster.
+        The nth dataset is returned given the ``id`` parameter. Typically
+        items should have only 1-2 datasets attached.
+        """
 
         cluster = self._load_cloud_assets(priority=priority)
 
@@ -158,10 +168,12 @@ class DataPointItem(PropertiesMixin, UIMixin):
         which acts as a set of pointers to the asset list, rather
         than duplicating assets.
         """
+        cloud_list = []
+        if self._assets is None:
+            return cloud_list
 
         rf_titles = list(method_format.keys())
 
-        cloud_list = []
         for id, asset in self._assets.items():
             cf = None
             if 'cloud_format' in asset:
@@ -202,7 +214,7 @@ class DataPointItem(PropertiesMixin, UIMixin):
 
         if len(asset_list) == 0:
             logger.warning(
-                f'No dataset from {priority} found.'
+                f'No dataset from {priority} found (id={self._id})'
             )
             return None
         elif len(asset_list) > 1:
