@@ -18,7 +18,7 @@ def generate_id():
     import random
     chars = [*'0123456789abcdefghijklmnopqrstuvwxyz']
     id = ''
-    for i in range(10):
+    for i in range(6):
         j = random.randint(0,len(chars)-1)
         id += chars[j]
 

@@ -10,7 +10,7 @@ import hashlib
 from ceda_datapoint.mixins import UIMixin
 from .cloud import DataPointCluster
 from .item import DataPointItem
-from .utils import urls, hash_id
+from .utils import urls, hash_id, generate_id
 
 logger = logging.getLogger(__name__)
 
