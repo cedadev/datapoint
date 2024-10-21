@@ -7,6 +7,10 @@ class UIMixin:
     Mixin for behaviours common to all User-facing classes.
     """
 
+    @property
+    def id(self):
+        return self._id
+
     def help(self):
         """
         Link to documentation or other sources of assistance.
