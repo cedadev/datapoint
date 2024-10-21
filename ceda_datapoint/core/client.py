@@ -5,11 +5,12 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import pystac_client
 from pystac_client.stac_api_io import StacApiIO
 import logging
+import hashlib
 
 from ceda_datapoint.mixins import UIMixin
 from .cloud import DataPointCluster
 from .item import DataPointItem
-from .utils import urls, generate_id
+from .utils import urls, hash_id
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class DataPointSearch(UIMixin):
 
         self._meta['search_terms'] = self._search_terms
 
-        self._id = f'{parent_id}-{generate_id()}'
+        self._id = f'{parent_id}-{hash_id(parent_id)}'
 
     def __str__(self) -> str:
         """
@@ -181,8 +182,12 @@ class DataPointClient(UIMixin):
     def __init__(
             self, 
             org: str = 'CEDA', 
-            url: str = None
+            url: str = None,
+            hash_token: str = None,
         ) -> None:
+
+        if hash_token is None:
+            hash_token = generate_id()
 
         self._url = url
 
@@ -213,7 +218,7 @@ class DataPointClient(UIMixin):
         }
 
         self._id = self._org or ''
-        self._id += f'-{generate_id()}'
+        self._id += f'-{hash_id(hash_token)}'
 
     def __str__(self) -> str:
         """

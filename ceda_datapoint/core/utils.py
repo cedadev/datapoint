@@ -23,3 +23,9 @@ def generate_id():
         id += chars[j]
 
     return f'DP:{id}'
+
+def hash_id(hash_token):
+    hash_val=0
+    for ch in hash_token:
+        hash_val = ( hash_val*281  ^ ord(ch)*997) & 0xFFFFFFFF
+    return str(hash_val)[:6]

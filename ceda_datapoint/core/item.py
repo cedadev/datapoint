@@ -120,6 +120,11 @@ class DataPointItem(PropertiesMixin, UIMixin):
             priority: list = None,
             **kwargs
         ):
+        """
+        Returns a dataset represented by this item from its cluster.
+        The nth dataset is returned given the ``id`` parameter. Typically
+        items should have only 1-2 datasets attached.
+        """
 
         cluster = self._load_cloud_assets(priority=priority)
 
@@ -209,7 +214,7 @@ class DataPointItem(PropertiesMixin, UIMixin):
 
         if len(asset_list) == 0:
             logger.warning(
-                f'No dataset from {priority} found.'
+                f'No dataset from {priority} found (id={self._id})'
             )
             return None
         elif len(asset_list) > 1:
