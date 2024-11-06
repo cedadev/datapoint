@@ -122,6 +122,8 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
             order: int = None,
             mode: str = 'xarray',
             meta: dict = None,
+            stac_attrs: dict = None,
+            properties: dict = None,
         ):
 
         if mode != 'xarray':
@@ -138,6 +140,9 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
             'asset_id': id,
             'cloud_format': cf
         }
+
+        self._stac_attrs = stac_attrs
+        self._properties = properties
 
     @property
     def cloud_format(self):
@@ -169,13 +174,21 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
                 'No cloud format given for this dataset'
             )
         
-        if self._cloud_format == 'kerchunk':
-            return self._open_kerchunk(local_only=local_only, **kwargs)
-        elif self._cloud_format == 'CFA':
-            return self._open_cfa(**kwargs)
-        else:
-            raise ValueError(
-                'Cloud format not recognised - must be one of ("kerchunk", "CFA")'
+        try:
+            if self._cloud_format == 'kerchunk':
+                return self._open_kerchunk(local_only=local_only, **kwargs)
+            elif self._cloud_format == 'CFA':
+                return self._open_cfa(**kwargs)
+            else:
+                raise ValueError(
+                    'Cloud format not recognised - must be one of ("kerchunk", "CFA")'
+                )
+        except ValueError as err:
+            raise err
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                'The requested resource could not be located: '
+                f'{self._asset_meta["href"]}'
             )
 
     def _open_kerchunk(

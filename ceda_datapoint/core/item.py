@@ -209,7 +209,10 @@ class DataPointItem(PropertiesMixin, UIMixin):
                 # Register this asset as a DataPointCloudProduct
                 order = priority.index(cf)
                 asset_id = f'{self._id}-{id}'
-                a = DataPointCloudProduct(asset, id=asset_id, cf=cf, order=order, meta=self._meta)
+                a = DataPointCloudProduct(
+                    asset, 
+                    id=asset_id, cf=cf, order=order, meta=self._meta,
+                    stac_attrs=self._stac_attrs, properties=self._properties)
                 asset_list.append(a)
 
         if len(asset_list) == 0:
