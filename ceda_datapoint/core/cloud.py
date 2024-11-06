@@ -5,6 +5,8 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import fsspec
 import xarray as xr
 import logging
+import requests
+import json
 
 from ceda_datapoint.mixins import UIMixin, PropertiesMixin
 from .utils import hash_id
@@ -21,9 +23,12 @@ class DataPointCluster(UIMixin):
             self, 
             products: list, 
             parent_id: str = None, 
-            meta: dict = None):
+            meta: dict = None,
+            local_only: bool = False):
         
         self._id = f'{parent_id}-{hash_id(parent_id)}'
+
+        self._local_only = local_only
 
         meta = meta or {}
 
@@ -43,6 +48,10 @@ class DataPointCluster(UIMixin):
         return f'<DataPointCluster: {self._id} (Datasets: {len(self._products)})>'
     
     def __getitem__(self, index):
+
+        if isinstance(index, int):
+            index = list(self._products.keys())[index]
+
         if index not in self._products:
             logger.warning(
                 f'"{index}" not found in available products.'
@@ -75,6 +84,7 @@ class DataPointCluster(UIMixin):
             self,
             id,
             mode: str = 'xarray',
+            local_only: bool = False,
             **kwargs,
         ) -> xr.Dataset:
             
@@ -82,6 +92,8 @@ class DataPointCluster(UIMixin):
             raise NotImplementedError(
                 'Only "xarray" mode currently implemented - cf-python is a future option'
             )
+        
+        local_only = local_only or self._local_only
         
         if isinstance(id, int):
             id = list(self._products.keys())[id]
@@ -93,7 +105,7 @@ class DataPointCluster(UIMixin):
             return None
         
         product = self._products[id]
-        return product.open_dataset(**kwargs)
+        return product.open_dataset(local_only=local_only, **kwargs)
 
     def open_datasets(self):
         raise NotImplementedError(
@@ -110,6 +122,8 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
             order: int = None,
             mode: str = 'xarray',
             meta: dict = None,
+            stac_attrs: dict = None,
+            properties: dict = None,
         ):
 
         if mode != 'xarray':
@@ -126,6 +140,9 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
             'asset_id': id,
             'cloud_format': cf
         }
+
+        self._stac_attrs = stac_attrs
+        self._properties = properties
 
     @property
     def cloud_format(self):
@@ -145,7 +162,7 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
         for k, v in self._meta.items():
             print(f' - {k}: {v}')
 
-    def open_dataset(self, **kwargs):
+    def open_dataset(self, local_only: bool = False, **kwargs):
         """
         Open the dataset for this product (in xarray).
         Specific methods to open cloud formats are private since
@@ -157,17 +174,26 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
                 'No cloud format given for this dataset'
             )
         
-        if self._cloud_format == 'kerchunk':
-            return self._open_kerchunk(**kwargs)
-        elif self._cloud_format == 'CFA':
-            return self._open_cfa(**kwargs)
-        else:
-            raise ValueError(
-                'Cloud format not recognised - must be one of ("kerchunk", "CFA")'
+        try:
+            if self._cloud_format == 'kerchunk':
+                return self._open_kerchunk(local_only=local_only, **kwargs)
+            elif self._cloud_format == 'CFA':
+                return self._open_cfa(**kwargs)
+            else:
+                raise ValueError(
+                    'Cloud format not recognised - must be one of ("kerchunk", "CFA")'
+                )
+        except ValueError as err:
+            raise err
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                'The requested resource could not be located: '
+                f'{self._asset_meta["href"]}'
             )
 
     def _open_kerchunk(
             self,
+            local_only: bool = False,
             **kwargs,
         ) -> xr.Dataset:
         
@@ -182,6 +208,9 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
         
         mapper_kwargs = self._asset_meta.get('mapper_kwargs') or {}
         open_zarr_kwargs = self._asset_meta.get('open_zarr_kwargs') or {}
+
+        if local_only:
+            href = _fetch_kerchunk_make_local(href)
         
         mapper = fsspec.get_mapper(
             'reference://',
@@ -223,3 +252,32 @@ def _zarr_kwargs_default(add_kwargs={}):
         'consolidated':False,
     }
     return defaults | add_kwargs
+
+def _fetch_kerchunk_make_local(href: str):
+    """
+    Fetch a kerchunk file, open as json content and do find/replace
+    to access local files only.
+    """
+    attempts = 0
+    success = False
+    while attempts < 3 and not success:
+        resp = requests.get(href)
+        if resp.status_code == 200:
+            success = True
+        attempts += 1
+    if attempts >= 3 and not success:
+        raise ValueError(
+            f'File {href}: Download unsuccessful - '
+            'could not download the file successfully (tried 3 times)'
+        )
+
+    refs = json.loads(resp.text)
+
+    for key in refs['refs'].keys():
+        v = refs['refs'][key]
+        if isinstance(v, list) and len(v) == 3:
+            # First character
+            if 'https://' in v[0]:
+                refs['refs'][key][0] = v[0].replace('https://dap.ceda.ac.uk/','/')
+    return refs
+
