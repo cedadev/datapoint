@@ -192,7 +192,7 @@
         <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">searched</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">searched</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataPointSearch.open_cluster"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.open_cluster">[docs]</a>    <span class="k">def</span> <span class="nf">open_cluster</span><span class="p">(</span>
+<div class="viewcode-block" id="DataPointSearch.collect_cloud_assets"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.collect_cloud_assets">[docs]</a>    <span class="k">def</span> <span class="nf">collect_cloud_assets</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -335,29 +335,34 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">DataPointSearch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">collection</span><span class="p">]))</span>
         
-<div class="viewcode-block" id="DataPointClient.list_query_terms"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_query_terms">[docs]</a>    <span class="k">def</span> <span class="nf">list_query_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DataPointClient.list_query_terms"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_query_terms">[docs]</a>    <span class="k">def</span> <span class="nf">list_query_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        List the possible query terms for all or</span>
 <span class="sd">        a particular collection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">search_terms</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">search_terms</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">display</span> <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 
             
             <span class="n">item</span> <span class="o">=</span> <span class="n">search</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span> <span class="n">coll</span> <span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: &lt; No Items &gt;&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: &lt; No Items &gt;&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="n">coll</span> <span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">collection</span><span class="p">],</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">search_terms</span><span class="p">(</span><span class="n">dps</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">search_terms</span><span class="p">(</span><span class="n">dps</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">():</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="p">],</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">search_terms</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">search_terms</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span></div>
 
 <div class="viewcode-block" id="DataPointClient.list_collections"><a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_collections">[docs]</a>    <span class="k">def</span> <span class="nf">list_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
