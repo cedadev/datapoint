@@ -250,29 +250,34 @@ class DataPointClient(UIMixin):
         """
         return DataPointSearch(self.search(collections=[collection]))
         
-    def list_query_terms(self, collection=None):
+    def list_query_terms(self, collection=None) -> dict | None:
         """
         List the possible query terms for all or
         a particular collection.
         """
 
-        def search_terms(search, coll):
+        def search_terms(search, coll, display : bool = False):
 
             
             item = search[0]
             if item is not None:
-                print(f'{coll}: {list(item.attributes.keys())}')
+                if display:
+                    print(f'{coll}: {list(item.attributes.keys())}')
+                return { coll : list(item.attributes.keys())}
             else:
-                print(f'{coll}: < No Items >')
+                if display:
+                    print(f'{coll}: < No Items >')
+                return {coll : None}
 
         if collection is not None:
             dps = self.search(collections=[collection], max_items=1)
-            search_terms(dps, collection)
+            return search_terms(dps, collection)
 
         else:
             for coll in self._client.get_collections():
                 c = self.search(collections=[coll.id], max_items=1)
-                search_terms(c, coll.id)
+                _ = search_terms(c, coll.id, display=True)
+            return
 
     def list_collections(self):
         """
