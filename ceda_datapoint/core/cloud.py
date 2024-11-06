@@ -48,6 +48,10 @@ class DataPointCluster(UIMixin):
         return f'<DataPointCluster: {self._id} (Datasets: {len(self._products)})>'
     
     def __getitem__(self, index):
+
+        if isinstance(index, int):
+            index = list(self._products.keys())[index]
+
         if index not in self._products:
             logger.warning(
                 f'"{index}" not found in available products.'
@@ -193,7 +197,7 @@ class DataPointCloudProduct(UIMixin, PropertiesMixin):
         open_zarr_kwargs = self._asset_meta.get('open_zarr_kwargs') or {}
 
         if local_only:
-            href = fetch_kerchunk_make_local(href)
+            href = _fetch_kerchunk_make_local(href)
         
         mapper = fsspec.get_mapper(
             'reference://',

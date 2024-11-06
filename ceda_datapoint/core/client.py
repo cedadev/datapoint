@@ -107,7 +107,7 @@ class DataPointSearch(UIMixin):
         for term, searched in self._search_terms.items():
             print(f' - {term}: {searched}')
 
-    def open_cluster(
+    def collect_cloud_assets(
             self,
             mode='xarray',
             combine=False,
