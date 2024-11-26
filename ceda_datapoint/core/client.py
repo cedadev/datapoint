@@ -5,14 +5,15 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import pystac_client
 from pystac_client.stac_api_io import StacApiIO
 import logging
-import hashlib
 
 from ceda_datapoint.mixins import UIMixin
+from ceda_datapoint.utils import urls, hash_id, generate_id, logstream
 from .cloud import DataPointCluster
 from .item import DataPointItem
-from .utils import urls, hash_id, generate_id
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logstream)
+logger.propagate = False
 
 class DataPointSearch(UIMixin):
     """
@@ -78,34 +79,51 @@ class DataPointSearch(UIMixin):
             )
             return None
 
-    def help(self):
-        print('DataPointSearch Help:')
-        print(' > search.get_items() - fetch the set of items as a list of DataPointItems')
-        print(' > search.info() - General information about this search')
-        print(' > search.open_cluster() - Open cloud datasets represented in this search')
-        print(' > search.display_assets() - List the names of assets for each item in this search')
-        print(' > search.display_cloud_assets() - List the cloud format types for each item in this search')
-        super().help()
-
-    def get_items(self) -> dict:
+    @property
+    def items(self) -> dict[str, DataPointItem]:
         """
-        Public method to get the set of 
-        DataPointItem objects.
-        """
-
+        Get the set of ``DataPointItem`` objects 
+        described by this search."""
         if not self._item_set:
             self._load_item_set()
-
         return self._item_set
 
+    @property
+    def assets(self) -> dict:
+        """
+        Get the set of assets under each item in
+        this search, returned as a set of nested
+        dictionaries."""
+        if not self._asset_set:
+            self._load_asset_set()
+        return self._asset_set
+            
+    def help(self):
+        print('DataPointSearch Help:')
+        print(' > search.info() - General information about this search')
+        print(' > search.collect_cloud_assets() - Collect the cloud products into a `cluster`')
+        print(' > search.display_assets() - List the names of assets for each item in this search')
+        print(' > search.display_cloud_assets() - List the cloud format types for each item in this search')
+        super().help(additionals=['items','assets'])
+    
     def info(self) -> None:
         """
         Provide information about this search
         """
-        print(self)
-        print('Search terms:')
-        for term, searched in self._search_terms.items():
-            print(f' - {term}: {searched}')
+        print(self.__repr__())
+
+    def open_dataset(
+            self,
+            id,
+            mode='xarray',
+            combine=False,
+            priority=[],
+            **kwargs,
+        ):
+        return self.collect_cloud_assets(
+            mode=mode, 
+            combine=combine, 
+            priority=priority).open_dataset(id,**kwargs)
 
     def collect_cloud_assets(
             self,
@@ -130,7 +148,7 @@ class DataPointSearch(UIMixin):
         
         assets = []
         for item in self._item_set.values():
-            assets.append(item.get_cloud_assets(priority=priority))
+            assets.append(item.collect_cloud_assets(priority=priority))
 
         return DataPointCluster(assets, meta=self._meta, parent_id=self._id)
     
@@ -139,10 +157,8 @@ class DataPointSearch(UIMixin):
         Display the number of assets attributed to each item in
         the itemset.
         """
-        if not self._item_set:
-            self._load_item_set()
 
-        for item in self._item_set.values():
+        for item in self.items.values():
             assets = item.get_assets()
             print(item)
             print(' - ' + ', '.join(assets.keys()))
@@ -174,6 +190,16 @@ class DataPointSearch(UIMixin):
             items[item.id] = DataPointItem(item, meta=self._meta)
         self._item_set = items
     
+    def _load_asset_set(self) -> None:
+        """
+        Load the set of assets under each item for this 
+        search as a dictionary
+        """
+        assets = {}
+        for item in self.items.values():
+            assets[item.id] = item.get_assets()
+        self._asset_set = assets
+
 class DataPointClient(UIMixin):
     """
     Client for searching STAC collections, returns self-describing 
@@ -185,6 +211,10 @@ class DataPointClient(UIMixin):
             url: str = None,
             hash_token: str = None,
         ) -> None:
+        """
+        Initialise a DataPointClient. Default organisation/url
+        corresponds to CEDA from config information. A hash token
+        can be provided for setting the ID (mostly for testing)."""
 
         if hash_token is None:
             hash_token = generate_id()
@@ -229,14 +259,14 @@ class DataPointClient(UIMixin):
             org = f'{self._org}'
 
         return f'<DataPointClient: {self._id}>'
-    
+
     def help(self):
         print('DataPointClient Help:')
         print(' > client.info() - Get information about this client.')
-        print(
-            ' > client.list_query_terms() - List terms available to '
-            'query for all or a specific collection')
-        print(' > client.list_collections() - List all collections known to this client.')
+        print(' > client.list_query_terms() - List of queryable terms for a specific collection')
+        print(' > client.display_query_terms() - Prints query terms to the terminal.')
+        print(' > client.list_collections() - Get list of all collections known to this client.')
+        print(' > client.display_collections() - Print collections and their descriptions')
         print(' > client.search() - perform a search operation. For example syntax see the documentation.')
         super().help()
 
@@ -250,41 +280,46 @@ class DataPointClient(UIMixin):
         """
         return DataPointSearch(self.search(collections=[collection]))
         
-    def list_query_terms(self, collection=None) -> dict | None:
+    def list_query_terms(self, collection) -> list | None:
         """
         List the possible query terms for all or
         a particular collection.
         """
-
-        def search_terms(search, coll, display : bool = False):
-
-            
-            item = search[0]
-            if item is not None:
-                if display:
-                    print(f'{coll}: {list(item.attributes.keys())}')
-                return { coll : list(item.attributes.keys())}
-            else:
-                if display:
-                    print(f'{coll}: < No Items >')
-                return {coll : None}
-
-        if collection is not None:
-            dps = self.search(collections=[collection], max_items=1)
-            return search_terms(dps, collection)
-
+        dps = self.search(collections=[collection], max_items=1)
+        item = dps[0]
+        if item is not None:
+            return list(item.attributes.keys())
         else:
-            for coll in self._client.get_collections():
-                c = self.search(collections=[coll.id], max_items=1)
-                _ = search_terms(c, coll.id, display=True)
+            logger.warning(f'Collection {collection} returned no search terms.')
+            return None
+        
+    def display_query_terms(self, collection: str = None) -> None:
+        """
+        Display query terms for all collections or 
+        just a specific collection.
+        """
+        colls = self.list_collections()
+        if collection is not None:
+            if collection in colls:
+                print(f'{collection}: {self.list_query_terms(collection)}')
+            else:
+                logger.warning(f'Collection {collection} was not found.')
             return
+        
+        for coll in colls:
+            print(f'{coll}: {self.list_query_terms(coll)}')
 
-    def list_collections(self):
+    def list_collections(self) -> list:
         """
         Return a list of the names of collections for this Client
         """
+        return [coll.id for coll in self._client.get_collections()]
+    
+    def display_collections(self):
+        """
+        Display the list of collections with their descriptions"""
         for coll in self._client.get_collections():
-            print(f"{coll.id}: {coll.description}")
+            print(f'{coll.id}: {coll.description}')
 
     def search(self, **kwargs) -> DataPointSearch:
         """

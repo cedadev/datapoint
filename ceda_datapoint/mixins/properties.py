@@ -4,18 +4,28 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
 
+from ceda_datapoint.utils import logstream
+
+from .general import UIMixin
+
 logger = logging.getLogger(__name__)
+logger.addHandler(logstream)
+logger.propagate = False
 
-class PropertiesMixin:
+class PropertiesMixin(UIMixin):
 
-    @property
-    def id(self):
-        """
-        Attempt to get the stac id, or use the string
-        representation of the source stac object."""
+    def help(self, additionals: list = None):
+        """Get all properties of this Mixin"""
 
-        return self._id
-    
+        additionals = additionals or []
+        additionals += [
+            'bbox', 'start_datetime', 
+            'end_datetime', 'attributes',
+            'stac_attributes','variables',
+            'units'
+        ]
+        super().help(additionals=additionals)
+
     @property
     def bbox(self):
         return self._stac_attrs['bbox']
