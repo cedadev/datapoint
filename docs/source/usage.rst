@@ -3,7 +3,7 @@ CEDA DataPoint - Basic Usage
 
 This page/notebook demonstrates some basic usage and functionality for
 CEDA’s DataPoint package, installable with
-``pip install ceda_datapoint``. To begin we can import the datapoint
+``pip install ceda-datapoint``. To begin we can import the datapoint
 module and start using the search client.
 
 .. code::
