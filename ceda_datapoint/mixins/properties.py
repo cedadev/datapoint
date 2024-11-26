@@ -13,6 +13,10 @@ logger.addHandler(logstream)
 logger.propagate = False
 
 class PropertiesMixin(UIMixin):
+    """
+    Mixin for Item/Cloud product objects where specific properties
+    apply to all sub-elements of the object.
+    """
 
     def help(self, additionals: list = None):
         """Get all properties of this Mixin"""
@@ -28,14 +32,17 @@ class PropertiesMixin(UIMixin):
 
     @property
     def bbox(self):
+        """Get the bounding box for this object."""
         return self._stac_attrs['bbox']
     
     @property
     def start_datetime(self):
+        """Get the start datetime for this object"""
         return self._properties['start_datetime']
     
     @property
     def end_datetime(self):
+        """Get the end datetime for this object"""
         return self._properties['end_datetime']
          
     @property
