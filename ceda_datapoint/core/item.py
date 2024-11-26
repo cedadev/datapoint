@@ -191,12 +191,13 @@ class DataPointItem(PropertiesMixin):
     def collect_cloud_assets(
             self,
             priority=None,
+            show_unreachable: bool = False,
         ) -> DataPointCluster:
         """
         Returns a cluster of DataPointCloudProduct objects representing the cloud assets
         as requested."""
 
-        return self._load_cloud_assets(priority=priority)
+        return self._load_cloud_assets(priority=priority, show_unreachable=show_unreachable)
 
     def get_assets(self) -> dict:
         """
@@ -244,6 +245,7 @@ class DataPointItem(PropertiesMixin):
     def _load_cloud_assets(
             self,
             priority: list = None,
+            show_unreachable: bool = False
         ) -> DataPointCluster:
 
         """
@@ -267,7 +269,8 @@ class DataPointItem(PropertiesMixin):
                     asset, 
                     id=asset_id, cf=cf, order=order, meta=self._meta,
                     stac_attrs=self._stac_attrs, properties=self._properties)
-                asset_list.append(a)
+                if show_unreachable or a.visibility != 'unreachable':
+                    asset_list.append(a)
             
 
         if len(asset_list) == 0:

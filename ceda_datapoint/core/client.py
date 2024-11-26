@@ -130,6 +130,7 @@ class DataPointSearch(UIMixin):
             mode='xarray',
             combine=False,
             priority=[],
+            show_unreachable=False,
             **kwargs,
         ) -> DataPointCluster:
 
@@ -148,7 +149,7 @@ class DataPointSearch(UIMixin):
         
         assets = []
         for item in self._item_set.values():
-            assets.append(item.collect_cloud_assets(priority=priority))
+            assets.append(item.collect_cloud_assets(priority=priority, show_unreachable=show_unreachable))
 
         return DataPointCluster(assets, meta=self._meta, parent_id=self._id)
     
