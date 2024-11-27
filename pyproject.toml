@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ceda-datapoint"
-version = "0.3.0"
+version = "0.3.1"
 description = "DataPoint provides python-based search/access tools for using data primarily from the CEDA Archive."
 authors = ["Daniel Westwood <daniel.westwood@stfc.ac.uk>"]
 license = "{file = \"LICENSE\"}"
