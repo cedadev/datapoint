@@ -63,4 +63,4 @@ available to all DataPoint users when published to our production indexes. The b
 delivering a cohesive data search service.
 
 .. image:: _images/SearchFutures.png
-   :alt: The connection between creating cloud formats and STAC records to be used by the DataPoint API.
+   :alt: The connection between creating cloud formats and STAC records to be used by the DataPoint API for Data Discovery.
