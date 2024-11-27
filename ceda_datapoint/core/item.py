@@ -33,6 +33,13 @@ class DataPointItem(PropertiesMixin):
         :param meta:        (dict) Metadata about the parent object.
         """
 
+        self._meta = {}
+
+        if item_stac is None:
+            raise ValueError(
+                'DataPointItem could not be initialised from empty STAC Item'
+            )
+
         self._item_stac = item_stac
 
         self._id = 'N/A'
@@ -47,9 +54,12 @@ class DataPointItem(PropertiesMixin):
             'item': self._id,
             'assets': len(self._assets),
             'cloud_assets': len(self._cloud_assets),
-            'attributes': len(self._properties.keys()),
-            'stac_attributes': len(self._stac_attrs.keys()),
         }
+        if self._properties:
+            self._meta['attributes'] = len(self._properties.keys())
+        if self._stac_attrs:
+            self._meta['stac_attributes'] = len(self._stac_attrs.keys())
+
 
     def __str__(self):
         """
@@ -108,12 +118,22 @@ class DataPointItem(PropertiesMixin):
     @property
     def _properties(self):
         """Fetch properties from item_stac"""
-        return self._item_stac.to_dict()['properties']
+        try:
+            properties = self._item_stac.to_dict()['properties'] or []
+        except KeyError:
+            logger.warning(f'Unable to read `properties` attribute from item {self._id}')
+            properties = []
+        return properties
     
     @property
     def _assets(self):
         """Fetch assets from item_stac"""
-        return self._item_stac.to_dict()['assets']
+        try:
+            assets = self._item_stac.to_dict()['assets'] or []
+        except KeyError:
+            logger.warning(f'Unable to read `assets` attribute from item {self._id}')
+            assets = []
+        return assets
     
     @property
     def _stac_attrs(self):
@@ -243,8 +263,10 @@ class DataPointItem(PropertiesMixin):
         which acts as a set of pointers to the asset list, rather
         than duplicating assets.
         """
+        assets = self._assets or []
+
         cloud_list = []
-        if self._assets is None:
+        if len(assets) == 0:
             return cloud_list
 
         rf_titles = list(method_format.keys())
