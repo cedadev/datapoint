@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Cloud Formats" href="cloud_formats.html" />
-    <link rel="prev" title="Inspiration for DataPoint" href="inspiration.html" /> 
+    <link rel="prev" title="Example Use Cases" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,10 +48,15 @@
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">STAC Catalogs Explained</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-basics-of-stac">1. The basics of STAC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stac-conventions-from-ceda">2. STAC Conventions from CEDA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -87,14 +92,42 @@
              
   <section id="stac-catalogs-and-conventions">
 <h1>STAC Catalogs and Conventions<a class="headerlink" href="#stac-catalogs-and-conventions" title="Permalink to this heading"></a></h1>
-<p><strong>Coming Soon!</strong></p>
+<p>The CEDA STAC catalogs are accessible via an API portal at <a class="reference external" href="https://api.ceda.stac.ac.uk">https://api.ceda.stac.ac.uk</a>.</p>
+<img alt="The Spatio-Temporal Asset Catalog Logo" src="_images/STACLogo.png" />
+<section id="the-basics-of-stac">
+<h2>1. The basics of STAC<a class="headerlink" href="#the-basics-of-stac" title="Permalink to this heading"></a></h2>
+<p>Spatio-Temporal Asset Catalog is an emerging standard for storing Geospatial assets in JSON-style format,
+with a convention for metadata attributes to be stored so that STAC records are uniform and standardised across institutions and data centers.
+The STAC methodology consists of several hierarchical layers for organising geospatial data such that searching and accessing data are made
+consistent and easy. STAC objects are grouped into three categories, as seen in the figure:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>STAC Assets: Lowest level object, a single NetCDF file representing some arbitrary N-dimensional data.</p></li>
+<li><p>STAC Items: A grouping of assets that are associated by some attributes. This could be a set of NetCDF files or a Cloud Optimised object like a Zarr Store.</p></li>
+<li><p>STAC Catalog: Access point for Item browsing, all items can be searched via their defined attributes using an API.</p></li>
+</ul>
+</div></blockquote>
+<p>Read more about STAC conventions and possible extensions/plugins on the <a class="reference external" href="https://stacspec.org/en">STAC Docs</a></p>
+</section>
+<section id="stac-conventions-from-ceda">
+<h2>2. STAC Conventions from CEDA<a class="headerlink" href="#stac-conventions-from-ceda" title="Permalink to this heading"></a></h2>
+<p>At CEDA we have created multiple STAC Catalogs for various collections of data, all accessible via a single URL - this is what DataPoint uses.
+Our convention for storing cloud format records alongside more traditional file types is to create an Item for each dataset object. This item then has one or more
+assets; the original data files in NetCDF or similar formats plus a <code class="docutils literal notranslate"><span class="pre">reference-file</span></code> asset which is typically a Kerchunk or CFA file. Zarr will likely also fit under
+this or perhaps a different keyword asset name. Items may have multiple <code class="docutils literal notranslate"><span class="pre">reference-file</span></code> assets, but should not have more than one of the same format. For example an item
+can have a kerchunk and Zarr asset, but should not have two kerchunk assets since each item should have a one-to-one mapping with a cloud dataset object.</p>
+<p>DataPoint can identify the <code class="docutils literal notranslate"><span class="pre">reference-file</span></code> assets and check the <code class="docutils literal notranslate"><span class="pre">cloud_format</span></code> property if it exists to direct the user as to which format the asset represents. The asset
+then contains properties like <code class="docutils literal notranslate"><span class="pre">open_zarr_kwargs</span></code> or <code class="docutils literal notranslate"><span class="pre">open_mapper_kwargs</span></code> which are used internally to open an xarray dataset object to serve to the user. The actual loading of
+the cloud object into a dataset happens as lazily as possible - meaning the data is not accessed until directly requested to preserve memory space in the user’s environment for
+as long as possible.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="inspiration.html" class="btn btn-neutral float-left" title="Inspiration for DataPoint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Example Use Cases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cloud_formats.html" class="btn btn-neutral float-right" title="Cloud Formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

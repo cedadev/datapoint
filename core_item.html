@@ -48,22 +48,26 @@
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="core_client.html">Client and Search</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">STAC Items</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem"><code class="docutils literal notranslate"><span class="pre">DataPointItem</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.cloud_assets"><code class="docutils literal notranslate"><span class="pre">DataPointItem.cloud_assets</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.help"><code class="docutils literal notranslate"><span class="pre">DataPointItem.help()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.info"><code class="docutils literal notranslate"><span class="pre">DataPointItem.info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.get_cloud_product"><code class="docutils literal notranslate"><span class="pre">DataPointItem.get_cloud_product()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.open_dataset"><code class="docutils literal notranslate"><span class="pre">DataPointItem.open_dataset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.get_cloud_assets"><code class="docutils literal notranslate"><span class="pre">DataPointItem.get_cloud_assets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.collect_cloud_assets"><code class="docutils literal notranslate"><span class="pre">DataPointItem.collect_cloud_assets()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.get_assets"><code class="docutils literal notranslate"><span class="pre">DataPointItem.get_assets()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.list_cloud_formats"><code class="docutils literal notranslate"><span class="pre">DataPointItem.list_cloud_formats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.display_cloud_formats"><code class="docutils literal notranslate"><span class="pre">DataPointItem.display_cloud_formats()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -103,10 +107,16 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.core.item.</span></span><span class="sig-name descname"><span class="pre">DataPointItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_stac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem" title="Permalink to this definition"></a></dt>
 <dd><p>Class to represent a self-describing Item object from 
 the STAC collection.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.cloud_assets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cloud_assets</span></span><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.cloud_assets" title="Permalink to this definition"></a></dt>
+<dd><p>Lazily identify cloud assets</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.help">
 <span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.help" title="Permalink to this definition"></a></dt>
-<dd><p>Link to documentation or other sources of assistance.</p>
+<dd><p>Help method for this class</p>
 </dd></dl>
 
 <dl class="py method">
@@ -116,18 +126,48 @@ the STAC collection.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.open_dataset">
-<span class="sig-name descname"><span class="pre">open_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.open_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.open_dataset" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a dataset represented by this item from its cluster.
-The nth dataset is returned given the <code class="docutils literal notranslate"><span class="pre">id</span></code> parameter. Typically
-items should have only 1-2 datasets attached.</p>
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.get_cloud_product">
+<span class="sig-name descname"><span class="pre">get_cloud_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct" title="ceda_datapoint.core.cloud.DataPointCloudProduct"><span class="pre">DataPointCloudProduct</span></a></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.get_cloud_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.get_cloud_product" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a cloud product represented by this item from its cluster.
+The nth cloud product is returned given the <code class="docutils literal notranslate"><span class="pre">id</span></code> parameter. 
+Typically items should have only 1-2 cloud products attached.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – (str) The ID or index of the dataset in the resulting cluster.</p></li>
+<li><p><strong>priority</strong> – (list) Order by which to open a set of datasets.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.get_cloud_assets">
-<span class="sig-name descname"><span class="pre">get_cloud_assets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster" title="ceda_datapoint.core.cloud.DataPointCluster"><span class="pre">DataPointCluster</span></a></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.get_cloud_assets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.get_cloud_assets" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.open_dataset">
+<span class="sig-name descname"><span class="pre">open_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.open_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.open_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Open a specific dataset, skip retrieving the cloud product</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – (str) The ID or index of the dataset.</p></li>
+<li><p><strong>priority</strong> – (list) Order by which to open a set of datasets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.collect_cloud_assets">
+<span class="sig-name descname"><span class="pre">collect_cloud_assets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_unreachable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster" title="ceda_datapoint.core.cloud.DataPointCluster"><span class="pre">DataPointCluster</span></a></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.collect_cloud_assets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.collect_cloud_assets" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a cluster of DataPointCloudProduct objects representing the cloud assets
 as requested.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>priority</strong> – (list) Order by which to open a set of datasets.</p></li>
+<li><p><strong>show_unreachable</strong> – (bool) Show the hidden assets that DataPoint has determined are currently unreachable.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -141,6 +181,12 @@ as requested.</p>
 <span class="sig-name descname"><span class="pre">list_cloud_formats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.list_cloud_formats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.list_cloud_formats" title="Permalink to this definition"></a></dt>
 <dd><p>Return the list of cloud formats identified from the set
 of cloud assets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.DataPointItem.display_cloud_formats">
+<span class="sig-name descname"><span class="pre">display_cloud_formats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#DataPointItem.display_cloud_formats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.DataPointItem.display_cloud_formats" title="Permalink to this definition"></a></dt>
+<dd><p>Display the list of cloud formats based on the cloud assets.</p>
 </dd></dl>
 
 </dd></dl>

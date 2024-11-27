@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Client and Search" href="core_client.html" />
-    <link rel="prev" title="CEDA DataPoint - Basic Usage" href="usage.html" /> 
+    <link rel="next" title="STAC Catalogs and Conventions" href="stac.html" />
+    <link rel="prev" title="DataPoint Objects" href="objects.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,10 +48,15 @@
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">When to Use DataPoint</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#where-to-use-datapoint">Where to use DataPoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-not-to-use-datapoint">Where not to use DataPoint</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -87,15 +92,34 @@
              
   <section id="example-use-cases">
 <h1>Example Use Cases<a class="headerlink" href="#example-use-cases" title="Permalink to this heading"></a></h1>
-<p><strong>Coming Soon!</strong></p>
+<p>Please refer to the following for recommended cases of when DataPoint will suit your needs.</p>
+<section id="where-to-use-datapoint">
+<h2>Where to use DataPoint<a class="headerlink" href="#where-to-use-datapoint" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Quickly identifying which datasets/IDs are relevant to your work</p></li>
+<li><p>Easily selecting/plotting a subset of the data over a specific region/timestep.</p></li>
+<li><p>Performing complex analyses/comparisons on a subset of data or across multiple datasets.</p></li>
+</ul>
+</section>
+<section id="where-not-to-use-datapoint">
+<h2>Where not to use DataPoint<a class="headerlink" href="#where-not-to-use-datapoint" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Accessing data for large scale processing (especially by remote)</p></li>
+<li><p>Downloading massive amounts of data by opening datasets and saving locally.</p></li>
+</ul>
+<p>Summary:
+The best cases to use DataPoint are for finding the correct datasets and performing preliminary analysis/generating plots.
+What DataPoint is not designed for is performing large-scale processing on multiple GB’s or TB’s of data - DataPoint provides methods to access
+the assets that constitute the datasets, which you should analyse in-situ with the data (i.e on JASMIN) using specific software.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-left" title="CEDA DataPoint - Basic Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="core_client.html" class="btn btn-neutral float-right" title="Client and Search" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="objects.html" class="btn btn-neutral float-left" title="DataPoint Objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="stac.html" class="btn btn-neutral float-right" title="STAC Catalogs and Conventions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

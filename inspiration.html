@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="STAC Catalogs and Conventions" href="stac.html" />
-    <link rel="prev" title="CEDA DataPoint Documentation" href="index.html" /> 
+    <link rel="next" title="CEDA DataPoint - Basic Usage" href="usage.html" />
+    <link rel="prev" title="CEDA DataPoint API" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,11 +47,18 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inspiration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-aggregations">1. Data Aggregations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generating-cloud-formats">2. Generating Cloud Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-ceda-singularity">3. The CEDA Singularity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-next">4. What’s Next?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -87,15 +94,67 @@
              
   <section id="inspiration-for-datapoint">
 <h1>Inspiration for DataPoint<a class="headerlink" href="#inspiration-for-datapoint" title="Permalink to this heading"></a></h1>
-<p><strong>Coming Soon!</strong></p>
+<p>A paradigm shift is underway among many data storage centers as the need for cloud-accessible analysis-ready data increases.
+There are significant issues relating to accessibility with current storage formats, and the existing archives of data which are
+not suited for aggregation and usage in cloud applications. Several technologies are in development for storing data in more
+cloud-accessible formats such as Zarr and Cloud-Optimised Geotiff (COG), as well as less storage-intensive reference formats
+like Kerchunk and CFA. At CEDA we have begun to create and ingest these new file formats, but have yet to advertise these new
+advancements to our user community. In order to create the best environment for accessing our cloud data products, we have
+created an API called DataPoint.</p>
+<section id="data-aggregations">
+<h2>1. Data Aggregations<a class="headerlink" href="#data-aggregations" title="Permalink to this heading"></a></h2>
+<p>The ideal scenario for accessing data from a user perspective is a single dataset object that contains all the data and attributes required.
+In practice, a single file representing this dataset only works if the data is relatively small - very unlikely to be the case, especially
+with increasing resolutions in new datasets. Instead the dataset is normally split up between multiple files that may represent a slice of the
+total dataset in time, by region, or otherwise. This then presents a problem: how to present this to the user as a single continuous entity while pulling
+from all the individual distributed files.</p>
+<img alt="Data aggregated to an 'Atomic Dataset' - single object independent of chunks or files." src="_images/DataAggs.png" />
+<p>Methods to solve this problem typically involve aggregating the data to present a unified dataset. This can be done either on-the-fly as the data is accessed,
+or determined beforehand and saved somehow. This is where cloud optimised formats come in - saving the aggregations is far better because the
+way to build the dataset is already known. On-the-fly aggregations may work well for small datasets, but if there are many thousands of files, each with
+multiple variables and dimensions that need to be connected in a convoluted way, that will take some time!</p>
+</section>
+<section id="generating-cloud-formats">
+<h2>2. Generating Cloud Formats<a class="headerlink" href="#generating-cloud-formats" title="Permalink to this heading"></a></h2>
+<p>Over the last 18-24 months we’ve been using various tools to generate new reference files with Kerchunk or new cloud data
+stores with Zarr. These have been ingested into the CEDA Archive and are accessible to all users - except that no one knows
+how to use or even find them. Since these technologies are relatively new to most of the communities that make use of our services,
+the mechanisms for accessing these types of data are not well known or well understood, with researchers using our data preferring
+more well-established formats like NetCDF/HDF which have existed for several decades. What we were looking for was a way to
+introduce these formats in a way that does not require all users to learn to use multiple new formats and tools in what would be a
+large barrier to optimised use of our data.</p>
+</section>
+<section id="the-ceda-singularity">
+<h2>3. The CEDA Singularity<a class="headerlink" href="#the-ceda-singularity" title="Permalink to this heading"></a></h2>
+<p>DataPoint is the culmination of several ideas around creating a single point of access to the data archived at CEDA; the so-called
+‘CEDA Singularity’. It is a STAC API which connects to our STAC catalogs - again a new technology that most users do not utilise
+- and can be used to search across our data holdings to find specific datasets and metadata. What sets DataPoint apart is the
+ability to directly open datasets from cloud formats without the user needing to understand the format or specific configuration
+for opening the dataset.</p>
+<img alt="Diagram showing the connection from the CEDA Archive of NetCDF data up to an application layer via the STAC Catalog and Kerchunk reference files." src="_images/CEDASingularity.png" />
+<p>All the storage details and options are abstracted from the users, for which it doesn’t matter anyway.
+With DataPoint, a user can search across a vast library of datasets, select a specific dataset matching a set of constraints
+and then simply open the result as a dataset. DataPoint handles the extraction of the link to the cloud formats stored in our
+archive to present a dataset that looks the same regardless of what type or format the data is stored.</p>
+</section>
+<section id="what-s-next">
+<h2>4. What’s Next?<a class="headerlink" href="#what-s-next" title="Permalink to this heading"></a></h2>
+<p>Currently our STAC catalogs represent only a small fraction of the total CEDA archive which spans more than 40 years of data,
+totalling over 25 Petabytes. Even less of the data has a cloud representation that can be fully utilised by datapoint.
+The next step towards greater data accessibility will be to dramatically expand our STAC representations as well as the
+cloud formats required for DataPoint. We have well established pipelines for generating both, which will become immediately
+available to all DataPoint users when published to our production indexes. The below diagram illustrates these three components
+delivering a cohesive data search service.</p>
+<img alt="The connection between creating cloud formats and STAC records to be used by the DataPoint API." src="_images/SearchFutures.png" />
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="CEDA DataPoint Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="stac.html" class="btn btn-neutral float-right" title="STAC Catalogs and Conventions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="CEDA DataPoint API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="CEDA DataPoint - Basic Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

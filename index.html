@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CEDA DataPoint Documentation &mdash; CEDA DataPoint 0.1.0 documentation</title>
+  <title>CEDA DataPoint API &mdash; CEDA DataPoint 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -47,10 +47,11 @@
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -74,7 +75,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">CEDA DataPoint Documentation</li>
+      <li class="breadcrumb-item active">CEDA DataPoint API</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -84,28 +85,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ceda-datapoint-documentation">
-<h1>CEDA DataPoint Documentation<a class="headerlink" href="#ceda-datapoint-documentation" title="Permalink to this heading"></a></h1>
-<p><strong>ceda-datapoint</strong> is a Python package which provides python-based search/access tools for using data primarily from the CEDA Archive.</p>
-<dl class="simple">
-<dt>Currently Supported cloud formats:</dt><dd><ul class="simple">
-<li><p>Kerchunk</p></li>
-<li><p>CFA</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>More details coming soon! Please see <code class="docutils literal notranslate"><span class="pre">Usage</span></code> and <code class="docutils literal notranslate"><span class="pre">Examples</span></code> for guidance with using DataPoint</p>
+  <section id="ceda-datapoint-api">
+<h1>CEDA DataPoint API<a class="headerlink" href="#ceda-datapoint-api" title="Permalink to this heading"></a></h1>
+<p><strong>ceda-datapoint</strong> is a Python package which provides python-based search/access tools for using data primarily from the CEDA Archive. For some time we’ve been generating so-called
+Cloud Formats which act as representations, references or mappers to data stored in the CEDA Archive. Most of our data is in archival formats like NetCDF/HDF which makes them great for use
+with the HPC architecture on which the archive resides (see the <a class="reference external" href="https://jasmin.ac.uk/">JASMIN homepage</a> for more details), but not so good for open access outside of JASMIN.</p>
+<p>This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to
+access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>The datapoint package can be installed via pip, and requires python3.11 or later.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pip</span> <span class="n">install</span> <span class="n">ceda</span><span class="o">-</span><span class="n">datapoint</span>
+</pre></div>
 </div>
+<p>See the section on <code class="docutils literal notranslate"><span class="pre">Inspiration</span></code> if you would like to learn more about why <code class="docutils literal notranslate"><span class="pre">datapoint</span></code> was developed and how it benefits users of CEDA data.</p>
+<p>The long term goal is for datapoint to be included in the set of standard packages and libaries for JASMIN, in the <code class="docutils literal notranslate"><span class="pre">Jaspy</span> <span class="pre">module</span></code>.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -117,6 +120,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mixins.html">Mixins</a></li>
 </ul>
 </div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Module Index &mdash; CEDA DataPoint 0.1.0 documentation</title>
+  <title>DataPoint Objects &mdash; CEDA DataPoint 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -20,9 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="Example Use Cases" href="examples.html" />
+    <link rel="prev" title="CEDA DataPoint - Basic Usage" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,10 +46,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
-<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DataPoint Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
@@ -76,8 +76,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Python Module Index</li>
+      <li class="breadcrumb-item active">DataPoint Objects</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/objects.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -85,54 +86,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-
-   <h1>Python Module Index</h1>
-
-   <div class="modindex-jumpbox">
-   <a href="#cap-c"><strong>c</strong></a>
-   </div>
-
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-c"><td></td><td>
-       <strong>c</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">ceda_datapoint</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="core_client.html#module-ceda_datapoint.core.client"><code class="xref">ceda_datapoint.core.client</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="core_cloud.html#module-ceda_datapoint.core.cloud"><code class="xref">ceda_datapoint.core.cloud</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="core_item.html#module-ceda_datapoint.core.item"><code class="xref">ceda_datapoint.core.item</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="mixins.html#module-ceda_datapoint.mixins.general"><code class="xref">ceda_datapoint.mixins.general</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="mixins.html#module-ceda_datapoint.mixins.properties"><code class="xref">ceda_datapoint.mixins.properties</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+  <section id="datapoint-objects">
+<h1>DataPoint Objects<a class="headerlink" href="#datapoint-objects" title="Permalink to this heading"></a></h1>
+<p>This diagram showcases the different objects that form part of the DataPoint search structure, and how to move between them.</p>
+<img alt="Diagram showing the structure of a DataPoint query to obtain data." src="_images/PathToData.png" />
+<p>All DataPoint accesses start with a client object connected to an API endpoint/url. Currently DataPoint only knows about the CEDA endpoint
+by default, but others can be provided via the <code class="docutils literal notranslate"><span class="pre">url</span></code> kwarg to the client. The client has several methods to inform the user about search options.</p>
+<p>When a search is performed, the user receives a <code class="docutils literal notranslate"><span class="pre">DataPointSearch</span></code> object which encapsulates the results of the search and provides additional methods
+to access the metadata and present these in a meaningful way. From there the datasets described by the search can be collected into a <code class="docutils literal notranslate"><span class="pre">DataPointCluster</span></code> or a single item
+can be selected from the search if the user would like to specifically look at one item.</p>
+<p>In either case, the <code class="docutils literal notranslate"><span class="pre">Item</span></code> or <code class="docutils literal notranslate"><span class="pre">Cluster</span></code> object can be indexed numerically or by ID to obtain a <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> which represents a single Dataset object. The dataset
+has still not yet been loaded; the user is able to check the metadata of the cloud product to ensure they have the correct dataset, before simply using the <code class="docutils literal notranslate"><span class="pre">open_dataset</span></code> method
+to obtain an Xarray Dataset object. From there, the standard Xarray tools and methods apply for data manipulation, which you can find on the <a class="reference external" href="https://docs.xarray.dev/en/stable/">Xarray website</a></p>
+<p>Alternatively a user can skip accessing data via the cloud product by using <code class="docutils literal notranslate"><span class="pre">open_dataset</span></code> from the <code class="docutils literal notranslate"><span class="pre">Item</span></code> or <code class="docutils literal notranslate"><span class="pre">Cluster</span></code>, providing the ID here. It is even possible to open a dataset
+directly from the search item, if the ID of the cloud asset is known. Since a single item may contain multiple cloud assets, it is the cloud asset ID that must be provided
+in order to open the correct dataset.</p>
+</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="CEDA DataPoint - Basic Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Example Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

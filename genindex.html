@@ -45,10 +45,11 @@
               <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -85,18 +86,43 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.assets">assets (ceda_datapoint.core.client.DataPointSearch property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.attributes">attributes (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.bbox">bbox (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -121,8 +147,6 @@
         <li><a href="core_item.html#module-ceda_datapoint.core.item">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ceda_datapoint.mixins.general
 
@@ -130,6 +154,8 @@
         <li><a href="mixins.html#module-ceda_datapoint.mixins.general">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ceda_datapoint.mixins.properties
 
@@ -137,8 +163,16 @@
         <li><a href="mixins.html#module-ceda_datapoint.mixins.properties">module</a>
 </li>
       </ul></li>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.collect_cloud_assets">collect_cloud_assets() (ceda_datapoint.core.client.DataPointSearch method)</a>
+      <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.cloud_assets">cloud_assets (ceda_datapoint.core.item.DataPointItem property)</a>
 </li>
+      <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.cloud_format">cloud_format (ceda_datapoint.core.cloud.DataPointCloudProduct property)</a>
+</li>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.collect_cloud_assets">collect_cloud_assets() (ceda_datapoint.core.client.DataPointSearch method)</a>
+
+      <ul>
+        <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.collect_cloud_assets">(ceda_datapoint.core.item.DataPointItem method)</a>
+</li>
+      </ul></li>
       <li><a href="mixins.html#ceda_datapoint.mixins.general.UIMixin.collection">collection (ceda_datapoint.mixins.general.UIMixin property)</a>
 </li>
   </ul></td>
@@ -153,15 +187,29 @@
 </li>
       <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster">DataPointCluster (class in ceda_datapoint.core.cloud)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem">DataPointItem (class in ceda_datapoint.core.item)</a>
 </li>
       <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch">DataPointSearch (class in ceda_datapoint.core.client)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.display_assets">display_assets() (ceda_datapoint.core.client.DataPointSearch method)</a>
 </li>
       <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.display_cloud_assets">display_cloud_assets() (ceda_datapoint.core.client.DataPointSearch method)</a>
+</li>
+      <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.display_cloud_formats">display_cloud_formats() (ceda_datapoint.core.item.DataPointItem method)</a>
+</li>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.display_collections">display_collections() (ceda_datapoint.core.client.DataPointClient method)</a>
+</li>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.display_query_terms">display_query_terms() (ceda_datapoint.core.client.DataPointClient method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.end_datetime">end_datetime (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -173,9 +221,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.get_cloud_assets">get_cloud_assets() (ceda_datapoint.core.item.DataPointItem method)</a>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.get_attribute">get_attribute() (ceda_datapoint.mixins.properties.PropertiesMixin method)</a>
 </li>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.get_items">get_items() (ceda_datapoint.core.client.DataPointSearch method)</a>
+      <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.get_cloud_product">get_cloud_product() (ceda_datapoint.core.item.DataPointItem method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -196,19 +244,35 @@
 </li>
         <li><a href="mixins.html#ceda_datapoint.mixins.general.UIMixin.help">(ceda_datapoint.mixins.general.UIMixin method)</a>
 </li>
+        <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.help">(ceda_datapoint.mixins.properties.PropertiesMixin method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.href">href (ceda_datapoint.core.cloud.DataPointCloudProduct property)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.info">info() (ceda_datapoint.core.client.DataPointSearch method)</a>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.info">info() (ceda_datapoint.core.client.DataPointClient method)</a>
 
       <ul>
+        <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.info">(ceda_datapoint.core.client.DataPointSearch method)</a>
+</li>
+        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.info">(ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
+</li>
+        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.info">(ceda_datapoint.core.cloud.DataPointCluster method)</a>
+</li>
         <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.info">(ceda_datapoint.core.item.DataPointItem method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.items">items (ceda_datapoint.core.client.DataPointSearch property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -252,12 +316,28 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">open_dataset() (ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
+      <li><a href="core_client.html#ceda_datapoint.core.client.DataPointSearch.open_dataset">open_dataset() (ceda_datapoint.core.client.DataPointSearch method)</a>
 
       <ul>
+        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">(ceda_datapoint.core.cloud.DataPointCloudProduct method)</a>
+</li>
+        <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.open_dataset">(ceda_datapoint.core.cloud.DataPointCluster method)</a>
+</li>
         <li><a href="core_item.html#ceda_datapoint.core.item.DataPointItem.open_dataset">(ceda_datapoint.core.item.DataPointItem method)</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.products">products (ceda_datapoint.core.cloud.DataPointCluster property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin">PropertiesMixin (class in ceda_datapoint.mixins.properties)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -267,12 +347,30 @@
       <li><a href="core_client.html#ceda_datapoint.core.client.DataPointClient.search">search() (ceda_datapoint.core.client.DataPointClient method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.stac_attributes">stac_attributes (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
+</li>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.start_datetime">start_datetime (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mixins.html#ceda_datapoint.mixins.general.UIMixin">UIMixin (class in ceda_datapoint.mixins.general)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.units">units (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.variables">variables (ceda_datapoint.mixins.properties.PropertiesMixin property)</a>
 </li>
   </ul></td>
 </tr></table>
