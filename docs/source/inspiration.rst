@@ -58,5 +58,9 @@ archive to present a dataset that looks the same regardless of what type or form
 Currently our STAC catalogs represent only a small fraction of the total CEDA archive which spans more than 40 years of data, 
 totalling over 25 Petabytes. Even less of the data has a cloud representation that can be fully utilised by datapoint.
 The next step towards greater data accessibility will be to dramatically expand our STAC representations as well as the 
-formats required for DataPoint. We have well established pipelines for generating both, which will become immediately 
-available to all DataPoint users when published to our production indexes.
+cloud formats required for DataPoint. We have well established pipelines for generating both, which will become immediately 
+available to all DataPoint users when published to our production indexes. The below diagram illustrates these three components
+delivering a cohesive data search service.
+
+.. image:: _images/SearchFutures.png
+   :alt: The connection between creating cloud formats and STAC records to be used by the DataPoint API.
