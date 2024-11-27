@@ -5,6 +5,7 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import pystac_client
 from pystac_client.stac_api_io import StacApiIO
 import logging
+import xarray
 
 from ceda_datapoint.mixins import UIMixin
 from ceda_datapoint.utils import urls, hash_id, generate_id, logstream
@@ -26,6 +27,18 @@ class DataPointSearch(UIMixin):
             meta: dict = None,
             parent_id: str = None
         ):
+        """
+        Initialise the search object - used by the DataPointClient
+        upon searching.
+        
+        :param pystac_search:   (object) The returned search object from pystac_client (to be abstracted).
+        
+        :param search_terms:    (dict) The search terms used in the search query.
+        
+        :param meta:            (dict) Metadata about the Client (url/organisation etc.)
+
+        :param parent_id:       (str) ID of the parent client.
+        """
 
         self._search_terms = search_terms or None
         self._meta = meta or None
@@ -51,6 +64,9 @@ class DataPointSearch(UIMixin):
     def __getitem__(self, index) -> DataPointItem:
         """
         Public method to index the dict of items.
+
+        :param index:       (int|str) The index or ID from which to pull an 
+            item from the search.
         """
 
         if not self._item_set:
@@ -83,7 +99,9 @@ class DataPointSearch(UIMixin):
     def items(self) -> dict[str, DataPointItem]:
         """
         Get the set of ``DataPointItem`` objects 
-        described by this search."""
+        described by this search.
+        """
+
         if not self._item_set:
             self._load_item_set()
         return self._item_set
@@ -93,12 +111,15 @@ class DataPointSearch(UIMixin):
         """
         Get the set of assets under each item in
         this search, returned as a set of nested
-        dictionaries."""
+        dictionaries.
+        """
+
         if not self._asset_set:
             self._load_asset_set()
         return self._asset_set
             
-    def help(self):
+    def help(self) -> None:
+        """Helper function - lists methods that can be utilised for this class"""
         print('DataPointSearch Help:')
         print(' > search.info() - General information about this search')
         print(' > search.collect_cloud_assets() - Collect the cloud products into a `cluster`')
@@ -114,12 +135,23 @@ class DataPointSearch(UIMixin):
 
     def open_dataset(
             self,
-            id,
-            mode='xarray',
-            combine=False,
-            priority=[],
+            id : str,
+            mode : str = 'xarray',
+            combine: bool = False,
+            priority: list[str] = [],
             **kwargs,
-        ):
+        ) -> xarray.Dataset:
+        """Open a dataset directly from the search result
+        
+        :param id:      (str) The ID or index of the dataset in the resulting cluster.
+        
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (1.3.0)
+        
+        :param priority: (list) Order by which to open a set of datasets.
+        
+        """
         return self.collect_cloud_assets(
             mode=mode, 
             combine=combine, 
@@ -127,16 +159,24 @@ class DataPointSearch(UIMixin):
 
     def collect_cloud_assets(
             self,
-            mode='xarray',
-            combine=False,
-            priority=[],
-            show_unreachable=False,
+            mode: str = 'xarray',
+            combine: bool = False,
+            priority: list[str] = [],
+            show_unreachable: bool = False,
             **kwargs,
         ) -> DataPointCluster:
 
         """
         Open a DataPointCluster object from the cloud assets for 
         each item in this search.
+
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (1.3.0)
+        
+        :param priority: (list) Order by which to open a set of datasets.
+
+        :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.
         """
 
         if combine:
@@ -215,7 +255,13 @@ class DataPointClient(UIMixin):
         """
         Initialise a DataPointClient. Default organisation/url
         corresponds to CEDA from config information. A hash token
-        can be provided for setting the ID (mostly for testing)."""
+        can be provided for setting the ID (mostly for testing).
+        
+        :param org: (str) Organisation with a known API endpoint.
+        
+        :param url: (str) Bare API endpoint (outside organisation mapper) to search.
+        
+        :param hash_token (str) Token to use when generating IDs for client and other objects."""
 
         if hash_token is None:
             hash_token = generate_id()
@@ -262,6 +308,7 @@ class DataPointClient(UIMixin):
         return f'<DataPointClient: {self._id}>'
 
     def help(self):
+        """Helper function - lists methods that can be utilised for this class"""
         print('DataPointClient Help:')
         print(' > client.info() - Get information about this client.')
         print(' > client.list_query_terms() - List of queryable terms for a specific collection')
@@ -272,6 +319,7 @@ class DataPointClient(UIMixin):
         super().help()
 
     def info(self):
+        """Display information about this class object"""
         print(f'{str(self)}')
         print(f' - Client for DataPoint searches via {self._url}')
 
@@ -281,7 +329,7 @@ class DataPointClient(UIMixin):
         """
         return DataPointSearch(self.search(collections=[collection]))
         
-    def list_query_terms(self, collection) -> list | None:
+    def list_query_terms(self, collection: str) -> list | None:
         """
         List the possible query terms for all or
         a particular collection.

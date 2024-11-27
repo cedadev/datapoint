@@ -3,6 +3,7 @@ __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
+import xarray
 
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import method_format, logstream
@@ -26,6 +27,10 @@ class DataPointItem(PropertiesMixin):
         """
         DataPointItem initialisation, requires the original STAC record
         plus the meta information about parent objects within DataPoint.
+        
+        :param item_stac:   (object) A pystac Item object (to be abstracted)
+
+        :param meta:        (dict) Metadata about the parent object.
         """
 
         self._item_stac = item_stac
@@ -150,11 +155,15 @@ class DataPointItem(PropertiesMixin):
             self, 
             id: int = 0,
             priority: list = None
-        ):
+        ) -> DataPointCloudProduct:
         """
         Returns a cloud product represented by this item from its cluster.
         The nth cloud product is returned given the ``id`` parameter. 
         Typically items should have only 1-2 cloud products attached.
+
+        :param id:      (str) The ID or index of the dataset in the resulting cluster.
+        
+        :param priority: (list) Order by which to open a set of datasets.
         """
 
         product = self._load_cloud_assets(priority=priority)
@@ -183,19 +192,30 @@ class DataPointItem(PropertiesMixin):
             id: int = 0,
             priority: list = None,
             **kwargs
-        ):
-        """Open a specific dataset, skip retrieving the cloud product"""
+        ) -> xarray.Dataset:
+        """
+        Open a specific dataset, skip retrieving the cloud product
+        
+        :param id:      (str) The ID or index of the dataset.
+        
+        :param priority: (list) Order by which to open a set of datasets.
+        """
         prod = self.get_cloud_product(id=id, priority=priority)
         return prod.open_dataset(**kwargs)
 
     def collect_cloud_assets(
             self,
-            priority=None,
+            priority: list = None,
             show_unreachable: bool = False,
         ) -> DataPointCluster:
         """
         Returns a cluster of DataPointCloudProduct objects representing the cloud assets
-        as requested."""
+        as requested.
+        
+        :param priority: (list) Order by which to open a set of datasets.
+
+        :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.
+        """
 
         return self._load_cloud_assets(priority=priority, show_unreachable=show_unreachable)
 
@@ -251,6 +271,10 @@ class DataPointItem(PropertiesMixin):
         """
         Sets the cloud assets property with a cluster of DataPointCloudProducts or a 
         single DataPointCloudProduct if only one is present.
+        
+        :param priority: (list) Order by which to open a set of datasets.
+
+        :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.
         """
 
         file_formats = list(method_format.values())

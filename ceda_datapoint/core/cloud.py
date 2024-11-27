@@ -27,11 +27,29 @@ class DataPointCluster(UIMixin):
             products: list, 
             parent_id: str = None, 
             meta: dict = None,
-            local_only: bool = False):
+            local_only: bool = False,
+            show_unreachable: bool = False
+        ) -> None:
+        
+        """Initialise a cluster of datasets from a set of assets.
+        
+        :param products:    (list) A list of DataPoint cloud product objects.
+         
+        :param parent_id:   (str) ID of the parent search/item object.
+         
+        :param meta:        (dict) Metadata about the parent object.
+        
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.
+        """
         
         self._id = f'{parent_id}-{hash_id(parent_id)}'
 
         self._local_only = local_only
+
+        self.show_unreachable = show_unreachable
 
         meta = meta or {}
 
@@ -48,9 +66,14 @@ class DataPointCluster(UIMixin):
         self._meta['products'] = len(products)
 
     def __str__(self):
+        """String representation of this class"""
         return f'<DataPointCluster: {self._id} (Datasets: {len(self._products)})>'
     
     def __getitem__(self, index):
+        """
+        Index this object to obtain a DataPointCloudProduct 
+        by ID or position in the cluster.
+        """
 
         if isinstance(index, int):
             index = list(self._products.keys())[index]
@@ -63,18 +86,22 @@ class DataPointCluster(UIMixin):
     
     @property
     def products(self):
-        return [ v for v in self._products.values() if v.visibility != 'unreachable']
+        """List of products contained within this cluster"""
+        return [ v for v in self._products.values() if v.visibility != 'unreachable' or self.show_unreachable]
 
     def help(self):
+        """Helper function - lists methods that can be utilised for this class"""
         print('DataPointCluster Help:')
         print(' > cluster.info() - basic cluster information')
         print(' > cluster.open_dataset(index/id) - open a specific dataset in xarray')
         super().help(additionals=['products'])
 
     def info(self):
+        """Information about this object instance."""
         print(self.__repr__())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Notebooks representation of this class"""
         repr = super().__repr__().split('\n')
         repr.append('Products:')
         for p in self._products.values():
@@ -86,7 +113,7 @@ class DataPointCluster(UIMixin):
     
     def open_dataset(
             self,
-            id,
+            id : str,
             mode: str = 'xarray',
             local_only: bool = False,
             **kwargs,
@@ -94,7 +121,14 @@ class DataPointCluster(UIMixin):
         """
         Open a dataset from within this cluster's cloud products. A 
         dataset can be indexed either by id or position within this 
-        cluster's set of datasets. """
+        cluster's set of datasets. 
+        
+        :param id:      (str) The ID or index of the dataset in the resulting cluster.
+        
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths."""
             
         if mode != 'xarray':
             raise NotImplementedError(
@@ -189,6 +223,7 @@ class DataPointCloudProduct(PropertiesMixin):
     
     @property
     def href(self):
+        """Read-only href property"""
         return self._asset_stac['href']
 
     def __str__(self):
@@ -219,6 +254,9 @@ class DataPointCloudProduct(PropertiesMixin):
         Specific methods to open cloud formats are private since
         the method should be determined by internal values not user
         input.
+
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
         """
         if not self._cloud_format:
             raise ValueError(
@@ -255,7 +293,11 @@ class DataPointCloudProduct(PropertiesMixin):
         ) -> xr.Dataset:
         
         """
-        Open a kerchunk dataset in xarray"""
+        Open a kerchunk dataset in xarray
+        
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+        """
         
         if 'href' not in self._asset_stac:
             raise ValueError(
@@ -292,7 +334,10 @@ class DataPointCloudProduct(PropertiesMixin):
         ) -> xr.Dataset:
 
         """
-        Open a CFA dataset in xarray"""
+        Open a CFA dataset in xarray
+        
+        :param cfa_options:     (dict) Configuration options to pass to the CFA engine
+        """
 
         cfa_options = cfa_options or {}
 
