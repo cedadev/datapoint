@@ -7,18 +7,17 @@ license = "{file = \"LICENSE\"}"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<4.0"
+python = ">=3.9,<4.0"
 fsspec = "2024.9.0"
 xarray = "2024.6.0"
 pystac-client = "0.8.3"
 kerchunk = "0.2.6"
-cfapyx = "2024.11.6"
+cfapyx = "2024.11.27"
 requests = "^2.32.3"
-#sphinx = "7.1.2"
-#sphinx-rtd-theme = "2.0.0"
+sphinx = "7.1.2"
+sphinx-rtd-theme = "2.0.0"
 xdoctest = "1.2.0"
 matplotlib = "3.9.2"
-
 
 [build-system]
 requires = ["poetry-core", "wheel"]
