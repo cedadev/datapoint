@@ -125,7 +125,7 @@ class DataPointCluster(UIMixin):
         
         :param id:      (str) The ID or index of the dataset in the resulting cluster.
         
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths."""

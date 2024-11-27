@@ -145,9 +145,9 @@ class DataPointSearch(UIMixin):
         
         :param id:      (str) The ID or index of the dataset in the resulting cluster.
         
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
         
-        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (1.3.0)
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.3.X)
         
         :param priority: (list) Order by which to open a set of datasets.
         
@@ -170,9 +170,9 @@ class DataPointSearch(UIMixin):
         Open a DataPointCluster object from the cloud assets for 
         each item in this search.
 
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
         
-        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (1.3.0)
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.3.X)
         
         :param priority: (list) Order by which to open a set of datasets.
 
