@@ -2,7 +2,7 @@ from ceda_datapoint import DataPointClient
 
 
 class TestClient:
-    def test_main():
+    def test_main(self):
         dpc = DataPointClient(hash_token='lonestar')
 
         assert hasattr(dpc, 'meta')

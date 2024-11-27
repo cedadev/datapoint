@@ -7,7 +7,8 @@ class ExampleItem:
 
     def to_dict(self):
         return {
-            'test':'test_value'
+            'test':'test_value',
+            'assets':[]
         }
     
     def get_collection(self):
@@ -19,7 +20,7 @@ def test_main():
     test_meta = {}
 
     item = DataPointItem(test_item, meta=test_meta)
-    assert hasattr(item, 'meta')
+    assert hasattr(item, '_meta')
 
 if __name__ == '__main__':
     test_main()
