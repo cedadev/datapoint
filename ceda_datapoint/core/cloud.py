@@ -125,7 +125,7 @@ class DataPointCluster(UIMixin):
         
         :param id:      (str) The ID or index of the dataset in the resulting cluster.
         
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (1.3.0)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths."""
@@ -310,12 +310,6 @@ class DataPointCloudProduct(PropertiesMixin):
 
         if local_only:
             href = _fetch_kerchunk_make_local(href)
-
-        if 'https://' not in href:
-            if not os.path.isfile(href):
-                raise ValueError(
-                    f'File {href} could not be found.'
-                )
 
         mapper = fsspec.get_mapper(
             'reference://',
