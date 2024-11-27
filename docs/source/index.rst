@@ -30,11 +30,11 @@ The long term goal is for datapoint to be included in the set of standard packag
    :caption: Details:
 
    Inspiration <inspiration>
-   Use Cases (Coming Soon!) <examples>
-   STAC Catalogs <stac>
-   Cloud Formats <cloud_formats>
    How to Use DataPoint <usage>
    DataPoint Objects <objects>
+   When to Use DataPoint <examples>
+   STAC Catalogs Explained <stac>
+   Cloud Formats Explained <cloud_formats>
 
 .. toctree::
    :maxdepth: 1

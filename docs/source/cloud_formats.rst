@@ -3,9 +3,9 @@ Cloud Formats
 =============
 
 From recent user surveys relating to the Climate Model Intercomparison Project (CMIP6) 
-datasets available via the CEDA Archive, some common issues and barriers to research are 
-reported. Research in fields such as Atmospheric Chemistry/Dynamics and Climate Model 
-Development is done by either connecting to JASMIN using remote SSH or downloading 
+datasets available via the CEDA Archive, some common issues and barriers to research relate to how to find and access the data itself.
+
+Research is typically undertaken by either connecting to JASMIN using remote SSH to access data, or downloading 
 entire datasets to local institutions for data analysis. The download process can 
 take weeks for some datasets, and not all institutions are able to provide remote JASMIN access. 
 To give data users alternative ways of accessing data without requiring large downloads of data, 
@@ -20,8 +20,9 @@ if not smaller. If the chunk structure is much larger than the area of interest,
 set of data, only to discard most of it to then access their small area.
 
 There are generally two approaches with allowing individual chunk access to data: 
- - reformat: break them up into separate objects that can be individually requested.
- - reference: provide a mechanism to get a specific byte range corresponding to that chunk from a larger object. 
+- reformat: break them up into separate objects that can be individually requested.
+- reference: provide a mechanism to get a specific byte range corresponding to that chunk from a larger object. 
+
 The most common formats for utilising these methods (for raster data) are Zarr and Kerchunk respectively. 
 
 .. image:: _images/ChunksPerFileDiagram.png

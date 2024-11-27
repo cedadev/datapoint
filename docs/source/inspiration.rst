@@ -10,7 +10,24 @@ like Kerchunk and CFA. At CEDA we have begun to create and ingest these new file
 advancements to our user community. In order to create the best environment for accessing our cloud data products, we have 
 created an API called DataPoint.
 
-1. Generating Cloud Formats
+1. Data Aggregations
+--------------------
+
+The ideal scenario for accessing data from a user perspective is a single dataset object that contains all the data and attributes required.
+In practice, a single file representing this dataset only works if the data is relatively small - very unlikely to be the case, especially 
+with increasing resolutions in new datasets. Instead the dataset is normally split up between multiple files that may represent a slice of the
+total dataset in time, by region, or otherwise. This then presents a problem: how to present this to the user as a single continuous entity while pulling
+from all the individual distributed files.
+
+.. image:: _images/DataAggs.png
+   :alt: Data aggregated to an 'Atomic Dataset' - single object independent of chunks or files.
+
+Methods to solve this problem typically involve aggregating the data to present a unified dataset. This can be done either on-the-fly as the data is accessed,
+or determined beforehand and saved somehow. This is where cloud optimised formats come in - saving the aggregations is far better because the 
+way to build the dataset is already known. On-the-fly aggregations may work well for small datasets, but if there are many thousands of files, each with
+multiple variables and dimensions that need to be connected in a convoluted way, that will take some time!
+
+2. Generating Cloud Formats
 ---------------------------
 Over the last 18-24 months we've been using various tools to generate new reference files with Kerchunk or new cloud data 
 stores with Zarr. These have been ingested into the CEDA Archive and are accessible to all users - except that no one knows 
@@ -20,7 +37,7 @@ more well-established formats like NetCDF/HDF which have existed for several dec
 introduce these formats in a way that does not require all users to learn to use multiple new formats and tools in what would be a 
 large barrier to optimised use of our data.
 
-2. The CEDA Singularity
+3. The CEDA Singularity
 -----------------------
 DataPoint is the culmination of several ideas around creating a single point of access to the data archived at CEDA; the so-called 
 'CEDA Singularity'. It is a STAC API which connects to our STAC catalogs - again a new technology that most users do not utilise 
@@ -36,7 +53,7 @@ With DataPoint, a user can search across a vast library of datasets, select a sp
 and then simply open the result as a dataset. DataPoint handles the extraction of the link to the cloud formats stored in our 
 archive to present a dataset that looks the same regardless of what type or format the data is stored.
 
-3. What's Next?
+4. What's Next?
 ---------------
 Currently our STAC catalogs represent only a small fraction of the total CEDA archive which spans more than 40 years of data, 
 totalling over 25 Petabytes. Even less of the data has a cloud representation that can be fully utilised by datapoint.
