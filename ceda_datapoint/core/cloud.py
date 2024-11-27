@@ -311,12 +311,6 @@ class DataPointCloudProduct(PropertiesMixin):
         if local_only:
             href = _fetch_kerchunk_make_local(href)
 
-        if 'https://' not in href:
-            if not os.path.isfile(href):
-                raise ValueError(
-                    f'File {href} could not be found.'
-                )
-
         mapper = fsspec.get_mapper(
             'reference://',
             fo=href,
