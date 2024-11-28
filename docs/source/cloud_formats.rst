@@ -38,7 +38,7 @@ to a format like Zarr, which will allow the chunk structure to be altered.
 
 1. Kerchunk Reference format
 ----------------------------
-Kerchunk was developed by Martin Durant at Anaconda as a python library for cloud-friendly access 
+Kerchunk was developed by Martin Durant at Anaconda as a Python library for cloud-friendly access 
 to archival data by reference, an alternative to converting archival data into newer cloud-optimised formats. 
 There are specific similarities in syntax between Kerchunk and Zarr as there is a significant overlap 
 between the teams working on both. The key difference with Kerchunk is that the data is not converted 
@@ -56,7 +56,7 @@ Since Kerchunk files can be opened using Xarray the chunks can be loaded when
 required rather than all at once, a process called Lazy Loading. This removes the requirement 
 of downloading an entire NetCDF file to determine which parts of the data are required. In 
 that way Kerchunk does part of the work of Zarr, but without the second step of physically 
-moving the data into separate containers. Any kerchunk user can use HTTP GET requests to 
+moving the data into separate containers. Any Kerchunk user can use HTTP GET requests to 
 retrieve specific byte-ranges of data served by NginX/Apache web-servers which are 
 then combined into a single Xarray dataset object. 
 
