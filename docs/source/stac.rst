@@ -19,7 +19,7 @@ consistent and easy. STAC objects are grouped into three categories, as seen in 
  - STAC Items: A grouping of assets that are associated by some attributes. This could be a set of NetCDF files or a Cloud Optimised object like a Zarr Store.
  - STAC Catalog: Access point for Item browsing, all items can be searched via their defined attributes using an API.
 
-Read more about STAC conventions and possible extensions/plugins on the `STAC Docs <https://stacspec.org/en>`.
+Read more about STAC conventions and possible extensions/plugins on the `STAC Docs <https://stacspec.org/en>`_.
 
 2. STAC Conventions from CEDA
 -----------------------------
