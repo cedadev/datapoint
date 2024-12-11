@@ -1,0 +1,11 @@
+{
+    "id":"properties.id",
+    "properties":"properties",
+    "assets":"properties.model.assets",
+    "cloud_format":"cloud_format",
+    "href":"properties.href",
+    "mapper_kwargs":"kerchunk_kwargs",
+    "open_zarr_kwargs":"zarr_kwargs",
+    "open_xarray_kwargs":"xarray_kwargs",
+    "open_cog_kwargs":"cog_kwargs"
+}

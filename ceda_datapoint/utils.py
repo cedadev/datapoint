@@ -20,6 +20,7 @@ urls = {
 method_format = {
     'reference_file': 'kerchunk',
     'reference_file_2': 'CFA',
+    'cog':'cog',
 }
 
 def generate_id():

@@ -11,7 +11,9 @@ Cloud Formats which act as representations, references or mappers to data stored
 with the HPC architecture on which the archive resides (see the `JASMIN homepage <https://jasmin.ac.uk/>`_ for more details), but not so good for open access outside of JASMIN. 
 
 This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to 
-access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched
+access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched.
+
+**v0.4.0**: Zarr and COG products now supported via DataPoint, as well as Mappings for use with external APIs.
 
 Installation
 ------------
@@ -32,6 +34,7 @@ The long term goal is for datapoint to be included in the set of standard packag
    Inspiration <inspiration>
    How to Use DataPoint <usage>
    DataPoint Objects <objects>
+   Mappings for Non-CEDA STAC Catalogs <mappers>
    When to Use DataPoint <examples>
    STAC Catalogs Explained <stac>
    Cloud Formats Explained <cloud_formats>
