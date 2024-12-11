@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappings for Non-CEDA Catalogs &mdash; CEDA DataPoint 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Example Use Cases" href="examples.html" />
+    <link rel="prev" title="DataPoint Objects" href="objects.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CEDA DataPoint
+              <img src="_static/ceda.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Details:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mappings for Non-CEDA STAC Catalogs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#item-mappings">1. Item Mappings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#asset-mappings">2. Asset Mappings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core_client.html">Client and Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_item.html">STAC Items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_cloud.html">Clusters and Cloud Products</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixins.html">Mixins</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CEDA DataPoint</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Mappings for Non-CEDA Catalogs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mappers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mappings-for-non-ceda-catalogs">
+<h1>Mappings for Non-CEDA Catalogs<a class="headerlink" href="#mappings-for-non-ceda-catalogs" title="Permalink to this heading"></a></h1>
+<p>DataPoint was developed primarily to support data users for accessing the CEDA archive of data via CEDA STAC Catalogs.
+These catalogs have a specific arrangement of properties and attributes within each record that DataPoint uses for configuration i.e to open a dataset.
+We recognise that other organisations will have their own layout for STAC catalogs and their own specific property names. To that end, the <code class="docutils literal notranslate"><span class="pre">DataPointMapper</span></code> was created
+which allows a simple mapping to be applied to inform DataPoint of how to reach specific properties (if they are present) in any arrangement of STAC records.</p>
+<section id="item-mappings">
+<h2>1. Item Mappings<a class="headerlink" href="#item-mappings" title="Permalink to this heading"></a></h2>
+<p>There are a number of item-level attributes DataPoint expects to find; those being <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">properties</span></code> and <code class="docutils literal notranslate"><span class="pre">assets</span></code>. Additionally, DataPoint uses the <code class="docutils literal notranslate"><span class="pre">cloud_format</span></code> property of each asset to
+determine suitability for opening as a <code class="docutils literal notranslate"><span class="pre">Cloud</span> <span class="pre">Product</span></code>, i.e for Kerchunk/Zarr data. This is not applicable for NetCDF/HDF or other archival formats directly. The cloud format mapping should
+be treated as applying to all assets under whatever asset mapping is used.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">item_mappings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;properties.id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;properties&quot;</span><span class="p">:</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;assets&quot;</span><span class="p">:</span><span class="s2">&quot;properties.model.assets&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cloud_format&quot;</span><span class="p">:</span><span class="s2">&quot;cloud_format&quot;</span>
+<span class="p">}</span>
+
+<span class="n">search</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">mappings</span><span class="o">=</span><span class="n">item_mappings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, most of the expected attributes are found under <code class="docutils literal notranslate"><span class="pre">properties</span></code> for each item in this example, with the <code class="docutils literal notranslate"><span class="pre">assets</span></code> nested under a few layers of labels. The <code class="docutils literal notranslate"><span class="pre">cloud_format</span></code> in this case
+will be applied to all objects under <code class="docutils literal notranslate"><span class="pre">properties.model.assets</span></code>. Note the syntax for nested layers here is to use a <code class="docutils literal notranslate"><span class="pre">.</span></code> between sections, so this attribute would expand to <code class="docutils literal notranslate"><span class="pre">{&quot;properties&quot;:{&quot;models&quot;:{&quot;assets&quot;:[]}}}</span></code>
+in the STAC record.</p>
+</section>
+<section id="asset-mappings">
+<h2>2. Asset Mappings<a class="headerlink" href="#asset-mappings" title="Permalink to this heading"></a></h2>
+<p>Assets may have the same or different mappings to the items, so at the point of retrieving the desired cloud assets it is necessary to supply asset mappings in the same way as before.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">asset_mappings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;href&quot;</span><span class="p">:</span><span class="s2">&quot;properties.href&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mapper_kwargs&quot;</span><span class="p">:</span><span class="s2">&quot;kerchunk_kwargs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;open_zarr_kwargs&quot;</span><span class="p">:</span><span class="s2">&quot;zarr_kwargs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;open_xarray_kwargs&quot;</span><span class="p">:</span><span class="s2">&quot;xarray_kwargs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;open_cog_kwargs&quot;</span><span class="p">:</span><span class="s2">&quot;cog_kwargs&quot;</span>
+<span class="p">}</span>
+
+<span class="n">cluster</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">collect_cloud_assets</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">asset_mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span>
+
+<span class="c1"># Any attempt to access cloud assets can be used to inject the asset mappings, e.g.</span>
+
+<span class="n">ds</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">asset_mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case the attribute <code class="docutils literal notranslate"><span class="pre">href</span></code>, which is required for all cloud assets by DataPoint, is under the <code class="docutils literal notranslate"><span class="pre">properties</span></code> attribute of each asset itself - very unusual!
+Other attributes are found at the top-level of the asset, but under a different name. Importantly, the asset mappings can be provided at any point where assets are accessed.
+For example in the last line, a dataset is opened directly from the search object, but the mappings are still required to allow the configurations needed to open the dataset.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="objects.html" class="btn btn-neutral float-left" title="DataPoint Objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Example Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2024, Centre of Environmental Data Analysis Developers,Scientific and Technical Facilities Council (STFC),UK Research and Innovation (UKRI). BSD 2-Clause License. All rights reserved.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

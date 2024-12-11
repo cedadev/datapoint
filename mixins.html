@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
@@ -136,57 +137,63 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ceda_datapoint.mixins.properties.</span></span><span class="sig-name descname"><span class="pre">PropertiesMixin</span></span><a class="reference internal" href="_modules/ceda_datapoint/mixins/properties.html#PropertiesMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin" title="Permalink to this definition"></a></dt>
 <dd><p>Mixin for Item/Cloud product objects where specific properties
 apply to all sub-elements of the object.</p>
+<p>All Objects under PropertiesMixin must have a _mapper attachment.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.help">
-<span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">additionals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/mixins/properties.html#PropertiesMixin.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.help" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">additionals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/mixins/properties.html#PropertiesMixin.help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.help" title="Permalink to this definition"></a></dt>
 <dd><p>Get all properties of this Mixin</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.bbox">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bbox</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.bbox" title="Permalink to this definition"></a></dt>
-<dd><p>Get the bounding box for this object.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bbox</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.bbox" title="Permalink to this definition"></a></dt>
+<dd><p>Get the bounding box for this object.
+Stac_attrs is mapper-aware.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.start_datetime">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_datetime</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.start_datetime" title="Permalink to this definition"></a></dt>
-<dd><p>Get the start datetime for this object</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_datetime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.start_datetime" title="Permalink to this definition"></a></dt>
+<dd><p>Get the start datetime for this object.
+_properties is mapper-aware.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.end_datetime">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_datetime</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.end_datetime" title="Permalink to this definition"></a></dt>
-<dd><p>Get the end datetime for this object</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_datetime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.end_datetime" title="Permalink to this definition"></a></dt>
+<dd><p>Get the end datetime for this object.
+_properties is mapper-aware.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.attributes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attributes</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.attributes" title="Permalink to this definition"></a></dt>
-<dd><p>Attributes for this object listed under <code class="docutils literal notranslate"><span class="pre">properties</span></code> in the STAC record.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.attributes" title="Permalink to this definition"></a></dt>
+<dd><p>Attributes for this object listed under <code class="docutils literal notranslate"><span class="pre">properties</span></code> in the STAC record.
+_properties is mapper-aware.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.stac_attributes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stac_attributes</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.stac_attributes" title="Permalink to this definition"></a></dt>
-<dd><p>Top-level attributes for this object in the STAC record.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stac_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.stac_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>Top-level attributes for this object in the STAC record.
+_stac_attrs is mapper-aware.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.variables">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.variables" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variables</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.variables" title="Permalink to this definition"></a></dt>
 <dd><p>Return the <code class="docutils literal notranslate"><span class="pre">variables</span></code> for this object if present.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.units">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.units" title="Permalink to this definition"></a></dt>
 <dd><p>Return the <code class="docutils literal notranslate"><span class="pre">units</span></code> for this object if present.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ceda_datapoint.mixins.properties.PropertiesMixin.get_attribute">
-<span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/mixins/properties.html#PropertiesMixin.get_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.get_attribute" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ceda_datapoint/mixins/properties.html#PropertiesMixin.get_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.mixins.properties.PropertiesMixin.get_attribute" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieve a specific attribute from this object’s STAC Record,
 from either the <code class="docutils literal notranslate"><span class="pre">stac</span> <span class="pre">attributes</span></code> or properties.</p>
 </dd></dl>

@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
@@ -91,7 +92,8 @@
 Cloud Formats which act as representations, references or mappers to data stored in the CEDA Archive. Most of our data is in archival formats like NetCDF/HDF which makes them great for use
 with the HPC architecture on which the archive resides (see the <a class="reference external" href="https://jasmin.ac.uk/">JASMIN homepage</a> for more details), but not so good for open access outside of JASMIN.</p>
 <p>This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to
-access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched</p>
+access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched.</p>
+<p><strong>v0.4.0</strong>: Zarr and COG products now supported via DataPoint, as well as Mappings for use with external APIs.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
 <p>The datapoint package can be installed via pip, and requires python3.11 or later.</p>
@@ -106,6 +108,7 @@ access our collection, but DataPoint is unique in that it is automatically confi
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>

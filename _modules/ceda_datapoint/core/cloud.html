@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">How to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../stac.html">STAC Catalogs Explained</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cloud_formats.html">Cloud Formats Explained</a></li>
@@ -90,6 +91,7 @@
 
 <span class="kn">import</span> <span class="nn">fsspec</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">rioxarray</span> <span class="k">as</span> <span class="nn">rxr</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -101,6 +103,288 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logstream</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="DataPointMapper"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointMapper">[docs]</a><span class="k">class</span> <span class="nc">DataPointMapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mapper object for calling specific properties of an item&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mappings</span> <span class="o">=</span> <span class="n">mappings</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span>
+
+<div class="viewcode-block" id="DataPointMapper.set_id"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointMapper.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the ID for this mapper - cosmetic only&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="DataPointMapper.get"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointMapper.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stac_object</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mapper.index(&#39;assets&#39;,stac_object)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">access</span><span class="p">(</span>
+                <span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                <span class="n">stac_obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
+                <span class="n">chain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Error-accepting &#39;get&#39; operation for an attribute from a STAC object - </span>
+<span class="sd">            with chain or otherwise.&quot;&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">stac_obj</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">stac_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">stac_obj</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">chain</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Chain for accessing attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_mappings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1"> failed at </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Property &quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot; for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> is undefined.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mappings</span><span class="p">:</span>
+            <span class="n">keychain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mappings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">so</span> <span class="o">=</span> <span class="n">access</span><span class="p">(</span><span class="n">keychain</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">stac_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keychain</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">so</span> <span class="o">=</span> <span class="n">access</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">so</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">so</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">so</span> <span class="o">=</span> <span class="n">access</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">stac_object</span><span class="p">,</span> <span class="n">chain</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">so</span></div></div>
+
+<div class="viewcode-block" id="DataPointCloudProduct"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct">[docs]</a><span class="k">class</span> <span class="nc">DataPointCloudProduct</span><span class="p">(</span><span class="n">PropertiesMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object for storing and manipulating a single cloud product</span>
+<span class="sd">    i.e Kerchunk/Zarr/CFA.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">asset_stac</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
+            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">stac_attrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mapper</span><span class="p">:</span> <span class="n">DataPointMapper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise a single cloud product object. The cloud product has identical</span>
+<span class="sd">        properties and attributes to the parent item, but now represents a single </span>
+<span class="sd">        reference dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        :param asset_stac:  (dict) The asset as presented in the stac index.</span>
+<span class="sd">        </span>
+<span class="sd">        :param id:          (str) Identifier for this cloud product.</span>
+<span class="sd">        </span>
+<span class="sd">        :param cf:          (str) Cloud format type.</span>
+<span class="sd">        </span>
+<span class="sd">        :param order:       (int) Unused property relating to priority.</span>
+<span class="sd">        </span>
+<span class="sd">        :param mode:        (str) Method to use for opening dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        :param meta:        (dict) DataPoint metadata relating to parent objects.</span>
+<span class="sd">        </span>
+<span class="sd">        :param stac_attrs:  (dict) Attributes of the item outside the ``properties``.</span>
+<span class="sd">        </span>
+<span class="sd">        :param properties:  (dict) Properties of the item in the ``properties`` field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;Only &quot;xarray&quot; mode currently implemented - cf-python is a future option&#39;</span>
+            <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">=</span> <span class="n">cf</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span> <span class="o">=</span> <span class="n">mapper</span> <span class="ow">or</span> <span class="n">DataPointMapper</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span> <span class="o">=</span> <span class="n">asset_stac</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span> <span class="o">|</span> <span class="p">{</span>
+            <span class="s1">&#39;asset_id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">,</span>
+            <span class="s1">&#39;cloud_format&#39;</span><span class="p">:</span> <span class="n">cf</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span> <span class="o">=</span> <span class="n">stac_attrs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="n">properties</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_visibility</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointCloudProduct: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
+    
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Representation of this class using the meta components&quot;&quot;&quot;</span>
+        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Attributes:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cloud_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only property&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">href</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only href property&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DataPointCloudProduct.help"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display public methods for this object.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCloudProduct Help:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.info() - Get information about this cloud product.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="DataPointCloudProduct.info"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display information about this object&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="DataPointCloudProduct.open_dataset"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">open_dataset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open the dataset for this product (in xarray).</span>
+<span class="sd">        Specific methods to open cloud formats are private since</span>
+<span class="sd">        the method should be determined by internal values not user</span>
+<span class="sd">        input.</span>
+
+<span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
+<span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;No cloud format given for this dataset&#39;</span>
+            <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Cloud assets with no &quot;href&quot; are not supported&#39;</span>
+            <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">==</span> <span class="s1">&#39;local-only&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">local_only</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Href not reachable via https, please use `local_only=True` &#39;</span>
+                <span class="s1">&#39;to open this dataset.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;kerchunk&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_kerchunk</span><span class="p">(</span><span class="n">local_only</span><span class="o">=</span><span class="n">local_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;CFA&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_cfa</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;zarr&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_zarr</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;cog&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_cog</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Cloud format not recognised - must be one of (&quot;kerchunk&quot;, &quot;CFA&quot;, &quot;zarr&quot;, &quot;cog&quot;)&#39;</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">err</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s1">&#39;The requested resource could not be located: &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_open_kerchunk</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a kerchunk dataset in xarray</span>
+<span class="sd">        </span>
+<span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
+<span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+                
+        <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
+        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mapper_kwargs&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">local_only</span><span class="p">:</span>
+            <span class="n">href</span> <span class="o">=</span> <span class="n">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
+
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">fsspec</span><span class="o">.</span><span class="n">get_mapper</span><span class="p">(</span>
+            <span class="s1">&#39;reference://&#39;</span><span class="p">,</span>
+            <span class="n">fo</span><span class="o">=</span><span class="n">href</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">mapper_kwargs</span>
+        <span class="p">)</span>
+
+        <span class="n">zarr_kwargs</span> <span class="o">=</span> <span class="n">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="o">=</span><span class="n">open_zarr_kwargs</span><span class="p">)</span> <span class="o">|</span> <span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="o">**</span><span class="n">zarr_kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_open_cfa</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">cfa_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a CFA dataset in xarray</span>
+<span class="sd">        </span>
+<span class="sd">        :param cfa_options:     (dict) Configuration options to pass to the CFA engine</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cfa_options</span> <span class="o">=</span> <span class="n">cfa_options</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
+
+        <span class="n">open_xarray_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_xarray_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span>
+            <span class="n">href</span><span class="p">,</span> 
+            <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;CFA&#39;</span><span class="p">,</span> <span class="n">cfa_options</span><span class="o">=</span><span class="n">cfa_options</span><span class="p">,</span> <span class="o">**</span><span class="n">open_xarray_kwargs</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_open_zarr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;zarr&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">open_zarr_kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_open_cog</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+        <span class="n">open_cog_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_cog_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">rxr</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">,</span> <span class="o">**</span><span class="n">open_cog_kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if this product is reachable&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">:</span>
+            <span class="c1"># Check remote link</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;local-only&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        
+        <span class="c1"># Check local link</span>
+        <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">local_ref</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span></div>
 
 <div class="viewcode-block" id="DataPointCluster"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster">[docs]</a><span class="k">class</span> <span class="nc">DataPointCluster</span><span class="p">(</span><span class="n">UIMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -151,7 +435,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of this class&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointCluster: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Datasets: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">)</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
     
@@ -171,18 +455,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">products</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">products</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataPointCloudProduct</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;List of products contained within this cluster&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s1">&#39;unreachable&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_unreachable</span><span class="p">]</span>
 
-<div class="viewcode-block" id="DataPointCluster.help"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DataPointCluster.help"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function - lists methods that can be utilised for this class&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCluster Help:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.info() - basic cluster information&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.open_dataset(index/id) - open a specific dataset in xarray&#39;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="DataPointCluster.info"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DataPointCluster.info"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Information about this object instance.&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span></div>
 
@@ -240,223 +524,17 @@
             <span class="s1">&#39;&quot;Combine&quot; feature has not yet been implemented&#39;</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataPointCloudProduct"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct">[docs]</a><span class="k">class</span> <span class="nc">DataPointCloudProduct</span><span class="p">(</span><span class="n">PropertiesMixin</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Object for storing and manipulating a single cloud product</span>
-<span class="sd">    i.e Kerchunk/Zarr/CFA.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add any default kwargs for specific requests&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">asset_stac</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-            <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">cf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
-            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">stac_attrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="p">):</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialise a single cloud product object. The cloud product has identical</span>
-<span class="sd">        properties and attributes to the parent item, but now represents a single </span>
-<span class="sd">        reference dataset.</span>
-<span class="sd">        </span>
-<span class="sd">        :param asset_stac:  (dict) The asset as presented in the stac index.</span>
-<span class="sd">        </span>
-<span class="sd">        :param id:          (str) Identifier for this cloud product.</span>
-<span class="sd">        </span>
-<span class="sd">        :param cf:          (str) Cloud format type.</span>
-<span class="sd">        </span>
-<span class="sd">        :param order:       (int) Unused property relating to priority.</span>
-<span class="sd">        </span>
-<span class="sd">        :param mode:        (str) Method to use for opening dataset.</span>
-<span class="sd">        </span>
-<span class="sd">        :param meta:        (dict) DataPoint metadata relating to parent objects.</span>
-<span class="sd">        </span>
-<span class="sd">        :param stac_attrs:  (dict) Attributes of the item outside the ``properties``.</span>
-<span class="sd">        </span>
-<span class="sd">        :param properties:  (dict) Properties of the item in the ``properties`` field.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s1">&#39;Only &quot;xarray&quot; mode currently implemented - cf-python is a future option&#39;</span>
-            <span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">=</span> <span class="n">cf</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span> <span class="o">=</span> <span class="n">asset_stac</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span> <span class="o">|</span> <span class="p">{</span>
-            <span class="s1">&#39;asset_id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">,</span>
-            <span class="s1">&#39;cloud_format&#39;</span><span class="p">:</span> <span class="n">cf</span>
-        <span class="p">}</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span> <span class="o">=</span> <span class="n">stac_attrs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="n">properties</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_visibility</span><span class="p">()</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cloud_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only property&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span>
-    
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">href</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only href property&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointCloudProduct: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
-    
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Representation of this class using the meta components&quot;&quot;&quot;</span>
-        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Attributes:&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
-
-<div class="viewcode-block" id="DataPointCloudProduct.help"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display public methods for this object.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCloudProduct Help:&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.info() - Get information about this cloud product.&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">])</span></div>
-
-<div class="viewcode-block" id="DataPointCloudProduct.info"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.info">[docs]</a>    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display information about this object&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span></div>
-
-<div class="viewcode-block" id="DataPointCloudProduct.open_dataset"><a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">open_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Open the dataset for this product (in xarray).</span>
-<span class="sd">        Specific methods to open cloud formats are private since</span>
-<span class="sd">        the method should be determined by internal values not user</span>
-<span class="sd">        input.</span>
-
-<span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
-<span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;No cloud format given for this dataset&#39;</span>
-            <span class="p">)</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">==</span> <span class="s1">&#39;local-only&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">local_only</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Href not reachable via https, please use `local_only=True` &#39;</span>
-                <span class="s1">&#39;to open this dataset.&#39;</span>
-            <span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;kerchunk&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_kerchunk</span><span class="p">(</span><span class="n">local_only</span><span class="o">=</span><span class="n">local_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;CFA&#39;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_cfa</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;Cloud format not recognised - must be one of (&quot;kerchunk&quot;, &quot;CFA&quot;)&#39;</span>
-                <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">err</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="s1">&#39;The requested resource could not be located: &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">_open_kerchunk</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">        </span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Open a kerchunk dataset in xarray</span>
-<span class="sd">        </span>
-<span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
-<span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="k">if</span> <span class="s1">&#39;href&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Cloud assets with no &quot;href&quot; are not supported&#39;</span>
-            <span class="p">)</span>
-        <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
-        
-        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mapper_kwargs&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="n">local_only</span><span class="p">:</span>
-            <span class="n">href</span> <span class="o">=</span> <span class="n">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
-
-        <span class="n">mapper</span> <span class="o">=</span> <span class="n">fsspec</span><span class="o">.</span><span class="n">get_mapper</span><span class="p">(</span>
-            <span class="s1">&#39;reference://&#39;</span><span class="p">,</span>
-            <span class="n">fo</span><span class="o">=</span><span class="n">href</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">mapper_kwargs</span>
-        <span class="p">)</span>
-
-        <span class="n">zarr_kwargs</span> <span class="o">=</span> <span class="n">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="o">=</span><span class="n">open_zarr_kwargs</span><span class="p">)</span> <span class="o">|</span> <span class="n">kwargs</span>
-
-        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="o">**</span><span class="n">zarr_kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_open_cfa</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">cfa_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Open a CFA dataset in xarray</span>
-<span class="sd">        </span>
-<span class="sd">        :param cfa_options:     (dict) Configuration options to pass to the CFA engine</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">cfa_options</span> <span class="o">=</span> <span class="n">cfa_options</span> <span class="ow">or</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="s1">&#39;href&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Cloud assets with no &quot;href&quot; are not supported&#39;</span>
-            <span class="p">)</span>
-        <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
-
-        <span class="n">open_xarray_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_xarray_kwargs&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
-
-        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span>
-            <span class="n">href</span><span class="p">,</span> 
-            <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;CFA&#39;</span><span class="p">,</span> <span class="n">cfa_options</span><span class="o">=</span><span class="n">cfa_options</span><span class="p">,</span> <span class="o">**</span><span class="n">open_xarray_kwargs</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_set_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if this product is reachable&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">:</span>
-            <span class="c1"># Check remote link</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;local-only&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span>
-        
-        <span class="c1"># Check local link</span>
-        <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">local_ref</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span></div>
-
-<span class="k">def</span> <span class="nf">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="n">add_kwargs</span> <span class="o">=</span> <span class="n">add_kwargs</span> <span class="ow">or</span> <span class="p">[]</span>
 
     <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;consolidated&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">defaults</span> <span class="o">|</span> <span class="n">add_kwargs</span>
 
-<span class="k">def</span> <span class="nf">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetch a kerchunk file, open as json content and do find/replace</span>
 <span class="sd">    to access local files only.</span>
