@@ -17,7 +17,7 @@ access our collection, but DataPoint is unique in that it is automatically confi
 
 Installation
 ------------
-The datapoint package can be installed via pip, and requires Python 3.11 or later.
+The datapoint package can be installed via pip, and requires Python 3.8 or later.
 
 .. code::
 
