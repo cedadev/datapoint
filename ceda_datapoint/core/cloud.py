@@ -54,7 +54,7 @@ class DataPointMapper:
                 if so is None:
                     return None
         else:
-            access(k, stac_object, chain=False)
+            access(key, stac_object, chain=False)
         return so
 
 class DataPointCloudProduct(PropertiesMixin):
