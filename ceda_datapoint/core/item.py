@@ -34,7 +34,7 @@ class DataPointItem(PropertiesMixin):
         :param meta:        (dict) Metadata about the parent object.
         """
 
-        self._mapper = mapper or DataPointMapper()
+        self._mapper = mapper or DataPointMapper(None)
 
         self._meta = {}
 
@@ -46,15 +46,22 @@ class DataPointItem(PropertiesMixin):
         self._item_stac = item_stac
 
         self._id = self._mapper.get('id',item_stac)
-
+        self._mapper.set_id(self._id)
+        
         # Identify - does not create duplicates.
         self._cloud_assets = self._identify_cloud_assets()
+
+        num_assets, num_cassets = None, None
+        if self._assets is not None:
+            num_assets = len(self._assets)
+        if self._cloud_assets is not None:
+            num_cassets = len(self._cloud_assets)
 
         self._meta = meta | {
             'collection': self._collection,
             'item': self._id,
-            'assets': len(self._assets),
-            'cloud_assets': len(self._cloud_assets),
+            'assets': num_assets,
+            'cloud_assets': num_cassets,
         }
         if self._properties:
             self._meta['attributes'] = len(self._properties.keys())

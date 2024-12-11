@@ -19,8 +19,13 @@ logger.propagate = False
 
 class DataPointMapper:
     """Mapper object for calling specific properties of an item"""
-    def __init__(self, mappings: dict = None) -> None:
+    def __init__(self, mappings: dict = None, id: str = None) -> None:
         self._mappings = mappings or {}
+        self._id = id
+
+    def set_id(self, id: str) -> None:
+        """Set the ID for this mapper - cosmetic only"""
+        self._id = id
 
     def get(self, key: str, stac_object: object) -> str:
         """
@@ -36,14 +41,17 @@ class DataPointMapper:
             Error-accepting 'get' operation for an attribute from a STAC object - 
             with chain or otherwise."""
             try:
-                return stac_obj[k]
-            except KeyError:
+                if k in stac_obj:
+                    return stac_obj[k]
+                else:
+                    return getattr(stac_obj, k)
+            except (KeyError, ValueError, AttributeError):
                 if chain:
                     logger.warning(
                         f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
                     )
                 else:
-                    logger.warning(f'Property {k} is undefined.')
+                    logger.warning(f'Property "{k}" for {self._id} is undefined.')
                 return None
 
         if key in self._mappings:
@@ -54,7 +62,7 @@ class DataPointMapper:
                 if so is None:
                     return None
         else:
-            access(key, stac_object, chain=False)
+            so = access(key, stac_object, chain=False)
         return so
 
 class DataPointCloudProduct(PropertiesMixin):
@@ -107,7 +115,7 @@ class DataPointCloudProduct(PropertiesMixin):
         self._order = order
         self._cloud_format = cf
 
-        self._mapper = mapper or DataPointMapper()
+        self._mapper = mapper or DataPointMapper(id)
         
         self._asset_stac = asset_stac
         self._meta = meta | {

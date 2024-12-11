@@ -5,6 +5,16 @@ class ExampleItem:
 
         self.id = id
 
+    def __contains__(self, item):
+        if item in ['id']:
+            return True
+        
+    def __getitem__(self, item):
+        if item == 'id':
+            return self.id
+        if item == 'assets':
+            return []
+
     def to_dict(self):
         return {
             'test':'test_value',
@@ -14,13 +24,14 @@ class ExampleItem:
     def get_collection(self):
         return ExampleItem(id='test_collection')
 
-def test_main():
+class TestItem:
+    def test_main(self):
 
-    test_item = ExampleItem()
-    test_meta = {}
+        test_item = ExampleItem()
+        test_meta = {}
 
-    item = DataPointItem(test_item, meta=test_meta)
-    assert hasattr(item, '_meta')
+        item = DataPointItem(test_item, meta=test_meta)
+        assert hasattr(item, '_meta')
 
 if __name__ == '__main__':
-    test_main()
+    TestItem().test_main()
