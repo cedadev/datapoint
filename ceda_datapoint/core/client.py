@@ -5,11 +5,11 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import pystac_client
 from pystac_client.stac_api_io import StacApiIO
 import logging
-import xarray
+import xarray as xr
 
 from ceda_datapoint.mixins import UIMixin
 from ceda_datapoint.utils import urls, hash_id, generate_id, logstream
-from .cloud import DataPointCluster
+from .cloud import DataPointCluster, DataPointMapper
 from .item import DataPointItem
 
 logger = logging.getLogger(__name__)
@@ -23,10 +23,11 @@ class DataPointSearch(UIMixin):
     def __init__(
             self, 
             pystac_search: object, 
+            mappings: dict = None,
             search_terms: dict = None, 
             meta: dict = None,
             parent_id: str = None
-        ):
+        ) -> None:
         """
         Initialise the search object - used by the DataPointClient
         upon searching.
@@ -42,6 +43,8 @@ class DataPointSearch(UIMixin):
 
         self._search_terms = search_terms or None
         self._meta = meta or None
+
+        self._mappings = mappings
 
         self._search = pystac_search
         self._item_set  = None
@@ -139,15 +142,16 @@ class DataPointSearch(UIMixin):
             mode : str = 'xarray',
             combine: bool = False,
             priority: list[str] = [],
+            mappings: dict = None,
             **kwargs,
-        ) -> xarray.Dataset:
+        ) -> xr.Dataset:
         """Open a dataset directly from the search result
         
         :param id:      (str) The ID or index of the dataset in the resulting cluster.
         
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.4.X)
         
-        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.3.X)
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.4.X)
         
         :param priority: (list) Order by which to open a set of datasets.
         
@@ -155,7 +159,8 @@ class DataPointSearch(UIMixin):
         return self.collect_cloud_assets(
             mode=mode, 
             combine=combine, 
-            priority=priority).open_dataset(id,**kwargs)
+            priority=priority,
+            mappings=mappings).open_dataset(id,**kwargs)
 
     def collect_cloud_assets(
             self,
@@ -163,6 +168,7 @@ class DataPointSearch(UIMixin):
             combine: bool = False,
             priority: list[str] = [],
             show_unreachable: bool = False,
+            asset_mappings: dict = None,
             **kwargs,
         ) -> DataPointCluster:
 
@@ -170,9 +176,9 @@ class DataPointSearch(UIMixin):
         Open a DataPointCluster object from the cloud assets for 
         each item in this search.
 
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
+        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.4.X)
         
-        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.3.X)
+        :param combine: (bool) Combine multiple datasets to a single dataset - not implemented (0.4.X)
         
         :param priority: (list) Order by which to open a set of datasets.
 
@@ -185,11 +191,17 @@ class DataPointSearch(UIMixin):
             )
         
         if not self._item_set:
-            self._load_item_set()
+            self._load_item_set(mappings=self._mappings)
         
         assets = []
         for item in self._item_set.values():
-            assets.append(item.collect_cloud_assets(priority=priority, show_unreachable=show_unreachable))
+            assets.append(
+                item.collect_cloud_assets(
+                    priority=priority, 
+                    show_unreachable=show_unreachable, 
+                    asset_mappings=asset_mappings
+                )
+            )
 
         return DataPointCluster(assets, meta=self._meta, parent_id=self._id)
     
@@ -221,14 +233,21 @@ class DataPointSearch(UIMixin):
                 print(item)
                 print(' - ' + ', '.join(assets))
 
-    def _load_item_set(self) -> None:
+    def _load_item_set(self, mappings: dict = None) -> None:
         """
         Load the set of items for this search into 
         self-describing DataPointItem instances.
         """
+
+        mappings = mappings or self._mappings
+
+        mapper=None
+        if mappings is not None:
+            mapper = DataPointMapper(mappings=mappings)
+
         items = {}
         for item in self._search.items():
-            items[item.id] = DataPointItem(item, meta=self._meta)
+            items[item.id] = DataPointItem(item, meta=self._meta, mapper=mapper)
         self._item_set = items
     
     def _load_asset_set(self) -> None:
@@ -251,6 +270,7 @@ class DataPointClient(UIMixin):
             org: str = 'CEDA', 
             url: str = None,
             hash_token: str = None,
+            mappings: dict = None,
         ) -> None:
         """
         Initialise a DataPointClient. Default organisation/url
@@ -267,6 +287,8 @@ class DataPointClient(UIMixin):
             hash_token = generate_id()
 
         self._url = url
+
+        self._mappings = mappings
 
         if url and org != 'CEDA':
             self._org = org
@@ -307,7 +329,7 @@ class DataPointClient(UIMixin):
 
         return f'<DataPointClient: {self._id}>'
 
-    def help(self):
+    def help(self) -> None:
         """Helper function - lists methods that can be utilised for this class"""
         print('DataPointClient Help:')
         print(' > client.info() - Get information about this client.')
@@ -318,12 +340,12 @@ class DataPointClient(UIMixin):
         print(' > client.search() - perform a search operation. For example syntax see the documentation.')
         super().help()
 
-    def info(self):
+    def info(self) -> None:
         """Display information about this class object"""
         print(f'{str(self)}')
         print(f' - Client for DataPoint searches via {self._url}')
 
-    def __getitem__(self, collection):
+    def __getitem__(self, collection: str):
         """
         Public method for getting a collection from this client
         """
@@ -370,11 +392,13 @@ class DataPointClient(UIMixin):
         for coll in self._client.get_collections():
             print(f'{coll.id}: {coll.description}')
 
-    def search(self, **kwargs) -> DataPointSearch:
+    def search(self, mappings: dict = None, **kwargs) -> DataPointSearch:
         """
         Perform a search operation, creates a ``DataPointSearch``
         object which is also self-describing."""
+
+        mappings = mappings or self._mappings
         
         search = self._client.search(**kwargs)
-        return DataPointSearch(search, search_terms=kwargs, meta=self._meta, parent_id=self._id)
+        return DataPointSearch(search, search_terms=kwargs, meta=self._meta, parent_id=self._id, mappings=mappings)
 

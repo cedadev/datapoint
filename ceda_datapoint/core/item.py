@@ -8,7 +8,7 @@ import xarray
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import method_format, logstream
 
-from .cloud import DataPointCloudProduct, DataPointCluster
+from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
@@ -22,7 +22,8 @@ class DataPointItem(PropertiesMixin):
     def __init__(
             self, 
             item_stac: object, 
-            meta: dict = None
+            meta: dict = None,
+            mapper: DataPointMapper = None,
         ):
         """
         DataPointItem initialisation, requires the original STAC record
@@ -33,6 +34,8 @@ class DataPointItem(PropertiesMixin):
         :param meta:        (dict) Metadata about the parent object.
         """
 
+        self._mapper = mapper or DataPointMapper()
+
         self._meta = {}
 
         if item_stac is None:
@@ -42,9 +45,7 @@ class DataPointItem(PropertiesMixin):
 
         self._item_stac = item_stac
 
-        self._id = 'N/A'
-        if hasattr(item_stac,'id'):
-            self._id = item_stac.id
+        self._id = self._mapper.get('id',item_stac)
 
         # Identify - does not create duplicates.
         self._cloud_assets = self._identify_cloud_assets()
@@ -59,7 +60,6 @@ class DataPointItem(PropertiesMixin):
             self._meta['attributes'] = len(self._properties.keys())
         if self._stac_attrs:
             self._meta['stac_attributes'] = len(self._stac_attrs.keys())
-
 
     def __str__(self):
         """
@@ -116,27 +116,17 @@ class DataPointItem(PropertiesMixin):
         return self._item_stac.to_dict()
 
     @property
-    def _properties(self):
+    def _properties(self) -> dict:
         """Fetch properties from item_stac"""
-        try:
-            properties = self._item_stac.to_dict()['properties'] or []
-        except KeyError:
-            logger.warning(f'Unable to read `properties` attribute from item {self._id}')
-            properties = []
-        return properties
+        return self._mapper.get('properties',self._item_stac)
     
     @property
-    def _assets(self):
+    def _assets(self) -> dict:
         """Fetch assets from item_stac"""
-        try:
-            assets = self._item_stac.to_dict()['assets'] or []
-        except KeyError:
-            logger.warning(f'Unable to read `assets` attribute from item {self._id}')
-            assets = []
-        return assets
+        return self._mapper.get('assets',self._item_stac)
     
     @property
-    def _stac_attrs(self):
+    def _stac_attrs(self) -> dict:
         """Fetch ``stac_attrs`` from item_stac"""
         attrs = {}
         for k, v in self._item_stac.to_dict().items():
@@ -145,16 +135,16 @@ class DataPointItem(PropertiesMixin):
         return attrs
     
     @property
-    def _collection(self):
+    def _collection(self) -> str:
         """Fetch collection id from item_stac"""
         return self._item_stac.get_collection().id
     
     @property
-    def cloud_assets(self):
+    def cloud_assets(self) -> list[str]:
         """Lazily identify cloud assets"""
         return [self._assets[i[0]] for i in self._cloud_assets]
 
-    def help(self):
+    def help(self) -> None:
         """Help method for this class"""
         print('DataPointItem Help:')
         print(' > item.info() - Get information about this item')
@@ -165,7 +155,7 @@ class DataPointItem(PropertiesMixin):
         print(' > item.display_cloud_formats() - Display the list of cloud formats available.')
         super().help(additionals = ['cloud_assets'])
 
-    def info(self):
+    def info(self) -> None:
         """
         Information about this item.
         """
@@ -174,7 +164,9 @@ class DataPointItem(PropertiesMixin):
     def get_cloud_product(
             self, 
             id: int = 0,
-            priority: list = None
+            priority: list = None,
+            show_unreachable: bool = False,
+            asset_mappings: dict = None,
         ) -> DataPointCloudProduct:
         """
         Returns a cloud product represented by this item from its cluster.
@@ -186,7 +178,10 @@ class DataPointItem(PropertiesMixin):
         :param priority: (list) Order by which to open a set of datasets.
         """
 
-        product = self._load_cloud_assets(priority=priority)
+        product = self._load_cloud_assets(
+            priority=priority,
+            show_unreachable=show_unreachable,
+            asset_mappings=asset_mappings)
 
         if isinstance(product, DataPointCloudProduct):
             if isinstance(id, int) and id != 0:
@@ -211,6 +206,7 @@ class DataPointItem(PropertiesMixin):
             self, 
             id: int = 0,
             priority: list = None,
+            mappings: dict = None,
             **kwargs
         ) -> xarray.Dataset:
         """
@@ -220,13 +216,15 @@ class DataPointItem(PropertiesMixin):
         
         :param priority: (list) Order by which to open a set of datasets.
         """
-        prod = self.get_cloud_product(id=id, priority=priority)
+
+        prod = self.get_cloud_product(id=id, priority=priority, asset_mappings=mappings)
         return prod.open_dataset(**kwargs)
 
     def collect_cloud_assets(
             self,
             priority: list = None,
             show_unreachable: bool = False,
+            asset_mappings: dict = None,
         ) -> DataPointCluster:
         """
         Returns a cluster of DataPointCloudProduct objects representing the cloud assets
@@ -237,21 +235,24 @@ class DataPointItem(PropertiesMixin):
         :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.
         """
 
-        return self._load_cloud_assets(priority=priority, show_unreachable=show_unreachable)
+        return self._load_cloud_assets(
+            priority=priority, 
+            show_unreachable=show_unreachable, 
+            asset_mappings=asset_mappings)
 
     def get_assets(self) -> dict:
         """
         Get the set of assets (in dict form) for this item."""
         return self._assets
 
-    def list_cloud_formats(self) -> list:
+    def list_cloud_formats(self) -> list[str]:
         """
         Return the list of cloud formats identified from the set
         of cloud assets."""
 
         return [i[1] for i in self._cloud_assets]
     
-    def display_cloud_formats(self):
+    def display_cloud_formats(self) -> None:
         """
         Display the list of cloud formats based on the cloud assets."""
         for i in self.cloud_assets:
@@ -272,10 +273,9 @@ class DataPointItem(PropertiesMixin):
         rf_titles = list(method_format.keys())
 
         for id, asset in self._assets.items():
-            cf = None
-            if 'cloud_format' in asset:
-                cf = asset['cloud_format']
-            elif id in rf_titles:
+            cf = self._mapper.get('cloud_format', asset)
+
+            if cf is None and id in rf_titles:
                 cf = method_format[id]
 
             if cf is not None:
@@ -287,7 +287,8 @@ class DataPointItem(PropertiesMixin):
     def _load_cloud_assets(
             self,
             priority: list = None,
-            show_unreachable: bool = False
+            show_unreachable: bool = False,
+            asset_mappings: dict = None,
         ) -> DataPointCluster:
 
         """
@@ -300,6 +301,10 @@ class DataPointItem(PropertiesMixin):
         """
 
         file_formats = list(method_format.values())
+
+        mapper = None
+        if asset_mappings is not None:
+            mapper = DataPointMapper(mappings=asset_mappings)
 
         priority = priority or file_formats
 
@@ -314,7 +319,8 @@ class DataPointItem(PropertiesMixin):
                 a = DataPointCloudProduct(
                     asset, 
                     id=asset_id, cf=cf, order=order, meta=self._meta,
-                    stac_attrs=self._stac_attrs, properties=self._properties)
+                    stac_attrs=self._stac_attrs, properties=self._properties,
+                    mapper=mapper)
                 if show_unreachable or a.visibility != 'unreachable':
                     asset_list.append(a)
             

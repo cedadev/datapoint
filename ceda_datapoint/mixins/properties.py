@@ -16,9 +16,12 @@ class PropertiesMixin(UIMixin):
     """
     Mixin for Item/Cloud product objects where specific properties
     apply to all sub-elements of the object.
-    """
 
-    def help(self, additionals: list = None):
+    All Objects under PropertiesMixin must have a _mapper attachment.
+    """
+    __slots__ = ['_mapper']
+
+    def help(self, additionals: list = None) -> None:
         """Get all properties of this Mixin"""
 
         additionals = additionals or []
@@ -31,52 +34,59 @@ class PropertiesMixin(UIMixin):
         super().help(additionals=additionals)
 
     @property
-    def bbox(self):
-        """Get the bounding box for this object."""
+    def bbox(self) -> list:
+        """
+        Get the bounding box for this object.
+        Stac_attrs is mapper-aware."""
         return self._stac_attrs['bbox']
     
     @property
-    def start_datetime(self):
-        """Get the start datetime for this object"""
+    def start_datetime(self) -> str:
+        """Get the start datetime for this object.
+        _properties is mapper-aware."""
         return self._properties['start_datetime']
     
     @property
-    def end_datetime(self):
-        """Get the end datetime for this object"""
+    def end_datetime(self) -> str:
+        """Get the end datetime for this object.
+        _properties is mapper-aware."""
         return self._properties['end_datetime']
          
     @property
-    def attributes(self):
+    def attributes(self) -> dict:
         """
         Attributes for this object listed under ``properties`` in the STAC record.
+        _properties is mapper-aware.
         """
         return self._properties
     
     @property
-    def stac_attributes(self):
+    def stac_attributes(self) -> dict:
         """
         Top-level attributes for this object in the STAC record.
+        _stac_attrs is mapper-aware.
         """
         return self._stac_attrs
 
     @property
-    def variables(self):
+    def variables(self) -> str | list[str]:
         """
         Return the ``variables`` for this object if present.
         """
         return self._multiple_options(['variables', 'variable_long_name'])
 
     @property
-    def units(self):
+    def units(self) -> str | list[str]:
         """
         Return the ``units`` for this object if present.
         """
         return self._multiple_options(['units', 'variable_units'])
 
-    def _multiple_options(self, options):
+    def _multiple_options(self, options: list) -> str | list[str]:
         """
         Retrieve an attribute frokm the STAC record with multiple
         possible names. e.g units or Units.
+        _properties is mapper-aware.
         """
         attr = None
         for option in options:
@@ -94,7 +104,7 @@ class PropertiesMixin(UIMixin):
 
         return attr
     
-    def get_attribute(self, attr):
+    def get_attribute(self, attr: str):
         """
         Retrieve a specific attribute from this object's STAC Record,
         from either the ``stac attributes`` or properties.
