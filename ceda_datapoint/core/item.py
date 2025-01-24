@@ -277,14 +277,8 @@ class DataPointItem(PropertiesMixin):
         if len(assets) == 0:
             return cloud_list
 
-        rf_titles = list(method_format.keys())
-
         for id, asset in self._assets.items():
-            cf = self._mapper.get('cloud_format', asset)
-
-            if cf is None and id in rf_titles:
-                cf = method_format[id]
-
+            cf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
             if cf is not None:
                 cloud_list.append((id, cf))
 
@@ -342,3 +336,32 @@ class DataPointItem(PropertiesMixin):
         else:
             return asset_list[0]
     
+def identify_cloud_type(
+        id: str, 
+        asset,
+        cflabel: str = 'cloud_format',
+        asset_mapper: DataPointMapper | None = None,
+    ) -> str:
+    """
+    Identify the type of cloud format
+    to which this asset conforms.
+    """
+
+    # Try using the mapper tool
+    if asset_mapper is not None:
+        cf = asset_mapper.get(cflabel, asset)
+
+    if cf is not None:
+        return cf
+
+    rf_titles = list(method_format.keys())
+
+    # Try getting the correct property
+    if hasattr(asset, cflabel):
+        return getattr(asset, cflabel)
+    
+    # Otherwise identify from known methods
+    if id in rf_titles:
+        return method_format[id]
+    
+    return None

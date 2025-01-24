@@ -116,6 +116,8 @@ class DataPointCloudProduct(PropertiesMixin):
         self._cloud_format = cf
 
         self._mapper = mapper or DataPointMapper(id)
+
+        meta = meta or {}
         
         self._asset_stac = asset_stac
         self._meta = meta | {
