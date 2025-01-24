@@ -15,6 +15,8 @@ access our collection, but DataPoint is unique in that it is automatically confi
 
 **v0.4.0**: Zarr and COG products now supported via DataPoint, as well as Mappings for use with external APIs.
 
+**v0.4.1**: Added increased support for using `DataPointCloudProduct` objects externally.
+
 Installation
 ------------
 The datapoint package can be installed via pip, and requires Python 3.8 or later.
@@ -33,11 +35,11 @@ The long term goal is for datapoint to be included in the set of standard packag
 
    Inspiration <inspiration>
    How to Use DataPoint <usage>
+   DataPoint's Cloud Product Handler <cloud_formats>
    DataPoint Objects <objects>
    Mappings for Non-CEDA STAC Catalogs <mappers>
    When to Use DataPoint <examples>
    STAC Catalogs Explained <stac>
-   Cloud Formats Explained <cloud_formats>
 
 .. toctree::
    :maxdepth: 1

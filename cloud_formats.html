@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Formats &mdash; CEDA DataPoint 0.1.0 documentation</title>
+  <title>DataPoint’s Cloud Product Handler &mdash; CEDA DataPoint 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Client and Search" href="core_client.html" />
-    <link rel="prev" title="STAC Catalogs and Conventions" href="stac.html" /> 
+    <link rel="next" title="DataPoint Objects" href="objects.html" />
+    <link rel="prev" title="CEDA DataPoint - Basic Usage" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,16 +49,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
-<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Cloud Formats Explained</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DataPoint's Cloud Product Handler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-datapointcloudproduct-class">The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#datapointcluster-objects"><code class="docutils literal notranslate"><span class="pre">DataPointCluster</span></code> objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloud-formats">Cloud Formats</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#kerchunk-reference-format">1. Kerchunk Reference format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#zarr-stores">2. Zarr stores</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#climate-forecast-aggregations-cfa">3. Climate Forecast Aggregations (CFA)</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -82,7 +85,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Cloud Formats</li>
+      <li class="breadcrumb-item active">DataPoint’s Cloud Product Handler</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/cloud_formats.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,8 +95,57 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="cloud-formats">
-<h1>Cloud Formats<a class="headerlink" href="#cloud-formats" title="Permalink to this heading"></a></h1>
+  <section id="datapoint-s-cloud-product-handler">
+<h1>DataPoint’s Cloud Product Handler<a class="headerlink" href="#datapoint-s-cloud-product-handler" title="Permalink to this heading"></a></h1>
+<section id="the-datapointcloudproduct-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> class<a class="headerlink" href="#the-datapointcloudproduct-class" title="Permalink to this heading"></a></h2>
+<p>For any users wanting to take advantage of the functionality within datapoint to configure and open datasets via STAC records, this operator is the object to use.
+The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> operator can be instantiated for each conformant asset from one or more items. For a single item:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ceda_datapoint.core.cloud</span> <span class="kn">import</span> <span class="n">DataPointCloudProduct</span>
+<span class="kn">from</span> <span class="nn">ceda_datapoint.core.item</span> <span class="kn">import</span> <span class="n">identify_cloud_type</span>
+
+<span class="n">products</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+   <span class="n">cf</span> <span class="o">=</span> <span class="n">identify_cloud_type</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">asset</span><span class="p">)</span>
+   <span class="k">if</span> <span class="n">cf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">continue</span>
+   <span class="n">products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+      <span class="n">DataPointCloudProduct</span><span class="p">(</span>
+         <span class="n">asset</span><span class="p">,</span>   <span class="c1"># The asset obtained from pystac.Item</span>
+         <span class="nb">id</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="c1"># ID of the asset (can be combined with the item ID)</span>
+         <span class="n">cf</span><span class="o">=</span><span class="n">cf</span><span class="p">,</span>   <span class="c1"># Cloud format identified above.</span>
+         <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;bbox&#39;</span><span class="p">:</span><span class="n">bounding_box</span><span class="p">},</span> <span class="c1"># See below.</span>
+         <span class="n">properties</span><span class="o">=</span><span class="n">properties</span>       <span class="c1"># Properties of the parent item.</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, <code class="docutils literal notranslate"><span class="pre">item</span></code> is a pystac object that can be obtained from the <code class="docutils literal notranslate"><span class="pre">pystac-client</span></code> or a similar pystac implementation.
+The cloud format/type (see below) can be identifier using the function <code class="docutils literal notranslate"><span class="pre">identify_cloud_type</span></code> also imported from DataPoint.
+This relies on either the <code class="docutils literal notranslate"><span class="pre">id</span></code> of the asset conforming to the labels that DataPoint expects (i.e <code class="docutils literal notranslate"><span class="pre">reference_file</span></code>) or the asset containing
+a property called <code class="docutils literal notranslate"><span class="pre">cloud_format</span></code>. If the asset contains a the cloud format but under a different name, the <code class="docutils literal notranslate"><span class="pre">cflabel</span></code> can be adjusted accordingly.
+If the cloud label is nested within the asset, a mapper can be supplied (see the section on Mappers).</p>
+<p>We can then initialise a <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> for this asset. There are additional kwargs that can be supplied but the important ones are highlighted above.
+For the <code class="docutils literal notranslate"><span class="pre">meta</span></code> argument, a dictionary must be given which (at minimum) includes the bounding box (which is not typically part of the Item’s properties).
+Other attributes of the item that apply to the asset can be passed using this mechanism. STAC properties (like STAC version) can be passed using the
+<code class="docutils literal notranslate"><span class="pre">stac_attrs</span></code> kwarg if necessary.</p>
+</section>
+<section id="datapointcluster-objects">
+<h2><code class="docutils literal notranslate"><span class="pre">DataPointCluster</span></code> objects<a class="headerlink" href="#datapointcluster-objects" title="Permalink to this heading"></a></h2>
+<p>In the above example, a list of cloud products is generated for convenience. Instead, we could combine these into a <code class="docutils literal notranslate"><span class="pre">cluster</span></code> object which comes with some benefits
+over just using a list:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>String representation with metadata</p></li>
+<li><p>Able to obtain a listing of metadata in each cloud product.</p></li>
+<li><p>Help/Info methods available.</p></li>
+<li><p>Able to open a dataset directly from the cluster.</p></li>
+<li><p>Indexable, so can extract a product by ID or position.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="cloud-formats">
+<h2>Cloud Formats<a class="headerlink" href="#cloud-formats" title="Permalink to this heading"></a></h2>
 <p>From recent user surveys relating to the Climate Model Intercomparison Project (CMIP6)
 datasets available via the CEDA Archive, some common issues and barriers to research relate to how to find and access the data itself.</p>
 <p>Research is typically undertaken by either connecting to JASMIN using remote SSH to access data, or downloading
@@ -119,6 +171,7 @@ which can easily be mapped. There are two competing formats to store the referen
 references your dataset will produce.</p>
 <p>If the source files are not well chunked for the use case or have very few chunks in general, the best solution is reformatting
 to a format like Zarr, which will allow the chunk structure to be altered.</p>
+</section>
 <section id="kerchunk-reference-format">
 <h2>1. Kerchunk Reference format<a class="headerlink" href="#kerchunk-reference-format" title="Permalink to this heading"></a></h2>
 <p>Kerchunk was developed by Martin Durant at Anaconda as a Python library for cloud-friendly access
@@ -180,8 +233,8 @@ array required by the user for any particular computation.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="stac.html" class="btn btn-neutral float-left" title="STAC Catalogs and Conventions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="core_client.html" class="btn btn-neutral float-right" title="Client and Search" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage.html" class="btn btn-neutral float-left" title="CEDA DataPoint - Basic Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="objects.html" class="btn btn-neutral float-right" title="DataPoint Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

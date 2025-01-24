@@ -49,11 +49,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="inspiration.html">Inspiration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">How to Use DataPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">DataPoint's Cloud Product Handler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="objects.html">DataPoint Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mappers.html">Mappings for Non-CEDA STAC Catalogs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">When to Use DataPoint</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stac.html">STAC Catalogs Explained</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud_formats.html">Cloud Formats Explained</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#ceda_datapoint.core.item.DataPointItem.display_cloud_formats"><code class="docutils literal notranslate"><span class="pre">DataPointItem.display_cloud_formats()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#ceda_datapoint.core.item.identify_cloud_type"><code class="docutils literal notranslate"><span class="pre">identify_cloud_type()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="core_cloud.html">Clusters and Cloud Products</a></li>
@@ -190,6 +191,13 @@ of cloud assets.</p>
 <dd><p>Display the list of cloud formats based on the cloud assets.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ceda_datapoint.core.item.identify_cloud_type">
+<span class="sig-prename descclassname"><span class="pre">ceda_datapoint.core.item.</span></span><span class="sig-name descname"><span class="pre">identify_cloud_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cflabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cloud_format'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asset_mapper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core_cloud.html#ceda_datapoint.core.cloud.DataPointMapper" title="ceda_datapoint.core.cloud.DataPointMapper"><span class="pre">DataPointMapper</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ceda_datapoint/core/item.html#identify_cloud_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ceda_datapoint.core.item.identify_cloud_type" title="Permalink to this definition"></a></dt>
+<dd><p>Identify the type of cloud format
+to which this asset conforms.</p>
 </dd></dl>
 
 </section>

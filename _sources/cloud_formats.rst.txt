@@ -1,6 +1,56 @@
-=============
+=================================
+DataPoint's Cloud Product Handler
+=================================
+
+The ``DataPointCloudProduct`` class
+-----------------------------------
+
+For any users wanting to take advantage of the functionality within datapoint to configure and open datasets via STAC records, this operator is the object to use.
+The ``DataPointCloudProduct`` operator can be instantiated for each conformant asset from one or more items. For a single item:
+
+.. code::
+
+   from ceda_datapoint.core.cloud import DataPointCloudProduct
+   from ceda_datapoint.core.item import identify_cloud_type
+
+   products = []
+   for name, asset in item.assets.items():
+      cf = identify_cloud_type(id, asset)
+      if cf is None:
+         continue
+      products.append(
+         DataPointCloudProduct(
+            asset,   # The asset obtained from pystac.Item
+            id=name, # ID of the asset (can be combined with the item ID)
+            cf=cf,   # Cloud format identified above.
+            meta={'bbox':bounding_box}, # See below.
+            properties=properties       # Properties of the parent item.
+         )
+      )
+      
+In this example, ``item`` is a pystac object that can be obtained from the ``pystac-client`` or a similar pystac implementation.
+The cloud format/type (see below) can be identifier using the function ``identify_cloud_type`` also imported from DataPoint. 
+This relies on either the ``id`` of the asset conforming to the labels that DataPoint expects (i.e ``reference_file``) or the asset containing
+a property called ``cloud_format``. If the asset contains a the cloud format but under a different name, the ``cflabel`` can be adjusted accordingly.
+If the cloud label is nested within the asset, a mapper can be supplied (see the section on Mappers).
+
+We can then initialise a ``DataPointCloudProduct`` for this asset. There are additional kwargs that can be supplied but the important ones are highlighted above.
+For the ``meta`` argument, a dictionary must be given which (at minimum) includes the bounding box (which is not typically part of the Item's properties).
+Other attributes of the item that apply to the asset can be passed using this mechanism. STAC properties (like STAC version) can be passed using the
+``stac_attrs`` kwarg if necessary.
+
+``DataPointCluster`` objects
+----------------------------
+In the above example, a list of cloud products is generated for convenience. Instead, we could combine these into a ``cluster`` object which comes with some benefits
+over just using a list:
+ - String representation with metadata
+ - Able to obtain a listing of metadata in each cloud product.
+ - Help/Info methods available.
+ - Able to open a dataset directly from the cluster.
+ - Indexable, so can extract a product by ID or position.
+
 Cloud Formats
-=============
+-------------
 
 From recent user surveys relating to the Climate Model Intercomparison Project (CMIP6) 
 datasets available via the CEDA Archive, some common issues and barriers to research relate to how to find and access the data itself.
