@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STAC Catalogs and Conventions &mdash; CEDA DataPoint 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
@@ -15,9 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -92,11 +92,11 @@
            <div itemprop="articleBody">
              
   <section id="stac-catalogs-and-conventions">
-<h1>STAC Catalogs and Conventions<a class="headerlink" href="#stac-catalogs-and-conventions" title="Permalink to this heading"></a></h1>
+<h1>STAC Catalogs and Conventions<a class="headerlink" href="#stac-catalogs-and-conventions" title="Link to this heading"></a></h1>
 <p>The CEDA STAC catalogs are accessible via an API portal at <a class="reference external" href="https://api.ceda.stac.ac.uk">https://api.ceda.stac.ac.uk</a>.</p>
 <img alt="The Spatio-Temporal Asset Catalog Logo" src="_images/STACLogo.png" />
 <section id="the-basics-of-stac">
-<h2>1. The basics of STAC<a class="headerlink" href="#the-basics-of-stac" title="Permalink to this heading"></a></h2>
+<h2>1. The basics of STAC<a class="headerlink" href="#the-basics-of-stac" title="Link to this heading"></a></h2>
 <p>Spatio-Temporal Asset Catalog is an emerging standard for storing Geospatial assets in JSON-style format,
 with a convention for metadata attributes to be stored so that STAC records are uniform and standardised across institutions and data centers.
 The STAC methodology consists of several hierarchical layers for organising geospatial data such that searching and accessing data are made
@@ -111,7 +111,7 @@ consistent and easy. STAC objects are grouped into three categories, as seen in 
 <p>Read more about STAC conventions and possible extensions/plugins on the <a class="reference external" href="https://stacspec.org/en">STAC Docs</a>.</p>
 </section>
 <section id="stac-conventions-from-ceda">
-<h2>2. STAC Conventions from CEDA<a class="headerlink" href="#stac-conventions-from-ceda" title="Permalink to this heading"></a></h2>
+<h2>2. STAC Conventions from CEDA<a class="headerlink" href="#stac-conventions-from-ceda" title="Link to this heading"></a></h2>
 <p>At CEDA we have created multiple STAC Catalogs for various collections of data, all accessible via a single URL - this is what DataPoint uses.
 Our convention for storing cloud format records alongside more traditional file types is to create an Item for each dataset object. This item then has one or more
 assets; the original data files in NetCDF or similar formats plus a <code class="docutils literal notranslate"><span class="pre">reference-file</span></code> asset which is typically a Kerchunk or CFA file. Zarr will likely also fit under

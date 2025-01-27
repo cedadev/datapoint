@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inspiration for DataPoint &mdash; CEDA DataPoint 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
@@ -15,9 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -94,7 +94,7 @@
            <div itemprop="articleBody">
              
   <section id="inspiration-for-datapoint">
-<h1>Inspiration for DataPoint<a class="headerlink" href="#inspiration-for-datapoint" title="Permalink to this heading"></a></h1>
+<h1>Inspiration for DataPoint<a class="headerlink" href="#inspiration-for-datapoint" title="Link to this heading"></a></h1>
 <p>A paradigm shift is underway among many data storage centers as the need for cloud-accessible analysis-ready data increases.
 There are significant issues relating to accessibility with current storage formats, and the existing archives of data which are
 not suited for aggregation and usage in cloud applications. Several technologies are in development for storing data in more
@@ -103,7 +103,7 @@ like Kerchunk and CFA. At CEDA we have begun to create and ingest these new file
 advancements to our user community. In order to create the best environment for accessing our cloud data products, we have
 created an API called DataPoint.</p>
 <section id="data-aggregations">
-<h2>1. Data Aggregations<a class="headerlink" href="#data-aggregations" title="Permalink to this heading"></a></h2>
+<h2>1. Data Aggregations<a class="headerlink" href="#data-aggregations" title="Link to this heading"></a></h2>
 <p>The ideal scenario for accessing data from a user perspective is a single dataset object that contains all the data and attributes required.
 In practice, a single file representing this dataset only works if the data is relatively small - very unlikely to be the case, especially
 with increasing resolutions in new datasets. Instead the dataset is normally split up between multiple files that may represent a slice of the
@@ -116,7 +116,7 @@ way to build the dataset is already known. On-the-fly aggregations may work well
 multiple variables and dimensions that need to be connected in a convoluted way, that will take some time!</p>
 </section>
 <section id="generating-cloud-formats">
-<h2>2. Generating Cloud Formats<a class="headerlink" href="#generating-cloud-formats" title="Permalink to this heading"></a></h2>
+<h2>2. Generating Cloud Formats<a class="headerlink" href="#generating-cloud-formats" title="Link to this heading"></a></h2>
 <p>Over the last 18-24 months we’ve been using various tools to generate new reference files with Kerchunk or new cloud data
 stores with Zarr. These have been ingested into the CEDA Archive and are accessible to all users - except that no one knows
 how to use or even find them. Since these technologies are relatively new to most of the communities that make use of our services,
@@ -126,7 +126,7 @@ introduce these formats in a way that does not require all users to learn to use
 large barrier to optimised use of our data.</p>
 </section>
 <section id="the-ceda-singularity">
-<h2>3. The CEDA Singularity<a class="headerlink" href="#the-ceda-singularity" title="Permalink to this heading"></a></h2>
+<h2>3. The CEDA Singularity<a class="headerlink" href="#the-ceda-singularity" title="Link to this heading"></a></h2>
 <p>DataPoint is the culmination of several ideas around creating a single point of access to the data archived at CEDA; the so-called
 ‘CEDA Singularity’. It is a STAC API which connects to our STAC catalogs - again a new technology that most users do not utilise
 - and can be used to search across our data holdings to find specific datasets and metadata. What sets DataPoint apart is the
@@ -139,7 +139,7 @@ and then simply open the result as a dataset. DataPoint handles the extraction o
 archive to present a dataset that looks the same regardless of what type or format the data is stored.</p>
 </section>
 <section id="what-s-next">
-<h2>4. What’s Next?<a class="headerlink" href="#what-s-next" title="Permalink to this heading"></a></h2>
+<h2>4. What’s Next?<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h2>
 <p>Currently our STAC catalogs represent only a small fraction of the total CEDA archive which spans more than 40 years of data,
 totalling over 25 Petabytes. Even less of the data has a cloud representation that can be fully utilised by datapoint.
 The next step towards greater data accessibility will be to dramatically expand our STAC representations as well as the

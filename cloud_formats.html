@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DataPoint’s Cloud Product Handler &mdash; CEDA DataPoint 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
@@ -15,9 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,13 +96,13 @@
            <div itemprop="articleBody">
              
   <section id="datapoint-s-cloud-product-handler">
-<h1>DataPoint’s Cloud Product Handler<a class="headerlink" href="#datapoint-s-cloud-product-handler" title="Permalink to this heading"></a></h1>
+<h1>DataPoint’s Cloud Product Handler<a class="headerlink" href="#datapoint-s-cloud-product-handler" title="Link to this heading"></a></h1>
 <section id="the-datapointcloudproduct-class">
-<h2>The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> class<a class="headerlink" href="#the-datapointcloudproduct-class" title="Permalink to this heading"></a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> class<a class="headerlink" href="#the-datapointcloudproduct-class" title="Link to this heading"></a></h2>
 <p>For any users wanting to take advantage of the functionality within datapoint to configure and open datasets via STAC records, this operator is the object to use.
 The <code class="docutils literal notranslate"><span class="pre">DataPointCloudProduct</span></code> operator can be instantiated for each conformant asset from one or more items. For a single item:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ceda_datapoint.core.cloud</span> <span class="kn">import</span> <span class="n">DataPointCloudProduct</span>
-<span class="kn">from</span> <span class="nn">ceda_datapoint.core.item</span> <span class="kn">import</span> <span class="n">identify_cloud_type</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.core.cloud</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPointCloudProduct</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.core.item</span><span class="w"> </span><span class="kn">import</span> <span class="n">identify_cloud_type</span>
 
 <span class="n">products</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">asset</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -131,7 +131,7 @@ Other attributes of the item that apply to the asset can be passed using this me
 <code class="docutils literal notranslate"><span class="pre">stac_attrs</span></code> kwarg if necessary.</p>
 </section>
 <section id="datapointcluster-objects">
-<h2><code class="docutils literal notranslate"><span class="pre">DataPointCluster</span></code> objects<a class="headerlink" href="#datapointcluster-objects" title="Permalink to this heading"></a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">DataPointCluster</span></code> objects<a class="headerlink" href="#datapointcluster-objects" title="Link to this heading"></a></h2>
 <p>In the above example, a list of cloud products is generated for convenience. Instead, we could combine these into a <code class="docutils literal notranslate"><span class="pre">cluster</span></code> object which comes with some benefits
 over just using a list:</p>
 <blockquote>
@@ -145,7 +145,7 @@ over just using a list:</p>
 </div></blockquote>
 </section>
 <section id="cloud-formats">
-<h2>Cloud Formats<a class="headerlink" href="#cloud-formats" title="Permalink to this heading"></a></h2>
+<h2>Cloud Formats<a class="headerlink" href="#cloud-formats" title="Link to this heading"></a></h2>
 <p>From recent user surveys relating to the Climate Model Intercomparison Project (CMIP6)
 datasets available via the CEDA Archive, some common issues and barriers to research relate to how to find and access the data itself.</p>
 <p>Research is typically undertaken by either connecting to JASMIN using remote SSH to access data, or downloading
@@ -173,7 +173,7 @@ references your dataset will produce.</p>
 to a format like Zarr, which will allow the chunk structure to be altered.</p>
 </section>
 <section id="kerchunk-reference-format">
-<h2>1. Kerchunk Reference format<a class="headerlink" href="#kerchunk-reference-format" title="Permalink to this heading"></a></h2>
+<h2>1. Kerchunk Reference format<a class="headerlink" href="#kerchunk-reference-format" title="Link to this heading"></a></h2>
 <p>Kerchunk was developed by Martin Durant at Anaconda as a Python library for cloud-friendly access
 to archival data by reference, an alternative to converting archival data into newer cloud-optimised formats.
 There are specific similarities in syntax between Kerchunk and Zarr as there is a significant overlap
@@ -194,7 +194,7 @@ retrieve specific byte-ranges of data served by NginX/Apache web-servers which a
 then combined into a single Xarray dataset object.</p>
 </section>
 <section id="zarr-stores">
-<h2>2. Zarr stores<a class="headerlink" href="#zarr-stores" title="Permalink to this heading"></a></h2>
+<h2>2. Zarr stores<a class="headerlink" href="#zarr-stores" title="Link to this heading"></a></h2>
 <p>One solution to the problems NetCDF presents in terms of cloud access issues, would be to migrate
 data to a more cloud-friendly format and upload this new format to a public cloud platform like
 Amazon S3 or GCP. These use an Object Store architecture in place of a traditional file system.
@@ -218,7 +218,7 @@ and is stored as an independent object, hence parallel reads of different Zarr c
 supported. Data can be rechunked on conversion to Zarr to suit operational needs and typical use-cases.</p>
 </section>
 <section id="climate-forecast-aggregations-cfa">
-<h2>3. Climate Forecast Aggregations (CFA)<a class="headerlink" href="#climate-forecast-aggregations-cfa" title="Permalink to this heading"></a></h2>
+<h2>3. Climate Forecast Aggregations (CFA)<a class="headerlink" href="#climate-forecast-aggregations-cfa" title="Link to this heading"></a></h2>
 <p>CFA parameters are now included in the CF conventions (as of CF version 1.12),
 and define how so-called <code class="docutils literal notranslate"><span class="pre">aggregation</span> <span class="pre">variables</span></code> should be defined within a CFA-netCDF file. A
 CFA-netCDF file acts as a reference file to a set of Fragment files (which may be netCDF or other formats),

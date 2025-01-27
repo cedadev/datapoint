@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mappings for Non-CEDA Catalogs &mdash; CEDA DataPoint 0.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
@@ -15,9 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -92,13 +92,13 @@
            <div itemprop="articleBody">
              
   <section id="mappings-for-non-ceda-catalogs">
-<h1>Mappings for Non-CEDA Catalogs<a class="headerlink" href="#mappings-for-non-ceda-catalogs" title="Permalink to this heading"></a></h1>
+<h1>Mappings for Non-CEDA Catalogs<a class="headerlink" href="#mappings-for-non-ceda-catalogs" title="Link to this heading"></a></h1>
 <p>DataPoint was developed primarily to support data users for accessing the CEDA archive of data via CEDA STAC Catalogs.
 These catalogs have a specific arrangement of properties and attributes within each record that DataPoint uses for configuration i.e to open a dataset.
 We recognise that other organisations will have their own layout for STAC catalogs and their own specific property names. To that end, the <code class="docutils literal notranslate"><span class="pre">DataPointMapper</span></code> was created
 which allows a simple mapping to be applied to inform DataPoint of how to reach specific properties (if they are present) in any arrangement of STAC records.</p>
 <section id="item-mappings">
-<h2>1. Item Mappings<a class="headerlink" href="#item-mappings" title="Permalink to this heading"></a></h2>
+<h2>1. Item Mappings<a class="headerlink" href="#item-mappings" title="Link to this heading"></a></h2>
 <p>There are a number of item-level attributes DataPoint expects to find; those being <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">properties</span></code> and <code class="docutils literal notranslate"><span class="pre">assets</span></code>. Additionally, DataPoint uses the <code class="docutils literal notranslate"><span class="pre">cloud_format</span></code> property of each asset to
 determine suitability for opening as a <code class="docutils literal notranslate"><span class="pre">Cloud</span> <span class="pre">Product</span></code>, i.e for Kerchunk/Zarr data. This is not applicable for NetCDF/HDF or other archival formats directly. The cloud format mapping should
 be treated as applying to all assets under whatever asset mapping is used.</p>
@@ -117,7 +117,7 @@ will be applied to all objects under <code class="docutils literal notranslate">
 in the STAC record.</p>
 </section>
 <section id="asset-mappings">
-<h2>2. Asset Mappings<a class="headerlink" href="#asset-mappings" title="Permalink to this heading"></a></h2>
+<h2>2. Asset Mappings<a class="headerlink" href="#asset-mappings" title="Link to this heading"></a></h2>
 <p>Assets may have the same or different mappings to the items, so at the point of retrieving the desired cloud assets it is necessary to supply asset mappings in the same way as before.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">asset_mappings</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;href&quot;</span><span class="p">:</span><span class="s2">&quot;properties.href&quot;</span><span class="p">,</span>
