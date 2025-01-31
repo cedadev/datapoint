@@ -8,24 +8,31 @@ jobs:
   build:
     # Specify an OS for the runner
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11","3.12"]
 
     #Define steps
     steps:
-
       # Firstly, checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
       # Set up Python env
-      - name: Setup Python
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ matrix.python-version }}
       # Install dependencies
       - name: Install Python dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip3 install poetry
           poetry install
+
+      - name: Run isort
+        run: |
+          poetry run isort --check --diff ceda_datapoint
       # Test with pytest
       - name: Run pytest
         run: |

@@ -2,15 +2,16 @@ __author__    = "Daniel Westwood"
 __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
-import fsspec
-import xarray as xr
-import rioxarray as rxr
-import logging
-import requests
 import json
+import logging
 import os
 
-from ceda_datapoint.mixins import UIMixin, PropertiesMixin
+import fsspec
+import requests
+import rioxarray as rxr
+import xarray as xr
+
+from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import hash_id, logstream
 
 logger = logging.getLogger(__name__)

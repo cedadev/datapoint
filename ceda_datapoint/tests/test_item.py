@@ -1,5 +1,6 @@
 from ceda_datapoint.core.item import DataPointItem
 
+
 class ExampleItem:
     def __init__(self, id='test_item1'):
 

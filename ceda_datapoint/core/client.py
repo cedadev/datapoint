@@ -2,13 +2,15 @@ __author__    = "Daniel Westwood"
 __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
-import pystac_client
-from pystac_client.stac_api_io import StacApiIO
 import logging
+
+import pystac_client
 import xarray as xr
+from pystac_client.stac_api_io import StacApiIO
 
 from ceda_datapoint.mixins import UIMixin
-from ceda_datapoint.utils import urls, hash_id, generate_id, logstream
+from ceda_datapoint.utils import generate_id, hash_id, logstream, urls
+
 from .cloud import DataPointCluster, DataPointMapper
 from .item import DataPointItem
 

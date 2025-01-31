@@ -1,5 +1,6 @@
 from ceda_datapoint.core.cloud import DataPointCluster
 
+
 class TestCluster:
     def test_main(self):
         dpc = DataPointCluster([], 'test_search',meta={})

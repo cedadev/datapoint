@@ -3,10 +3,11 @@ __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
+
 import xarray
 
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
-from ceda_datapoint.utils import method_format, logstream
+from ceda_datapoint.utils import logstream, method_format
 
 from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
 
