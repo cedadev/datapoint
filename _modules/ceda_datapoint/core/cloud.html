@@ -89,15 +89,16 @@
 <span class="n">__contact__</span>   <span class="o">=</span> <span class="s2">&quot;daniel.westwood@stfc.ac.uk&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2024 United Kingdom Research and Innovation&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">fsspec</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rxr</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">UIMixin</span><span class="p">,</span> <span class="n">PropertiesMixin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fsspec</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rxr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropertiesMixin</span><span class="p">,</span> <span class="n">UIMixin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hash_id</span><span class="p">,</span> <span class="n">logstream</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
