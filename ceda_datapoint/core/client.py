@@ -3,6 +3,7 @@ __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
+from typing import Union
 
 import pystac_client
 import xarray as xr
@@ -353,7 +354,7 @@ class DataPointClient(UIMixin):
         """
         return DataPointSearch(self.search(collections=[collection]))
         
-    def list_query_terms(self, collection: str) -> list | None:
+    def list_query_terms(self, collection: str) -> Union[list,None]:
         """
         List the possible query terms for all or
         a particular collection.

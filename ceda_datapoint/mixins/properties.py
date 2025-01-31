@@ -3,6 +3,7 @@ __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
+from typing import Union
 
 from ceda_datapoint.utils import logstream
 
@@ -69,20 +70,20 @@ class PropertiesMixin(UIMixin):
         return self._stac_attrs
 
     @property
-    def variables(self) -> str | list[str]:
+    def variables(self) -> Union[str,list[str]]:
         """
         Return the ``variables`` for this object if present.
         """
         return self._multiple_options(['variables', 'variable_long_name'])
 
     @property
-    def units(self) -> str | list[str]:
+    def units(self) -> Union[str,list[str]]:
         """
         Return the ``units`` for this object if present.
         """
         return self._multiple_options(['units', 'variable_units'])
 
-    def _multiple_options(self, options: list) -> str | list[str]:
+    def _multiple_options(self, options: list) -> Union[str,list[str]]:
         """
         Retrieve an attribute frokm the STAC record with multiple
         possible names. e.g units or Units.

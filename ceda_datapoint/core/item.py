@@ -3,6 +3,7 @@ __contact__   = "daniel.westwood@stfc.ac.uk"
 __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 import logging
+from typing import Union
 
 import xarray
 
@@ -341,7 +342,7 @@ def identify_cloud_type(
         id: str, 
         asset,
         cflabel: str = 'cloud_format',
-        asset_mapper: DataPointMapper | None = None,
+        asset_mapper: Union[DataPointMapper,None] = None,
     ) -> str:
     """
     Identify the type of cloud format
