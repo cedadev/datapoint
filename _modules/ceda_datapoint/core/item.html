@@ -94,7 +94,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropertiesMixin</span><span class="p">,</span> <span class="n">UIMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropertiesMixin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">logstream</span><span class="p">,</span> <span class="n">method_format</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cloud</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPointCloudProduct</span><span class="p">,</span> <span class="n">DataPointCluster</span><span class="p">,</span> <span class="n">DataPointMapper</span>
@@ -465,6 +465,7 @@
 <span class="sd">    to which this asset conforms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">cf</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># Try using the mapper tool</span>
     <span class="k">if</span> <span class="n">asset_mapper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cf</span> <span class="o">=</span> <span class="n">asset_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cflabel</span><span class="p">,</span> <span class="n">asset</span><span class="p">)</span>
