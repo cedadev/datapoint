@@ -7,7 +7,6 @@ from typing import Union
 
 import pystac_client
 import xarray as xr
-from pystac_client.stac_api_io import StacApiIO
 
 from ceda_datapoint.mixins import UIMixin
 from ceda_datapoint.utils import generate_id, hash_id, logstream, urls
@@ -326,10 +325,6 @@ class DataPointClient(UIMixin):
         """
         String representation of this class.
         """
-        org = ''
-        if self._org:
-            org = f'{self._org}'
-
         return f'<DataPointClient: {self._id}>'
 
     def help(self) -> None:

@@ -7,7 +7,7 @@ from typing import Union
 
 import xarray
 
-from ceda_datapoint.mixins import PropertiesMixin, UIMixin
+from ceda_datapoint.mixins import PropertiesMixin
 from ceda_datapoint.utils import logstream, method_format
 
 from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
@@ -349,6 +349,7 @@ def identify_cloud_type(
     to which this asset conforms.
     """
 
+    cf = None
     # Try using the mapper tool
     if asset_mapper is not None:
         cf = asset_mapper.get(cflabel, asset)
