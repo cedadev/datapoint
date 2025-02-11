@@ -136,11 +136,11 @@
 <span class="sd">            Error-accepting &#39;get&#39; operation for an attribute from a STAC object - </span>
 <span class="sd">            with chain or otherwise.&quot;&quot;&quot;</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">stac_obj</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">stac_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">stac_obj</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
                     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">stac_obj</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">stac_obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">chain</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s1">&#39;Chain for accessing attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_mappings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1"> failed at </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -326,6 +326,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_kerchunk</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">mapper_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span>
@@ -334,10 +335,14 @@
 <span class="sd">        </span>
 <span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
 <span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
+
+<span class="sd">        :param mapper_kwargs: (dict) Kwargs to provide to Kerchunk&#39;s fsspec mapper.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="n">mapper_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
                 
         <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
-        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mapper_kwargs&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mapper_kwargs&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="n">mapper_kwargs</span>
         <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">local_only</span><span class="p">:</span>
@@ -563,7 +568,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add any default kwargs for specific requests&quot;&quot;&quot;</span>
 
-    <span class="n">add_kwargs</span> <span class="o">=</span> <span class="n">add_kwargs</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">add_kwargs</span> <span class="o">=</span> <span class="n">add_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;consolidated&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span>
