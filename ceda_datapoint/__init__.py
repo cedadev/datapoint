@@ -4,3 +4,5 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 
 from .core import DataPointClient
 
+from .utils import disable_logs, enable_logs
+

@@ -39,6 +39,16 @@ def hash_id(hash_token):
         hash_val = ( hash_val*281  ^ ord(ch)*997) & 0xFFFFFFFF
     return str(hash_val)[:6]
 
+def disable_logs():
+    for name in logging.root.manager.loggerDict:
+        lg = logging.getLogger(name)
+        lg.disabled=True
+
+def enable_logs():
+    for name in logging.root.manager.loggerDict:
+        lg = logging.getLogger(name)
+        lg.disabled=False
+
 def set_verbose(level: int):
     """
     Reset the logger basic config.

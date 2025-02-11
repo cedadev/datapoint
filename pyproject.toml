@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ceda-datapoint"
-version = "0.4.6"
+version = "0.4.7"
 description = "DataPoint provides python-based search/access tools for using data primarily from the CEDA Archive."
 authors = ["Daniel Westwood <daniel.westwood@stfc.ac.uk>"]
 license = "BSD 3"
@@ -23,6 +23,7 @@ aiohttp = "^3.11.7"
 rioxarray = "*"
 pytest = "^8"
 isort = "^5.13.2"
+zarr = "^2"
 
 [build-system]
 requires = ["poetry-core", "wheel"]

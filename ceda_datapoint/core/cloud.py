@@ -42,11 +42,11 @@ class DataPointMapper:
             Error-accepting 'get' operation for an attribute from a STAC object - 
             with chain or otherwise."""
             try:
-                if k in stac_obj:
-                    return stac_obj[k]
-                else:
+                if hasattr(stac_obj,k):
                     return getattr(stac_obj, k)
-            except (KeyError, ValueError, AttributeError):
+                else:
+                    return stac_obj[k]
+            except (KeyError, ValueError, AttributeError, TypeError):
                 if chain:
                     logger.warning(
                         f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
