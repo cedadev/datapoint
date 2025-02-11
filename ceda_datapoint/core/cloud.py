@@ -219,6 +219,7 @@ class DataPointCloudProduct(PropertiesMixin):
     def _open_kerchunk(
             self,
             local_only: bool = False,
+            mapper_kwargs: dict = None,
             **kwargs,
         ) -> xr.Dataset:
         
@@ -227,10 +228,14 @@ class DataPointCloudProduct(PropertiesMixin):
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param mapper_kwargs: (dict) Kwargs to provide to Kerchunk's fsspec mapper.
         """
+
+        mapper_kwargs = mapper_kwargs or {}
                 
         href = self.href
-        mapper_kwargs = self._mapper.get('mapper_kwargs',self._asset_stac) or {}
+        mapper_kwargs = self._mapper.get('mapper_kwargs',self._asset_stac) or mapper_kwargs
         open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
 
         if local_only:
@@ -443,7 +448,7 @@ class DataPointCluster(UIMixin):
 def _zarr_kwargs_default(add_kwargs: dict = None) -> dict:
     """Add any default kwargs for specific requests"""
 
-    add_kwargs = add_kwargs or []
+    add_kwargs = add_kwargs or {}
 
     defaults = {
         'consolidated':False,
