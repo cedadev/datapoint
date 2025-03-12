@@ -48,11 +48,11 @@ class DataPointMapper:
                     return stac_obj[k]
             except (KeyError, ValueError, AttributeError, TypeError):
                 if chain:
-                    logger.warning(
+                    logger.debug(
                         f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
                     )
                 else:
-                    logger.warning(f'Property "{k}" for {self._id} is undefined.')
+                    logger.debug(f'Property "{k}" for {self._id} is undefined.')
                 return None
 
         if key in self._mappings:

@@ -38,8 +38,6 @@ class DataPointItem(PropertiesMixin):
 
         self._mapper = mapper or DataPointMapper(None)
 
-        self._meta = {}
-
         if item_stac is None:
             raise ValueError(
                 'DataPointItem could not be initialised from empty STAC Item'
