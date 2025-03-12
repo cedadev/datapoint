@@ -38,8 +38,6 @@ class DataPointItem(PropertiesMixin):
 
         self._mapper = mapper or DataPointMapper(None)
 
-        self._meta = {}
-
         if item_stac is None:
             raise ValueError(
                 'DataPointItem could not be initialised from empty STAC Item'
@@ -362,6 +360,9 @@ def identify_cloud_type(
     # Try getting the correct property
     if hasattr(asset, cflabel):
         return getattr(asset, cflabel)
+    
+    if asset.to_dict().get(cflabel,None):
+        return asset.to_dict().get(cflabel)
     
     # Otherwise identify from known methods
     if id in rf_titles:

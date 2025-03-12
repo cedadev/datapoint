@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "ceda-datapoint"
-version = "0.4.8"
+version = "0.4.9"
 description = "DataPoint provides python-based search/access tools for using data primarily from the CEDA Archive."
 authors = ["Daniel Westwood <daniel.westwood@stfc.ac.uk>"]
 license = "BSD 3"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9,<3.13"
 poetry = "^1.8.5"
 fsspec = "^2024.9.0"
 xarray = "^2024.6.0"
