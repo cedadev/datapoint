@@ -363,6 +363,9 @@ def identify_cloud_type(
     if hasattr(asset, cflabel):
         return getattr(asset, cflabel)
     
+    if asset.to_dict().get(cflabel,None):
+        return asset.to_dict().get(cflabel)
+    
     # Otherwise identify from known methods
     if id in rf_titles:
         return method_format[id]
