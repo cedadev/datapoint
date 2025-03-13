@@ -140,6 +140,10 @@ class DataPointCloudProduct(PropertiesMixin):
         """Representation of this class using the meta components"""
         repr = super().__repr__().split('\n')
         repr.append('Attributes:')
+        if self._properties is None:
+            repr.append('   <empty>')
+            return '\n'.join(repr)
+        
         for k, v in self._properties.items():
             repr.append(f' - {k}: {v}')
         return '\n'.join(repr)
@@ -294,18 +298,28 @@ class DataPointCloudProduct(PropertiesMixin):
 
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
-        if 'https://' in self.href:
-            # Check remote link
-            status = requests.head(self.href)
-            if status.status_code != 200:
-                self.visibility = 'local-only'
-            else:
-                return
-        
-        # Check local link
-        local_ref = self.href.replace('https://dap.ceda.ac.uk','')
-        if not os.path.isfile(local_ref):
-            self.visibility = 'unreachable'
+
+        if self.href.startswith('/'):
+            # Check local path
+            self.visibility = 'local-only'
+            if not os.path.isfile(self.href):
+                self.visibility = 'unreachable'
+            return
+
+        # Check remote link
+        check_ref = self.href
+        if self._cloud_format == 'zarr':
+            check_ref = f'{self.href}/.zmetadata'
+
+        status = requests.head(check_ref)
+        if status.status_code != 200:
+            # Check local link
+            self.visibility='local-only'
+            local_ref = self.href.replace('https://dap.ceda.ac.uk','')
+            if not os.path.isfile(local_ref):
+                self.visibility = 'unreachable'
+            return
+        return
 
 class DataPointCluster(UIMixin):
     """

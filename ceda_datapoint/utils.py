@@ -21,6 +21,7 @@ method_format = {
     'reference_file': 'kerchunk',
     'reference_file_2': 'CFA',
     'cog':'cog',
+    'zstore':'zarr'
 }
 
 def generate_id():
