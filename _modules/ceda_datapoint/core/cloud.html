@@ -238,6 +238,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Representation of this class using the meta components&quot;&quot;&quot;</span>
         <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Attributes:&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;   &lt;empty&gt;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+        
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
@@ -401,18 +405,28 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if this product is reachable&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">:</span>
-            <span class="c1"># Check remote link</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;local-only&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span>
-        
-        <span class="c1"># Check local link</span>
-        <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">local_ref</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span></div>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="c1"># Check local path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;local-only&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Check remote link</span>
+        <span class="n">check_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;zarr&#39;</span><span class="p">:</span>
+            <span class="n">check_ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s1">/.zmetadata&#39;</span>
+
+        <span class="n">status</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">check_ref</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="c1"># Check local link</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span><span class="o">=</span><span class="s1">&#39;local-only&#39;</span>
+            <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">local_ref</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span>
+            <span class="k">return</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="DataPointCluster">
