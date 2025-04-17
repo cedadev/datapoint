@@ -28,7 +28,8 @@ class DataPointSearch(UIMixin):
             mappings: dict = None,
             search_terms: dict = None, 
             meta: dict = None,
-            parent_id: str = None
+            parent_id: str = None,
+            data_selection: dict = None
         ) -> None:
         """
         Initialise the search object - used by the DataPointClient
@@ -44,6 +45,7 @@ class DataPointSearch(UIMixin):
         """
 
         self._search_terms = search_terms or None
+        self._data_selection = data_selection or None
         self._meta = meta or None
 
         self._mappings = mappings
@@ -205,7 +207,9 @@ class DataPointSearch(UIMixin):
                 )
             )
 
-        return DataPointCluster(assets, meta=self._meta, parent_id=self._id)
+        return DataPointCluster(
+            assets, 
+            meta=self._meta, parent_id=self._id)
     
     def display_assets(self) -> None:
         """
@@ -249,7 +253,10 @@ class DataPointSearch(UIMixin):
 
         items = {}
         for item in self._search.items():
-            items[item.id] = DataPointItem(item, meta=self._meta, mapper=mapper)
+            items[item.id] = DataPointItem(
+                item, 
+                meta=self._meta, mapper=mapper,
+                data_selection=self._data_selection)
         self._item_set = items
     
     def _load_asset_set(self) -> None:
@@ -390,13 +397,48 @@ class DataPointClient(UIMixin):
         for coll in self._client.get_collections():
             print(f'{coll.id}: {coll.description}')
 
-    def search(self, mappings: dict = None, **kwargs) -> DataPointSearch:
+    def search(
+            self, 
+            collections: list,
+            mappings: dict = None, 
+            data_selection: dict = None, 
+            **kwargs
+        ) -> DataPointSearch:
         """
         Perform a search operation, creates a ``DataPointSearch``
         object which is also self-describing."""
 
         mappings = mappings or self._mappings
+
+        collections = self._nested_collections(collections)
         
-        search = self._client.search(**kwargs)
-        return DataPointSearch(search, search_terms=kwargs, meta=self._meta, parent_id=self._id, mappings=mappings)
+        search = self._client.search(collections=collections, **kwargs)
+        return DataPointSearch(
+            search, 
+            search_terms=kwargs, meta=self._meta, parent_id=self._id, 
+            mappings=mappings, data_selection=data_selection)
+    
+    def _nested_collections(self, collections: list):
+        """
+        Find all nested collections for the set of collections given here.
+        """
+        collection_set = []
+        for coll in collections:
+            collection_set += self._find_nested_collections(coll)
+
+        # Remove duplicates
+        return list(set(collection_set))
+
+    def _find_nested_collections(self, collection: str):
+        """
+        Recursive function to find all nested collections for a specific collection.
+        """
+
+        collections = [collection]
+        for link in self._client.get_collection(collection).links:
+            if link.rel == 'child':
+                if 'collections' in link.target:
+                    coll = link.target.split('collections/')[-1]
+                    collections += self._find_nested_collections(coll)
+        return collections
 
