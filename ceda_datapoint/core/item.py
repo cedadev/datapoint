@@ -26,6 +26,7 @@ class DataPointItem(PropertiesMixin):
             item_stac: object, 
             meta: dict = None,
             mapper: DataPointMapper = None,
+            data_selection: dict = None,
         ):
         """
         DataPointItem initialisation, requires the original STAC record
@@ -37,6 +38,7 @@ class DataPointItem(PropertiesMixin):
         """
 
         self._mapper = mapper or DataPointMapper(None)
+        self._data_selection = data_selection
 
         if item_stac is None:
             raise ValueError(
@@ -321,7 +323,7 @@ class DataPointItem(PropertiesMixin):
                     asset, 
                     id=asset_id, cf=cf, order=order, meta=self._meta,
                     stac_attrs=self._stac_attrs, properties=self._properties,
-                    mapper=mapper)
+                    mapper=mapper, data_selection=self._data_selection)
                 if show_unreachable or a.visibility != 'unreachable':
                     asset_list.append(a)
             

@@ -11,12 +11,34 @@ import requests
 import rioxarray as rxr
 import xarray as xr
 
+from typing import Union
+
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import hash_id, logstream
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
+
+def _decode_datetime(datetime):
+    """
+    Decode pystac datetime to xarray select.
+    """
+    dt = datetime.split('/')
+    if len(dt) > 1:
+        return slice(dt[0],dt[1])
+    elif len(dt) == 1:
+        return dt[0]
+    else:
+        return dt
+
+def _find_spatial_dims(ds, bbox):
+    """
+    Determine the names of the spatial dims.
+    """
+
+    
+
 
 class DataPointMapper:
     """Mapper object for calling specific properties of an item"""
@@ -83,6 +105,7 @@ class DataPointCloudProduct(PropertiesMixin):
             stac_attrs: dict = None,
             properties: dict = None,
             mapper: DataPointMapper = None,
+            data_selection: dict = None,
         ) -> None:
 
         """
@@ -119,6 +142,7 @@ class DataPointCloudProduct(PropertiesMixin):
         self._mapper = mapper or DataPointMapper(id)
 
         meta = meta or {}
+        self._data_selection = data_selection
         
         self._asset_stac = asset_stac
         self._meta = meta | {
@@ -171,7 +195,8 @@ class DataPointCloudProduct(PropertiesMixin):
 
     def open_dataset(
             self, 
-            local_only: bool = False, 
+            local_only: bool = False,
+            prepare_data: bool = True,
             **kwargs
         ) -> xr.Dataset:
         """
@@ -201,17 +226,20 @@ class DataPointCloudProduct(PropertiesMixin):
 
         try:
             if self._cloud_format == 'kerchunk':
-                return self._open_kerchunk(local_only=local_only, **kwargs)
+                ds = self._open_kerchunk(local_only=local_only, **kwargs)
             elif self._cloud_format == 'CFA':
-                return self._open_cfa(**kwargs)
+                ds = self._open_cfa(**kwargs)
             elif self._cloud_format == 'zarr':
-                return self._open_zarr(**kwargs)
+                ds = self._open_zarr(**kwargs)
             elif self._cloud_format == 'cog':
-                return self._open_cog(**kwargs)
+                ds = self._open_cog(**kwargs)
             else:
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
+            
+            return self._prepare_dataset(ds, prepare_data=prepare_data)
+
         except ValueError as err:
             raise err
         except FileNotFoundError:
@@ -296,6 +324,56 @@ class DataPointCloudProduct(PropertiesMixin):
 
         return rxr.open_rasterio(self.href, **open_cog_kwargs)
 
+    def _prepare_dataset(
+            self, 
+            ds: xr.Dataset, 
+            prepare_data: bool = True
+        ) -> Union[xr.Dataset, xr.DataArray]:
+        """Perform any dataset selections here."""
+
+        intersects = self._meta['search_terms'].get('intersects',None)
+        # Intersection applies to spatial data
+
+        datetime = self._meta['search_terms'].get('datetime',None)
+        # Datetime can only be applied to 'time' dimension.
+
+        variable = self._data_selection.get('variable',None)
+        sel = self._data_selection.get('sel',None)
+
+        if intersects:
+            if intersects['type'] == 'Polygon':
+                spatial_dims = _find_spatial_dims(ds, self.bbox)
+
+                for i, dim in enumerate(spatial_dims):
+                    corners = [c[i] for c in intersects['coordinates']]
+                    dim_range = slice(min(corners),max(corners))
+                    ds = ds.sel(**{dim:dim_range})
+
+        if datetime is not None:
+            if 'time' not in ds:
+                logger.warning(
+                    'Datetime selection could not be applied - ',
+                    'no "time" dimension present.'
+                )
+            else:
+                time_sel = _decode_datetime(datetime)
+                ds = ds.sel(time=time_sel)
+
+        if variable is not None:
+            if variable not in ds:
+                logger.warning(
+                    'Variable selection could not be applied - ',
+                    f'no "{variable}" variable present.'
+                )
+            else:
+                ds = ds[variable]
+
+        if sel is not None:
+            ds = ds.sel(**sel)
+
+        return ds
+                
+
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
 
@@ -333,7 +411,7 @@ class DataPointCluster(UIMixin):
             parent_id: str = None, 
             meta: dict = None,
             local_only: bool = False,
-            show_unreachable: bool = False
+            show_unreachable: bool = False,
         ) -> None:
         
         """Initialise a cluster of datasets from a set of assets.
@@ -353,6 +431,7 @@ class DataPointCluster(UIMixin):
         self._id = f'{parent_id}-{hash_id(parent_id)}'
 
         self._local_only = local_only
+        self._data_selection = data_selection
 
         self.show_unreachable = show_unreachable
 
