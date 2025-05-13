@@ -142,7 +142,7 @@ class DataPointCloudProduct(PropertiesMixin):
         self._mapper = mapper or DataPointMapper(id)
 
         meta = meta or {}
-        self._data_selection = data_selection
+        self._data_selection = data_selection or {}
         
         self._asset_stac = asset_stac
         self._meta = meta | {
@@ -356,7 +356,10 @@ class DataPointCloudProduct(PropertiesMixin):
                     'no "time" dimension present.'
                 )
             else:
-                time_sel = _decode_datetime(datetime)
+                if isinstance(datetime, str):
+                    time_sel = _decode_datetime(datetime)
+                else:
+                    time_sel = slice(datetime[0],datetime[1])
                 ds = ds.sel(time=time_sel)
 
         if variable is not None:
@@ -411,6 +414,7 @@ class DataPointCluster(UIMixin):
             parent_id: str = None, 
             meta: dict = None,
             local_only: bool = False,
+            data_selection: Union[dict,None] = None,
             show_unreachable: bool = False,
         ) -> None:
         
