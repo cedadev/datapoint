@@ -5,13 +5,12 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import json
 import logging
 import os
+from typing import Union
 
 import fsspec
 import requests
 import rioxarray as rxr
 import xarray as xr
-
-from typing import Union
 
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import hash_id, logstream
