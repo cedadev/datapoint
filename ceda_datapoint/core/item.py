@@ -11,6 +11,7 @@ from ceda_datapoint.mixins import PropertiesMixin
 from ceda_datapoint.utils import logstream, method_format
 
 from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
+from .asset import BasicAsset
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
@@ -249,10 +250,30 @@ class DataPointItem(PropertiesMixin):
             show_unreachable=show_unreachable, 
             asset_mappings=asset_mappings)
 
-    def get_assets(self) -> dict:
+    def get_assets_dict(self) -> dict:
         """
-        Get the set of assets (in dict form) for this item."""
+        Get the set of assets (in pure dict form) for this item."""
         return self._assets
+    
+    def get_assets(self, asset_mappings: None) -> dict:
+        """
+        Compile the set of assets for this item as their own objects
+        """
+        asset_dict = {}
+        for asset_id, v in self._assets.items():
+
+            mapper = None
+            if asset_mappings is not None:
+                mapper = DataPointMapper(mappings=asset_mappings)
+
+            id = f'{self._id}-{asset_id}'
+            asset_dict[asset_id] = BasicAsset(
+                v,
+                id=id, 
+                meta=self._meta,
+                stac_attrs=self._stac_attrs, properties=self._properties,
+                mapper=mapper)   
+        return asset_dict
 
     def list_cloud_formats(self) -> list[str]:
         """

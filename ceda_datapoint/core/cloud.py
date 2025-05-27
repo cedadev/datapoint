@@ -5,7 +5,7 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import json
 import logging
 import os
-from typing import Union
+from typing import Union, Any
 
 import fsspec
 import requests
@@ -13,6 +13,7 @@ import rioxarray as rxr
 import xarray as xr
 
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
+from ceda_datapoint.core.asset import DataPointMapper, BasicAsset
 from ceda_datapoint.utils import hash_id, logstream
 
 logger = logging.getLogger(__name__)
@@ -36,58 +37,7 @@ def _find_spatial_dims(ds, bbox):
     Determine the names of the spatial dims.
     """
 
-    
-
-
-class DataPointMapper:
-    """Mapper object for calling specific properties of an item"""
-    def __init__(self, mappings: dict = None, id: str = None) -> None:
-        self._mappings = mappings or {}
-        self._id = id
-
-    def set_id(self, id: str) -> None:
-        """Set the ID for this mapper - cosmetic only"""
-        self._id = id
-
-    def get(self, key: str, stac_object: object) -> str:
-        """
-        Mapper.index('assets',stac_object)
-        """
-
-        def access(
-                k: str, 
-                stac_obj: object, 
-                chain: bool = True
-            ) -> str:
-            """
-            Error-accepting 'get' operation for an attribute from a STAC object - 
-            with chain or otherwise."""
-            try:
-                if hasattr(stac_obj,k):
-                    return getattr(stac_obj, k)
-                else:
-                    return stac_obj[k]
-            except (KeyError, ValueError, AttributeError, TypeError):
-                if chain:
-                    logger.debug(
-                        f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
-                    )
-                else:
-                    logger.debug(f'Property "{k}" for {self._id} is undefined.')
-                return None
-
-        if key in self._mappings:
-            keychain = self._mappings[key].split('.')
-            so = access(keychain[0], stac_object)
-            for k in keychain[1:]:
-                so = access(k, so)
-                if so is None:
-                    return None
-        else:
-            so = access(key, stac_object, chain=False)
-        return so
-
-class DataPointCloudProduct(PropertiesMixin):
+class DataPointCloudProduct(BasicAsset):
     """
     Object for storing and manipulating a single cloud product
     i.e Kerchunk/Zarr/CFA.
@@ -134,23 +84,18 @@ class DataPointCloudProduct(PropertiesMixin):
                 'Only "xarray" mode currently implemented - cf-python is a future option'
             )
         
-        self._id = id
+        super().__init__(
+            asset_stac,
+            id=id, meta=meta,
+            stac_attrs=stac_attrs,
+            properties=properties,
+            mapper=mapper,
+        )
+        
         self._order = order
         self._cloud_format = cf
 
-        self._mapper = mapper or DataPointMapper(id)
-
-        meta = meta or {}
-        self._data_selection = data_selection or {}
-        
-        self._asset_stac = asset_stac
-        self._meta = meta | {
-            'asset_id': id,
-            'cloud_format': cf
-        }
-
-        self._stac_attrs = stac_attrs
-        self._properties = properties
+        self._meta['cloud_format'] = cf
 
         self.visibility = 'all'
 
@@ -191,6 +136,17 @@ class DataPointCloudProduct(PropertiesMixin):
     def info(self) -> None:
         """Display information about this object"""
         print(self.__repr__())
+
+    def open_asset(
+            self,
+            local_only: bool = False,
+            prepare_data: bool = True,
+            **kwargs
+        ) -> Any:
+        """
+        Override for basic asset get function.
+        """
+        return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
 
     def open_dataset(
             self, 
