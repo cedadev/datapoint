@@ -10,8 +10,8 @@ import xarray
 from ceda_datapoint.mixins import PropertiesMixin
 from ceda_datapoint.utils import logstream, method_format
 
-from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
 from .asset import BasicAsset
+from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)

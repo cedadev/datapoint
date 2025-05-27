@@ -2,7 +2,6 @@ import logging
 from typing import Any, Union
 
 from ceda_datapoint.mixins import PropertiesMixin
-
 from ceda_datapoint.utils import logstream
 
 logger = logging.getLogger(__name__)

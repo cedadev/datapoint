@@ -5,15 +5,15 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import json
 import logging
 import os
-from typing import Union, Any
+from typing import Any, Union
 
 import fsspec
 import requests
 import rioxarray as rxr
 import xarray as xr
 
+from ceda_datapoint.core.asset import BasicAsset, DataPointMapper
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
-from ceda_datapoint.core.asset import DataPointMapper, BasicAsset
 from ceda_datapoint.utils import hash_id, logstream
 
 logger = logging.getLogger(__name__)
