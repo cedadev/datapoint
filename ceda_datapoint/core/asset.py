@@ -1,6 +1,13 @@
+import logging
 from typing import Any, Union
 
 from ceda_datapoint.mixins import PropertiesMixin
+
+from ceda_datapoint.utils import logstream
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logstream)
+logger.propagate = False
 
 class DataPointMapper:
     """Mapper object for calling specific properties of an item"""
@@ -95,6 +102,10 @@ class BasicAsset(PropertiesMixin):
 
         self._stac_attrs = stac_attrs
         self._properties = properties
+
+    def __str__(self):
+        """String representation of the asset"""
+        return f'<DataPointAsset: {self._id}>'
 
     def open_asset(
             self,

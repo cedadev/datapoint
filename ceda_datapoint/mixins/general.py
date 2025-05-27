@@ -23,7 +23,7 @@ class UIMixin:
 
     def __repr__(self):
         """Python representation of standard DataPoint metadata"""
-        repr = [str(self)]
+        repr = ['',str(self)]
         for k, v in self._meta.items():
             repr.append(f' - {k}: {v}')
         return '\n'.join(repr)

@@ -255,7 +255,7 @@ class DataPointItem(PropertiesMixin):
         Get the set of assets (in pure dict form) for this item."""
         return self._assets
     
-    def get_assets(self, asset_mappings: None) -> dict:
+    def get_assets(self, asset_mappings: None = None) -> dict:
         """
         Compile the set of assets for this item as their own objects
         """
@@ -268,12 +268,29 @@ class DataPointItem(PropertiesMixin):
 
             id = f'{self._id}-{asset_id}'
             asset_dict[asset_id] = BasicAsset(
-                v,
+                v.to_dict(),
                 id=id, 
                 meta=self._meta,
                 stac_attrs=self._stac_attrs, properties=self._properties,
                 mapper=mapper)   
         return asset_dict
+    
+    def get_data_files(self) -> list[str]:
+        """
+        Get all non-cloud files as a list.
+        """
+
+        assets = self._assets or []
+
+        data_list = []
+        if len(assets) == 0:
+            return data_list
+
+        for id, asset in self._assets.items():
+            cf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
+            if cf is None:
+                data_list.append(asset.href)
+        return data_list
 
     def list_cloud_formats(self) -> list[str]:
         """
@@ -341,7 +358,7 @@ class DataPointItem(PropertiesMixin):
                 order = priority.index(cf)
                 asset_id = f'{self._id}-{id}'
                 a = DataPointCloudProduct(
-                    asset, 
+                    asset.to_dict(), 
                     id=asset_id, cf=cf, order=order, meta=self._meta,
                     stac_attrs=self._stac_attrs, properties=self._properties,
                     mapper=mapper, data_selection=self._data_selection)
