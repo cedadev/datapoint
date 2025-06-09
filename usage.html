@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#client-and-search">Client and Search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#simple-dataset-access-example">Simple dataset access example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#more-about-searches">More about Searches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#new-feature-simple-configuration-with-single-search-selections">New Feature: Simple Configuration with Single-Search Selections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clustering-datasets">Clustering Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-datasets-cloud-products">Getting Datasets - Cloud Products</a></li>
 </ul>
@@ -99,7 +100,12 @@
 <h1>CEDA DataPoint - Basic Usage<a class="headerlink" href="#ceda-datapoint-basic-usage" title="Link to this heading"></a></h1>
 <p>This page/notebook demonstrates some basic usage and functionality for
 CEDA’s DataPoint package, installable with
-<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ceda-datapoint</span></code>. To begin we can import the datapoint
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ceda-datapoint</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>New for v0.5.0!</strong>: See below for the newly released Single-Search Selections, designed to minimise configuration complexity by applying pystac search parameters directly to the data!</p>
+</div>
+<p>To begin we can import the datapoint
 module and start using the search client.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPointClient</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">DataPointClient</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">&#39;CEDA&#39;</span><span class="p">,</span> <span class="n">hash_token</span><span class="o">=</span><span class="s1">&#39;lonestar&#39;</span><span class="p">)</span>
@@ -437,6 +443,51 @@ from the <code class="docutils literal notranslate"><span class="pre">items</spa
 <span class="go">...}</span>
 </pre></div>
 </div>
+</section>
+<section id="new-feature-simple-configuration-with-single-search-selections">
+<h2>New Feature: Simple Configuration with Single-Search Selections<a class="headerlink" href="#new-feature-simple-configuration-with-single-search-selections" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>One of the unique features of the CEDA DataPoint package is the user-focused design, specifically around user-friendliness and ease of use. We recognise there are other software tools in wide use that perform similar data access/searchability to DataPoint, so we try to provide features that specifically benefit the CEDA user community.</p>
+<p>We also encourage feedback from users directly, by way of feature requests on GitHub. If you have a specific feature that would be useful, please give us your feedback and create a feature request here: <a class="reference external" href="https://github.com/cedadev/datapoint/issues">https://github.com/cedadev/datapoint/issues</a></p>
+</div>
+<p>The selections made via the pystac-based DataPoint search, are now applied directly to the data where possible. This minimises the extra configuration required to get to your specific spatial/temporal area of interest (AOI). The following search parameters are now applied directly to the data as standard:
+- <cite>intersects</cite>: Search query for accessing STAC records within a specific AOI, this area will then be applied to the data produced when performing <cite>open_dataset</cite> so your data cube is representative of the search specified. (Note: This is supported for standard regular-grid coordinates only - namely lat/lon or variations of those. This is an experimental feature, please report any issues on the GitHub repo - link above)</p>
+<ul class="simple">
+<li><p><cite>datetime</cite>: Search query for finding STAC records that fall within a datetime range. This range is then applied to the data cube/array on output. (Note: This is supported for the standard temporal dimension label <cite>time</cite> only. Arrays without a <cite>time</cite> dimension are not applicable. This is an experimental feature, please report any issues on the GitHub repo - link above)</p></li>
+<li><p><cite>query.variables</cite>: Pystac implements a metadata query parameter for searching specific fields in the STAC properties. For STAC records that contain a <cite>variables</cite> property, this search is applied directly to the data array on output, so your dataset contains just the variables you’re searching for. This feature can also be utilised via the <cite>data_selections</cite> parameter specific to DataPoint - see below.</p></li>
+</ul>
+<p>Example query where the single-search selections will be applied:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+<span class="go">   collections=[&#39;example_collection&#39;], # Any nested collections will now also be searched.</span>
+<span class="go">   intersects={</span>
+<span class="go">      &quot;type&quot;: &quot;Polygon&quot;,</span>
+<span class="go">      &quot;coordinates&quot;: [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],</span>
+<span class="go">   }, # Intersection also applied to xarray Dataset</span>
+<span class="go">   datetime=&#39;20250101T000000Z/20250102T000000Z&#39;,</span>
+<span class="go">   query=[</span>
+<span class="go">      &#39;experiment_id&#39;:&#39;001&#39;,</span>
+<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;]</span>
+<span class="go">   ],</span>
+<span class="go">   data_selection={</span>
+<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;] # Alternative variable search</span>
+<span class="go">      &#39;sel&#39;:{</span>
+<span class="go">         &#39;nv&#39;:slice(0,5)</span>
+<span class="go">      }</span>
+<span class="go">   }</span>
+<span class="go">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Extra Points:</dt><dd><ul class="simple">
+<li><p>Nested collection search now applies. Any collections nested under <cite>example_collection</cite> are also included in the search.</p></li>
+<li><p>Intersects: With 0.5.0, only Polygon searches are implemented. Other types will not be applied to the data.</p></li>
+<li><p>Datetime: Searches matching the format of the dataset, separated by a <cite>/</cite> for start/end times are supported. Other formats will not be applied correctly. If you would like to see other search formats implemented for single-search selections, please create a feature request.</p></li>
+<li><p>Variables: Searching variables can be applied via single-search using either the query function (if the STAC records are searchable via variable) or using the <cite>data_selection</cite> parameter which does not affect the STAC record search.</p></li>
+<li><p>Data Selection: Here we demonstrate an example custom selection of the <cite>nv</cite> dimension from 0 to 5. This will be applied to all data output from this search query, including to multiple datasets derived from this search, which could mean a powerful tool to apply selections across multiple datasets with ease!</p></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section id="clustering-datasets">
 <h2>Clustering Datasets<a class="headerlink" href="#clustering-datasets" title="Link to this heading"></a></h2>
