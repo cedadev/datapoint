@@ -29,7 +29,8 @@ class DataPointSearch(UIMixin):
             search_terms: dict = None, 
             meta: dict = None,
             parent_id: str = None,
-            data_selection: dict = None
+            data_selection: dict = None,
+            collections: list = None,
         ) -> None:
         """
         Initialise the search object - used by the DataPointClient
@@ -44,7 +45,7 @@ class DataPointSearch(UIMixin):
         :param parent_id:       (str) ID of the parent client.
         """
 
-        self._search_terms = search_terms or None
+        self._search_terms = search_terms or {}
         self._data_selection = data_selection or None
         self._meta = meta or None
 
@@ -54,6 +55,7 @@ class DataPointSearch(UIMixin):
         self._item_set  = None
 
         self._meta['search_terms'] = self._search_terms
+        self._meta['collections'] = collections
 
         self._id = f'{parent_id}-{hash_id(parent_id)}'
 
@@ -317,7 +319,6 @@ class DataPointClient(UIMixin):
             raise ValueError(
                 'API URL could not be resolved'
             )
-
         self._client = pystac_client.Client.open(self._url)
 
         self._meta = {
@@ -402,6 +403,7 @@ class DataPointClient(UIMixin):
             collections: list,
             mappings: dict = None, 
             data_selection: dict = None, 
+            apply_search_to_xarray: bool = True,
             **kwargs
         ) -> DataPointSearch:
         """
@@ -411,11 +413,16 @@ class DataPointClient(UIMixin):
         mappings = mappings or self._mappings
 
         collections = self._nested_collections(collections)
+
+        search_terms = kwargs
+        if not apply_search_to_xarray:
+            search_terms = {}
         
         search = self._client.search(collections=collections, **kwargs)
         return DataPointSearch(
             search, 
-            search_terms=kwargs, meta=self._meta, parent_id=self._id, 
+            collections=collections,
+            search_terms=search_terms, meta=self._meta, parent_id=self._id, 
             mappings=mappings, data_selection=data_selection)
     
     def _nested_collections(self, collections: list):

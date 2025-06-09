@@ -5,12 +5,14 @@ __copyright__ = "Copyright 2024 United Kingdom Research and Innovation"
 import json
 import logging
 import os
+from typing import Any, Union
 
 import fsspec
 import requests
 import rioxarray as rxr
 import xarray as xr
 
+from ceda_datapoint.core.asset import BasicAsset, DataPointMapper
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import hash_id, logstream
 
@@ -18,55 +20,64 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
 
-class DataPointMapper:
-    """Mapper object for calling specific properties of an item"""
-    def __init__(self, mappings: dict = None, id: str = None) -> None:
-        self._mappings = mappings or {}
-        self._id = id
+def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
+    """
+    Decode GeoJSON Polygon to Xarray Selection.
+    """
+    selects = {}
+    for i, dim in enumerate(spatial_dims):
+        corners = [c[i] for c in coordinates]
+        dim_range = slice(min(corners),max(corners))
+        selects[dim] = dim_range
+    return selects
 
-    def set_id(self, id: str) -> None:
-        """Set the ID for this mapper - cosmetic only"""
-        self._id = id
+def _decode_datetime(datetime):
+    """
+    Decode pystac datetime to xarray select.
+    """
+    dt = datetime.split('/')
+    if len(dt) > 1:
+        return slice(dt[0],dt[1])
+    elif len(dt) == 1:
+        return dt[0]
+    else:
+        return dt
 
-    def get(self, key: str, stac_object: object) -> str:
-        """
-        Mapper.index('assets',stac_object)
-        """
+def _find_spatial_dims(ds) -> Union[list,None]:
+    """
+    Determine the names of the spatial dims.
+    """
 
-        def access(
-                k: str, 
-                stac_obj: object, 
-                chain: bool = True
-            ) -> str:
-            """
-            Error-accepting 'get' operation for an attribute from a STAC object - 
-            with chain or otherwise."""
-            try:
-                if hasattr(stac_obj,k):
-                    return getattr(stac_obj, k)
-                else:
-                    return stac_obj[k]
-            except (KeyError, ValueError, AttributeError, TypeError):
-                if chain:
-                    logger.debug(
-                        f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
-                    )
-                else:
-                    logger.debug(f'Property "{k}" for {self._id} is undefined.')
-                return None
+    accepted_lats = ['lat','latitude','Lat','Latitude']
+    accepted_lons = ['lon','longitude','Lon','Longitude']
 
-        if key in self._mappings:
-            keychain = self._mappings[key].split('.')
-            so = access(keychain[0], stac_object)
-            for k in keychain[1:]:
-                so = access(k, so)
-                if so is None:
-                    return None
-        else:
-            so = access(key, stac_object, chain=False)
-        return so
+    convention = None
 
-class DataPointCloudProduct(PropertiesMixin):
+    for convent in range(len(accepted_lats)):
+        lat = accepted_lats[convent]
+        lon = accepted_lons[convent]
+        if lat in ds.dims and lon in ds.dims:
+            convention = convent
+
+    if convention is None:
+        logger.warning(
+            'Spatial AOI Skipped - Could not identify spatial dims. '
+            f'Accepted dimensions are {accepted_lats} and {accepted_lons}'
+        )
+        return None
+    
+    lat = accepted_lats[convention]
+    lon = accepted_lons[convention]
+
+    # Determine lat/lon ordering in dataset.
+    lat_ind = list(ds.dims).index(lat)
+    lon_ind = list(ds.dims).index(lon)
+    if lat_ind > lon_ind:
+        return [lon, lat]
+    else:
+        return [lat, lon]
+
+class DataPointCloudProduct(BasicAsset):
     """
     Object for storing and manipulating a single cloud product
     i.e Kerchunk/Zarr/CFA.
@@ -83,6 +94,7 @@ class DataPointCloudProduct(PropertiesMixin):
             stac_attrs: dict = None,
             properties: dict = None,
             mapper: DataPointMapper = None,
+            data_selection: dict = None,
         ) -> None:
 
         """
@@ -112,22 +124,18 @@ class DataPointCloudProduct(PropertiesMixin):
                 'Only "xarray" mode currently implemented - cf-python is a future option'
             )
         
-        self._id = id
+        super().__init__(
+            asset_stac,
+            id=id, meta=meta,
+            stac_attrs=stac_attrs,
+            properties=properties,
+            mapper=mapper,
+        )
+        
         self._order = order
         self._cloud_format = cf
 
-        self._mapper = mapper or DataPointMapper(id)
-
-        meta = meta or {}
-        
-        self._asset_stac = asset_stac
-        self._meta = meta | {
-            'asset_id': id,
-            'cloud_format': cf
-        }
-
-        self._stac_attrs = stac_attrs
-        self._properties = properties
+        self._meta['cloud_format'] = cf
 
         self.visibility = 'all'
 
@@ -169,9 +177,21 @@ class DataPointCloudProduct(PropertiesMixin):
         """Display information about this object"""
         print(self.__repr__())
 
+    def open_asset(
+            self,
+            local_only: bool = False,
+            prepare_data: bool = True,
+            **kwargs
+        ) -> Any:
+        """
+        Override for basic asset get function.
+        """
+        return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
+
     def open_dataset(
             self, 
-            local_only: bool = False, 
+            local_only: bool = False,
+            prepare_data: bool = True,
             **kwargs
         ) -> xr.Dataset:
         """
@@ -201,17 +221,20 @@ class DataPointCloudProduct(PropertiesMixin):
 
         try:
             if self._cloud_format == 'kerchunk':
-                return self._open_kerchunk(local_only=local_only, **kwargs)
+                ds = self._open_kerchunk(local_only=local_only, **kwargs)
             elif self._cloud_format == 'CFA':
-                return self._open_cfa(**kwargs)
+                ds = self._open_cfa(**kwargs)
             elif self._cloud_format == 'zarr':
-                return self._open_zarr(**kwargs)
+                ds = self._open_zarr(**kwargs)
             elif self._cloud_format == 'cog':
-                return self._open_cog(**kwargs)
+                ds = self._open_cog(**kwargs)
             else:
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
+            
+            return self._prepare_dataset(ds, prepare_data=prepare_data)
+
         except ValueError as err:
             raise err
         except FileNotFoundError:
@@ -296,6 +319,82 @@ class DataPointCloudProduct(PropertiesMixin):
 
         return rxr.open_rasterio(self.href, **open_cog_kwargs)
 
+    def _prepare_dataset(
+            self, 
+            ds: xr.Dataset, 
+            prepare_data: bool = True
+        ) -> Union[xr.Dataset, xr.DataArray]:
+        """Perform any dataset selections here."""
+
+        intersects = self._meta['search_terms'].get('intersects',None)
+        # Intersection applies to spatial data
+
+        datetime = self._meta['search_terms'].get('datetime',None)
+        # Datetime can only be applied to 'time' dimension.
+
+        query = self._meta['search_terms'].get('query',{})
+        vq = query.get('variables',None)
+
+        variables = self._data_selection.get('variables',None) or vq
+        sel = self._data_selection.get('sel',None)
+
+        spatial_dims = None
+        if intersects:
+            # Order spatial dims correctly based on bbox
+            spatial_dims = _find_spatial_dims(ds)
+
+        if spatial_dims is not None:
+            if intersects['type'] == 'Polygon':
+                select = _decode_polygon(intersects['coordinates'])
+                ds = ds.sel(**select)
+            else:
+                logger.warning(
+                    'Unsupported intersection type for Single Search Selection - ' \
+                    'AOI not applied.'
+                )
+
+        if datetime is not None:
+            if 'time' not in ds:
+                logger.warning(
+                    'Datetime selection could not be applied - ',
+                    'no "time" dimension present.'
+                )
+            else:
+                if isinstance(datetime, str):
+                    time_sel = _decode_datetime(datetime)
+                else:
+                    time_sel = slice(datetime[0],datetime[1])
+                ds = ds.sel(time=time_sel)
+
+        if variables is not None:
+
+            if isinstance(variables,str):
+                variables = [variables]
+
+            keep_vars = []
+            all_vars = list(ds.variables)
+            for v in variables:
+                if v not in ds:
+                    logger.warning(
+                        'Variable selection could not be applied - ',
+                        f'no "{v}" variable present.'
+                    )
+                else:
+                    keep_vars.append(v)
+            if len(keep_vars) == 0:
+                raise ValueError(
+                    f'No variables kept in current selection - {variables}'
+                )
+            
+            drop_vars = list(set(all_vars).difference(set(keep_vars)))
+            ds = ds.drop_vars(drop_vars)
+
+        if sel is not None:
+            ds = ds.sel(**sel)
+
+        return ds
+                
+
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
 
@@ -333,7 +432,8 @@ class DataPointCluster(UIMixin):
             parent_id: str = None, 
             meta: dict = None,
             local_only: bool = False,
-            show_unreachable: bool = False
+            data_selection: Union[dict,None] = None,
+            show_unreachable: bool = False,
         ) -> None:
         
         """Initialise a cluster of datasets from a set of assets.
@@ -353,6 +453,7 @@ class DataPointCluster(UIMixin):
         self._id = f'{parent_id}-{hash_id(parent_id)}'
 
         self._local_only = local_only
+        self._data_selection = data_selection
 
         self.show_unreachable = show_unreachable
 

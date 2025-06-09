@@ -10,6 +10,7 @@ import xarray
 from ceda_datapoint.mixins import PropertiesMixin
 from ceda_datapoint.utils import logstream, method_format
 
+from .asset import BasicAsset
 from .cloud import DataPointCloudProduct, DataPointCluster, DataPointMapper
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class DataPointItem(PropertiesMixin):
             item_stac: object, 
             meta: dict = None,
             mapper: DataPointMapper = None,
+            data_selection: dict = None,
         ):
         """
         DataPointItem initialisation, requires the original STAC record
@@ -37,6 +39,7 @@ class DataPointItem(PropertiesMixin):
         """
 
         self._mapper = mapper or DataPointMapper(None)
+        self._data_selection = data_selection
 
         if item_stac is None:
             raise ValueError(
@@ -247,10 +250,47 @@ class DataPointItem(PropertiesMixin):
             show_unreachable=show_unreachable, 
             asset_mappings=asset_mappings)
 
-    def get_assets(self) -> dict:
+    def get_assets_dict(self) -> dict:
         """
-        Get the set of assets (in dict form) for this item."""
+        Get the set of assets (in pure dict form) for this item."""
         return self._assets
+    
+    def get_assets(self, asset_mappings: None = None) -> dict:
+        """
+        Compile the set of assets for this item as their own objects
+        """
+        asset_dict = {}
+        for asset_id, v in self._assets.items():
+
+            mapper = None
+            if asset_mappings is not None:
+                mapper = DataPointMapper(mappings=asset_mappings)
+
+            id = f'{self._id}-{asset_id}'
+            asset_dict[asset_id] = BasicAsset(
+                v.to_dict(),
+                id=id, 
+                meta=self._meta,
+                stac_attrs=self._stac_attrs, properties=self._properties,
+                mapper=mapper)   
+        return asset_dict
+    
+    def get_data_files(self) -> list[str]:
+        """
+        Get all non-cloud files as a list.
+        """
+
+        assets = self._assets or []
+
+        data_list = []
+        if len(assets) == 0:
+            return data_list
+
+        for id, asset in self._assets.items():
+            cf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
+            if cf is None:
+                data_list.append(asset.href)
+        return data_list
 
     def list_cloud_formats(self) -> list[str]:
         """
@@ -318,10 +358,10 @@ class DataPointItem(PropertiesMixin):
                 order = priority.index(cf)
                 asset_id = f'{self._id}-{id}'
                 a = DataPointCloudProduct(
-                    asset, 
+                    asset.to_dict(), 
                     id=asset_id, cf=cf, order=order, meta=self._meta,
                     stac_attrs=self._stac_attrs, properties=self._properties,
-                    mapper=mapper)
+                    mapper=mapper, data_selection=self._data_selection)
                 if show_unreachable or a.visibility != 'unreachable':
                     asset_list.append(a)
             
