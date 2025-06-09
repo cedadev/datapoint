@@ -20,6 +20,17 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
 
+def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
+    """
+    Decode GeoJSON Polygon to Xarray Selection.
+    """
+    selects = {}
+    for i, dim in enumerate(spatial_dims):
+        corners = [c[i] for c in coordinates]
+        dim_range = slice(min(corners),max(corners))
+        selects[dim] = dim_range
+    return selects
+
 def _decode_datetime(datetime):
     """
     Decode pystac datetime to xarray select.
@@ -32,10 +43,39 @@ def _decode_datetime(datetime):
     else:
         return dt
 
-def _find_spatial_dims(ds, bbox):
+def _find_spatial_dims(ds) -> Union[list,None]:
     """
     Determine the names of the spatial dims.
     """
+
+    accepted_lats = ['lat','latitude','Lat','Latitude']
+    accepted_lons = ['lon','longitude','Lon','Longitude']
+
+    convention = None
+
+    for convent in range(len(accepted_lats)):
+        lat = accepted_lats[convent]
+        lon = accepted_lons[convent]
+        if lat in ds.dims and lon in ds.dims:
+            convention = convent
+
+    if convention is None:
+        logger.warning(
+            'Spatial AOI Skipped - Could not identify spatial dims. '
+            f'Accepted dimensions are {accepted_lats} and {accepted_lons}'
+        )
+        return None
+    
+    lat = accepted_lats[convention]
+    lon = accepted_lons[convention]
+
+    # Determine lat/lon ordering in dataset.
+    lat_ind = list(ds.dims).index(lat)
+    lon_ind = list(ds.dims).index(lon)
+    if lat_ind > lon_ind:
+        return [lon, lat]
+    else:
+        return [lat, lon]
 
 class DataPointCloudProduct(BasicAsset):
     """
@@ -292,17 +332,26 @@ class DataPointCloudProduct(BasicAsset):
         datetime = self._meta['search_terms'].get('datetime',None)
         # Datetime can only be applied to 'time' dimension.
 
-        variable = self._data_selection.get('variable',None)
+        query = self._meta['search_terms'].get('query',{})
+        vq = query.get('variables',None)
+
+        variables = self._data_selection.get('variables',None) or vq
         sel = self._data_selection.get('sel',None)
 
+        spatial_dims = None
         if intersects:
-            if intersects['type'] == 'Polygon':
-                spatial_dims = _find_spatial_dims(ds, self.bbox)
+            # Order spatial dims correctly based on bbox
+            spatial_dims = _find_spatial_dims(ds)
 
-                for i, dim in enumerate(spatial_dims):
-                    corners = [c[i] for c in intersects['coordinates']]
-                    dim_range = slice(min(corners),max(corners))
-                    ds = ds.sel(**{dim:dim_range})
+        if spatial_dims is not None:
+            if intersects['type'] == 'Polygon':
+                select = _decode_polygon(intersects['coordinates'])
+                ds = ds.sel(**select)
+            else:
+                logger.warning(
+                    'Unsupported intersection type for Single Search Selection - ' \
+                    'AOI not applied.'
+                )
 
         if datetime is not None:
             if 'time' not in ds:
@@ -317,14 +366,28 @@ class DataPointCloudProduct(BasicAsset):
                     time_sel = slice(datetime[0],datetime[1])
                 ds = ds.sel(time=time_sel)
 
-        if variable is not None:
-            if variable not in ds:
-                logger.warning(
-                    'Variable selection could not be applied - ',
-                    f'no "{variable}" variable present.'
+        if variables is not None:
+
+            if isinstance(variables,str):
+                variables = [variables]
+
+            keep_vars = []
+            all_vars = list(ds.variables)
+            for v in variables:
+                if v not in ds:
+                    logger.warning(
+                        'Variable selection could not be applied - ',
+                        f'no "{v}" variable present.'
+                    )
+                else:
+                    keep_vars.append(v)
+            if len(keep_vars) == 0:
+                raise ValueError(
+                    f'No variables kept in current selection - {variables}'
                 )
-            else:
-                ds = ds[variable]
+            
+            drop_vars = list(set(all_vars).difference(set(keep_vars)))
+            ds = ds.drop_vars(drop_vars)
 
         if sel is not None:
             ds = ds.sel(**sel)

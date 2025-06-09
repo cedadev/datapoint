@@ -3,7 +3,14 @@ CEDA DataPoint - Basic Usage
 
 This page/notebook demonstrates some basic usage and functionality for
 CEDA’s DataPoint package, installable with
-``pip install ceda-datapoint``. To begin we can import the datapoint
+``pip install ceda-datapoint``. 
+
+.. note::
+
+   **New for v0.5.0!**: See below for the newly released Single-Search Selections, designed to minimise configuration complexity by applying pystac search parameters directly to the data!
+
+
+To begin we can import the datapoint
 module and start using the search client.
 
 .. code::
@@ -377,6 +384,52 @@ from the ``items`` property.
      - collection: cmip6
      - item: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319
    ...}
+
+New Feature: Simple Configuration with Single-Search Selections
+---------------------------------------------------------------
+
+.. note::
+
+   One of the unique features of the CEDA DataPoint package is the user-focused design, specifically around user-friendliness and ease of use. We recognise there are other software tools in wide use that perform similar data access/searchability to DataPoint, so we try to provide features that specifically benefit the CEDA user community. 
+
+   We also encourage feedback from users directly, by way of feature requests on GitHub. If you have a specific feature that would be useful, please give us your feedback and create a feature request here: https://github.com/cedadev/datapoint/issues
+
+The selections made via the pystac-based DataPoint search, are now applied directly to the data where possible. This minimises the extra configuration required to get to your specific spatial/temporal area of interest (AOI). The following search parameters are now applied directly to the data as standard:
+- `intersects`: Search query for accessing STAC records within a specific AOI, this area will then be applied to the data produced when performing `open_dataset` so your data cube is representative of the search specified. (Note: This is supported for standard regular-grid coordinates only - namely lat/lon or variations of those. This is an experimental feature, please report any issues on the GitHub repo - link above)
+
+- `datetime`: Search query for finding STAC records that fall within a datetime range. This range is then applied to the data cube/array on output. (Note: This is supported for the standard temporal dimension label `time` only. Arrays without a `time` dimension are not applicable. This is an experimental feature, please report any issues on the GitHub repo - link above) 
+
+- `query.variables`: Pystac implements a metadata query parameter for searching specific fields in the STAC properties. For STAC records that contain a `variables` property, this search is applied directly to the data array on output, so your dataset contains just the variables you're searching for. This feature can also be utilised via the `data_selections` parameter specific to DataPoint - see below.
+
+Example query where the single-search selections will be applied:
+
+.. code::
+
+   >>> client.search(
+      collections=['example_collection'], # Any nested collections will now also be searched.
+      intersects={
+         "type": "Polygon",
+         "coordinates": [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],
+      }, # Intersection also applied to xarray Dataset
+      datetime='20250101T000000Z/20250102T000000Z',
+      query=[
+         'experiment_id':'001',
+         'variables':['clt','sst']
+      ],
+      data_selection={
+         'variables':['clt','sst'] # Alternative variable search
+         'sel':{
+            'nv':slice(0,5)
+         }
+      }
+   )
+
+Extra Points:
+ - Nested collection search now applies. Any collections nested under `example_collection` are also included in the search.
+ - Intersects: With 0.5.0, only Polygon searches are implemented. Other types will not be applied to the data.
+ - Datetime: Searches matching the format of the dataset, separated by a `/` for start/end times are supported. Other formats will not be applied correctly. If you would like to see other search formats implemented for single-search selections, please create a feature request.
+ - Variables: Searching variables can be applied via single-search using either the query function (if the STAC records are searchable via variable) or using the `data_selection` parameter which does not affect the STAC record search.
+ - Data Selection: Here we demonstrate an example custom selection of the `nv` dimension from 0 to 5. This will be applied to all data output from this search query, including to multiple datasets derived from this search, which could mean a powerful tool to apply selections across multiple datasets with ease!
 
 Clustering Datasets
 -------------------
