@@ -135,6 +135,8 @@ class DataPointCloudProduct(BasicAsset):
         self._order = order
         self._cloud_format = cf
 
+        self._data_selection = data_selection or {}
+
         self._meta['cloud_format'] = cf
 
         self.visibility = 'all'
@@ -337,6 +339,7 @@ class DataPointCloudProduct(BasicAsset):
 
         variables = self._data_selection.get('variables',None) or vq
         sel = self._data_selection.get('sel',None)
+        isel = self._data_selection.get('isel',None)
 
         spatial_dims = None
         if intersects:
@@ -345,7 +348,13 @@ class DataPointCloudProduct(BasicAsset):
 
         if spatial_dims is not None:
             if intersects['type'] == 'Polygon':
-                select = _decode_polygon(intersects['coordinates'])
+
+                if len(intersects['coordinates']) == 1:
+                    coords = intersects['coordinates'][0]
+                else:
+                    coords = intersects['coordinates']
+
+                select = _decode_polygon(spatial_dims, coords)
                 ds = ds.sel(**select)
             else:
                 logger.warning(
@@ -391,6 +400,8 @@ class DataPointCloudProduct(BasicAsset):
 
         if sel is not None:
             ds = ds.sel(**sel)
+        if isel is not None:
+            ds = ds.isel(**isel)
 
         return ds
                 
