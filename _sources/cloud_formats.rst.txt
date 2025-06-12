@@ -43,6 +43,7 @@ Other attributes of the item that apply to the asset can be passed using this me
 ----------------------------
 In the above example, a list of cloud products is generated for convenience. Instead, we could combine these into a ``cluster`` object which comes with some benefits
 over just using a list:
+
  - String representation with metadata
  - Able to obtain a listing of metadata in each cloud product.
  - Help/Info methods available.

@@ -93,8 +93,44 @@ Cloud Formats which act as representations, references or mappers to data stored
 with the HPC architecture on which the archive resides (see the <a class="reference external" href="https://jasmin.ac.uk/">JASMIN homepage</a> for more details), but not so good for open access outside of JASMIN.</p>
 <p>This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to
 access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched.</p>
-<p><strong>v0.4.0</strong>: Zarr and COG products now supported via DataPoint, as well as Mappings for use with external APIs.</p>
-<p><strong>v0.4.1</strong>: Added increased support for using <cite>DataPointCloudProduct</cite> objects externally.</p>
+<section id="new-for-v0-5-single-search-selections">
+<h2>New for v0.5 - Single-Search Selections<a class="headerlink" href="#new-for-v0-5-single-search-selections" title="Link to this heading"></a></h2>
+<p>With the release of v0.5.0 of <cite>ceda-datapoint</cite>, the new single-search feature is in production! This significantly simplifies the data selection by applying STAC-based search queries to the Xarray datasets as they are accessed. This applies to all datasets returned via the search, so you will only see the data you’ve actually requested.</p>
+<p>Example search
+<a href="#id1"><span class="problematic" id="id2">``</span></a>`
+&gt;&gt;&gt; client.search(</p>
+<blockquote>
+<div><p>collections=[‘example_collection’], # Any nested collections will now also be searched.
+intersects={</p>
+<blockquote>
+<div><p>“type”: “Polygon”,
+“coordinates”: [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],</p>
+</div></blockquote>
+<p>}, # Intersection also applied to xarray Dataset
+datetime=’20250101T000000Z/20250102T000000Z’,
+query=[</p>
+<blockquote>
+<div><p>‘experiment_id’:’001’,
+‘variables’:[‘clt’,’sst’]</p>
+</div></blockquote>
+<p>],
+data_selection={</p>
+<blockquote>
+<div><p>‘variables’:[‘clt’,’sst’] # Alternative variable search
+‘sel’:{</p>
+<blockquote>
+<div><p>‘nv’:slice(0,5)</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<section id="id3">
+<h3>)<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>In this case, the Intersection (Area of Interest), Datetime range, query options and data selection will all be applied to Xarray datasets as they are delivered, which means upon opening a dataset you will receive an xarray representation that takes into account all your search criteria up to this point!</p>
+<p>Read more in the documentation page, under <code class="docutils literal notranslate"><span class="pre">Basic</span> <span class="pre">Usage</span> <span class="pre">&gt;&gt;</span> <span class="pre">New</span> <span class="pre">Feature:</span> <span class="pre">Simple</span> <span class="pre">Configuration</span> <span class="pre">with</span> <span class="pre">Single-Search</span> <span class="pre">Selections</span></code></p>
+</section>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
 <p>The datapoint package can be installed via pip, and requires Python 3.8 or later.</p>
