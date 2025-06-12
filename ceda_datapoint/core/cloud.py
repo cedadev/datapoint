@@ -135,6 +135,8 @@ class DataPointCloudProduct(BasicAsset):
         self._order = order
         self._cloud_format = cf
 
+        self._data_selection = data_selection or {}
+
         self._meta['cloud_format'] = cf
 
         self.visibility = 'all'
@@ -268,15 +270,7 @@ class DataPointCloudProduct(BasicAsset):
         if local_only:
             href = _fetch_kerchunk_make_local(href)
 
-        mapper = fsspec.get_mapper(
-            'reference://',
-            fo=href,
-            **mapper_kwargs
-        )
-
-        zarr_kwargs = _zarr_kwargs_default(add_kwargs=open_zarr_kwargs) | kwargs
-
-        return xr.open_zarr(mapper, **zarr_kwargs)
+        return xr.open_dataset(href, engine='kerchunk',**open_zarr_kwargs)
 
     def _open_cfa(
             self,
@@ -337,6 +331,7 @@ class DataPointCloudProduct(BasicAsset):
 
         variables = self._data_selection.get('variables',None) or vq
         sel = self._data_selection.get('sel',None)
+        isel = self._data_selection.get('isel',None)
 
         spatial_dims = None
         if intersects:
@@ -345,7 +340,13 @@ class DataPointCloudProduct(BasicAsset):
 
         if spatial_dims is not None:
             if intersects['type'] == 'Polygon':
-                select = _decode_polygon(intersects['coordinates'])
+
+                if len(intersects['coordinates']) == 1:
+                    coords = intersects['coordinates'][0]
+                else:
+                    coords = intersects['coordinates']
+
+                select = _decode_polygon(spatial_dims, coords)
                 ds = ds.sel(**select)
             else:
                 logger.warning(
@@ -391,6 +392,8 @@ class DataPointCloudProduct(BasicAsset):
 
         if sel is not None:
             ds = ds.sel(**sel)
+        if isel is not None:
+            ds = ds.isel(**isel)
 
         return ds
                 
