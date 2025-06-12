@@ -6,6 +6,7 @@ Please refer to the following for recommended cases of when DataPoint will suit 
 
 Where to use DataPoint
 ---------------------
+
 - Quickly identifying which datasets/IDs are relevant to your work
 - Easily selecting/plotting a subset of the data over a specific region/timestep.
 - Performing complex analyses/comparisons on a subset of data or across multiple datasets.

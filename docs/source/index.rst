@@ -13,9 +13,7 @@ with the HPC architecture on which the archive resides (see the `JASMIN homepage
 This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to 
 access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched.
 
-**v0.4.0**: Zarr and COG products now supported via DataPoint, as well as Mappings for use with external APIs.
-
-**v0.4.1**: Added increased support for using `DataPointCloudProduct` objects externally.
+**v0.5.0**: (09/06/25) Newly released Single-Search Selections, designed to minimise configuration complexity by applying pystac search parameters directly to the data!
 
 Installation
 ------------
