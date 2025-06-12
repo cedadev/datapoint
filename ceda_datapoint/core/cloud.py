@@ -270,15 +270,7 @@ class DataPointCloudProduct(BasicAsset):
         if local_only:
             href = _fetch_kerchunk_make_local(href)
 
-        mapper = fsspec.get_mapper(
-            'reference://',
-            fo=href,
-            **mapper_kwargs
-        )
-
-        zarr_kwargs = _zarr_kwargs_default(add_kwargs=open_zarr_kwargs) | kwargs
-
-        return xr.open_zarr(mapper, **zarr_kwargs)
+        return xr.open_dataset(href, engine='kerchunk',**open_zarr_kwargs)
 
     def _open_cfa(
             self,
