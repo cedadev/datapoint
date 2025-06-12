@@ -26,7 +26,7 @@ Example search
       "type": "Polygon",
       "coordinates": [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],
    }, # Intersection also applied to xarray Dataset
-   datetime='20250101T000000Z/20250102T000000Z',
+   datetime='2025-01-01/2025-12-31',
    query=[
       'experiment_id':'001',
       'variables':['clt','sst']
