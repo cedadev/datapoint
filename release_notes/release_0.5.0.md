@@ -27,4 +27,4 @@
     - `datetime` - from pystac datetime search.
     - `variable` - in data selection.
     - `sel` - custom selection from data selection.
-    - See the new documentation `How to Use Datapoint >> Simple Configuration with Single-Search Selection`.
+    - See the new documentation `How to Use Datapoint >> Single-Search Selections`.
