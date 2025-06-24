@@ -11,7 +11,8 @@ class UIMixin:
     def id(self):
         return self._id
 
-    def help(self, additionals: list = None):
+    @classmethod
+    def help(cls, additionals: list = None):
         """
         Link to documentation or other sources of assistance.
         """

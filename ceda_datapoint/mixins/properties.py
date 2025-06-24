@@ -22,7 +22,8 @@ class PropertiesMixin(UIMixin):
     """
     __slots__ = ['_mapper']
 
-    def help(self, additionals: list = None) -> None:
+    @classmethod
+    def help(cls, additionals: list = None) -> None:
         """Get all properties of this Mixin"""
 
         additionals = additionals or []
@@ -32,7 +33,7 @@ class PropertiesMixin(UIMixin):
             'stac_attributes','variables',
             'units'
         ]
-        super().help(additionals=additionals)
+        super(PropertiesMixin, cls).help(additionals=additionals)
 
     @property
     def bbox(self) -> list:

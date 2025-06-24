@@ -14,6 +14,12 @@ class DataPointMapper:
         self._mappings = mappings or {}
         self._id = id
 
+    @classmethod
+    def help(cls):
+        """Display public methods for this object."""
+        print('DataPointMapper Help:')
+        print(' > mapper.get() - Get a key from a given stac object using this reference mapper.')
+
     def set_id(self, id: str) -> None:
         """Set the ID for this mapper - cosmetic only"""
         self._id = id
@@ -102,6 +108,14 @@ class BasicAsset(PropertiesMixin):
         self._stac_attrs = stac_attrs
         self._properties = properties
 
+    @classmethod
+    def help(cls, additionals=None):
+        """Display public methods for this object."""
+        #print('BasicAsset Help:')
+        #print(' > asset.open_asset() - Not implemented for v0.5')
+        super(BasicAsset, cls).help(additionals=additionals)
+
+
     def __str__(self):
         """String representation of the asset"""
         return f'<DataPointAsset: {self._id}>'
@@ -115,12 +129,11 @@ class BasicAsset(PropertiesMixin):
         """
 
         raise NotImplementedError(
-            'This feature is not yet implemented for datapoint v1.0'
+            'This feature is not yet implemented for datapoint v0.5'
         )
 
         if self._asset_type == 'application/netcdf':
             return None
             # Open as netcdf - h5netcdf for cloud?
             # Skipped feature for v1.0
-
         

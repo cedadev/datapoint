@@ -127,14 +127,16 @@ class DataPointSearch(UIMixin):
             self._load_asset_set()
         return self._asset_set
             
-    def help(self) -> None:
+    @classmethod
+    def help(cls) -> None:
         """Helper function - lists methods that can be utilised for this class"""
         print('DataPointSearch Help:')
         print(' > search.info() - General information about this search')
+        print(' > search.open_dataset() - Directly open dataset from search based on asset ID')
         print(' > search.collect_cloud_assets() - Collect the cloud products into a `cluster`')
         print(' > search.display_assets() - List the names of assets for each item in this search')
         print(' > search.display_cloud_assets() - List the cloud format types for each item in this search')
-        super().help(additionals=['items','assets'])
+        super(DataPointSearch, cls).help(additionals=['items','assets'])
     
     def info(self) -> None:
         """
@@ -335,16 +337,22 @@ class DataPointClient(UIMixin):
         """
         return f'<DataPointClient: {self._id}>'
 
-    def help(self) -> None:
+    @classmethod
+    def help(cls) -> None:
         """Helper function - lists methods that can be utilised for this class"""
         print('DataPointClient Help:')
+        print('Parameters:')
+        print(' > org: Organisation (CEDA default)')
+        print(' > url: Direct URL to STAC API - default CEDA')
+        print(' > mappings: Mapping dict, see documentation for use cases.')
+        print('Methods:')
         print(' > client.info() - Get information about this client.')
         print(' > client.list_query_terms() - List of queryable terms for a specific collection')
         print(' > client.display_query_terms() - Prints query terms to the terminal.')
         print(' > client.list_collections() - Get list of all collections known to this client.')
         print(' > client.display_collections() - Print collections and their descriptions')
         print(' > client.search() - perform a search operation. For example syntax see the documentation.')
-        super().help()
+        super(DataPointClient, cls).help()
 
     def info(self) -> None:
         """Display information about this class object"""

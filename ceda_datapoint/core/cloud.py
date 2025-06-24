@@ -168,12 +168,15 @@ class DataPointCloudProduct(BasicAsset):
         """Read-only href property"""
         return self._mapper.get('href',self._asset_stac)
 
-    def help(self) -> None:
+    @classmethod
+    def help(cls) -> None:
         """Display public methods for this object."""
         print('DataPointCloudProduct Help:')
         print(' > product.info() - Get information about this cloud product.')
         print(' > product.open_dataset() - Open the dataset for this cloud product (in xarray)')
-        super().help(additionals = ['href','cloud_format'])
+        #print(' > product.open_asset() - Overrides BasicAsset get method')
+        print(' > product.open_dataset() - Open the dataset for this cloud product (in xarray)')
+        super(DataPointCloudProduct, cls).help(additionals = ['href','cloud_format'])
 
     def info(self) -> None:
         """Display information about this object"""
@@ -401,7 +404,6 @@ class DataPointCloudProduct(BasicAsset):
 
         return ds
                 
-
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
 
@@ -502,12 +504,13 @@ class DataPointCluster(UIMixin):
         """List of products contained within this cluster"""
         return [ v for v in self._products.values() if v.visibility != 'unreachable' or self.show_unreachable]
 
-    def help(self) -> None:
+    @classmethod
+    def help(cls) -> None:
         """Helper function - lists methods that can be utilised for this class"""
         print('DataPointCluster Help:')
         print(' > cluster.info() - basic cluster information')
         print(' > cluster.open_dataset(index/id) - open a specific dataset in xarray')
-        super().help(additionals=['products'])
+        super(DataPointCluster, cls).help(additionals=['products'])
 
     def info(self) -> None:
         """Information about this object instance."""

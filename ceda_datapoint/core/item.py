@@ -154,16 +154,20 @@ class DataPointItem(PropertiesMixin):
         """Lazily identify cloud assets"""
         return [self._assets[i[0]] for i in self._cloud_assets]
 
-    def help(self) -> None:
+    @classmethod
+    def help(cls) -> None:
         """Help method for this class"""
         print('DataPointItem Help:')
         print(' > item.info() - Get information about this item')
         print(' > item.get_cloud_product() - Get a particular cloud product by index')
+        print(' > item.get_assets() - Get a list of BasicAsset objects describing the Item assets.')
+        print(' > item.get_assets_dict() - Get the STAC assets as a dictionary.')
+        print(' > item.get_data_files() - Get a list of hrefs for all non-Cloud files.')
         print(' > item.collect_cloud_assets() - Collect cloud products into a cluster')
         print(' > item.open_dataset() - Open a specific dataset (default 0) attributed to this item')
         print(' > item.list_cloud_formats() - Get a list of the cloud formats available for this item.')
         print(' > item.display_cloud_formats() - Display the list of cloud formats available.')
-        super().help(additionals = ['cloud_assets'])
+        super(DataPointItem, cls).help(additionals = ['cloud_assets'])
 
     def info(self) -> None:
         """
