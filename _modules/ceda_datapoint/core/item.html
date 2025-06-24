@@ -483,6 +483,13 @@
                     <span class="n">mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span> <span class="n">data_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">show_unreachable</span> <span class="ow">or</span> <span class="n">a</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s1">&#39;unreachable&#39;</span><span class="p">:</span>
                     <span class="n">asset_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">visibility</span> <span class="o">==</span> <span class="s1">&#39;unreachable&#39;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;Dataset for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> not reachable - use &#39;</span>
+                            <span class="s1">&#39;show_unreachable=True in search.collect_cloud_assets() &#39;</span>
+                            <span class="s1">&#39;to obtain the product object.&#39;</span>
+                        <span class="p">)</span>
             
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">asset_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
