@@ -326,8 +326,12 @@ class DataPointCloudProduct(BasicAsset):
         datetime = self._meta['search_terms'].get('datetime',None)
         # Datetime can only be applied to 'time' dimension.
 
-        query = self._meta['search_terms'].get('query',{})
-        vq = query.get('variables',None)
+        query = self._meta['search_terms'].get('query',[])
+
+        vq = None
+        for ql in query:
+            if 'variables' in ql:
+                vq = ql.split('=')[-1]
 
         variables = self._data_selection.get('variables',None) or vq
         sel = self._data_selection.get('sel',None)
