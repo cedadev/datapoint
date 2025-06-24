@@ -175,7 +175,6 @@ class DataPointCloudProduct(BasicAsset):
         print(' > product.info() - Get information about this cloud product.')
         print(' > product.open_dataset() - Open the dataset for this cloud product (in xarray)')
         #print(' > product.open_asset() - Overrides BasicAsset get method')
-        print(' > product.open_dataset() - Open the dataset for this cloud product (in xarray)')
         super(DataPointCloudProduct, cls).help(additionals = ['href','cloud_format'])
 
     def info(self) -> None:
