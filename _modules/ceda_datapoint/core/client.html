@@ -218,14 +218,16 @@
             
 <div class="viewcode-block" id="DataPointSearch.help">
 <a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointSearch.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function - lists methods that can be utilised for this class&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointSearch Help:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.info() - General information about this search&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.open_dataset() - Directly open dataset from search based on asset ID&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.collect_cloud_assets() - Collect the cloud products into a `cluster`&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.display_assets() - List the names of assets for each item in this search&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; search.display_cloud_assets() - List the cloud format types for each item in this search&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">,</span><span class="s1">&#39;assets&#39;</span><span class="p">])</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointSearch</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">,</span><span class="s1">&#39;assets&#39;</span><span class="p">])</span></div>
 
     
 <div class="viewcode-block" id="DataPointSearch.info">
@@ -447,16 +449,22 @@
 
 <div class="viewcode-block" id="DataPointClient.help">
 <a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function - lists methods that can be utilised for this class&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointClient Help:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameters:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; org: Organisation (CEDA default)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; url: Direct URL to STAC API - default CEDA&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; mappings: Mapping dict, see documentation for use cases.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Methods:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.info() - Get information about this client.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.list_query_terms() - List of queryable terms for a specific collection&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.display_query_terms() - Prints query terms to the terminal.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.list_collections() - Get list of all collections known to this client.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.display_collections() - Print collections and their descriptions&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; client.search() - perform a search operation. For example syntax see the documentation.&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">()</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointClient</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DataPointClient.info">

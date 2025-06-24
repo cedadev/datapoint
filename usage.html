@@ -214,9 +214,9 @@ which returns 10 items, from which we can pull a specific dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">search_basic</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cmip6&#39;</span><span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">query</span><span class="o">=</span><span class="p">[</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;experiment_id=ssp585&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;activity_id=ScenarioMIP&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;institution_id=KIOST&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;cmip6:experiment_id=ssp585&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;cmip6:activity_id=ScenarioMIP&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="s1">&#39;cmip6:institution_id=KIOST&#39;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">max_items</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
@@ -459,18 +459,18 @@ from the <code class="docutils literal notranslate"><span class="pre">items</spa
 </ul>
 <p>Example query where the single-search selections will be applied:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-<span class="go">   collections=[&#39;example_collection&#39;],</span>
+<span class="go">   collections=[&#39;example_collection&#39;], # Any nested collections will now also be searched.</span>
 <span class="go">   intersects={</span>
 <span class="go">      &quot;type&quot;: &quot;Polygon&quot;,</span>
 <span class="go">      &quot;coordinates&quot;: [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],</span>
-<span class="go">   },</span>
+<span class="go">   }, # Intersection also applied to xarray Dataset</span>
 <span class="go">   datetime=&#39;2025-01-01/2025-12-31&#39;,</span>
 <span class="go">   query=[</span>
-<span class="go">      &#39;experiment_id&#39;:&#39;001&#39;,</span>
-<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;]</span>
+<span class="go">      &#39;cmip6:experiment_id=001&#39;,</span>
+<span class="go">      &#39;variables=clt&#39;,</span>
 <span class="go">   ],</span>
 <span class="go">   data_selection={</span>
-<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;]</span>
+<span class="go">      &#39;variables&#39;:[&#39;clt&#39;] # Alternative variable search</span>
 <span class="go">      &#39;sel&#39;:{</span>
 <span class="go">         &#39;nv&#39;:slice(0,5)</span>
 <span class="go">      }</span>

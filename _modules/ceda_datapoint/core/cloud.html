@@ -259,12 +259,15 @@
 
 <div class="viewcode-block" id="DataPointCloudProduct.help">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Display public methods for this object.&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCloudProduct Help:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.info() - Get information about this cloud product.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">])</span></div>
+        <span class="c1">#print(&#39; &gt; product.open_asset() - Overrides BasicAsset get method&#39;)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCloudProduct</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DataPointCloudProduct.info">
@@ -502,7 +505,6 @@
 
         <span class="k">return</span> <span class="n">ds</span>
                 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if this product is reachable&quot;&quot;&quot;</span>
 
@@ -608,12 +610,13 @@
 
 <div class="viewcode-block" id="DataPointCluster.help">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function - lists methods that can be utilised for this class&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCluster Help:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.info() - basic cluster information&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.open_dataset(index/id) - open a specific dataset in xarray&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">])</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCluster</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DataPointCluster.info">

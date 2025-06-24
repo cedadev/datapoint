@@ -113,7 +113,8 @@
 
 <div class="viewcode-block" id="PropertiesMixin.help">
 <a class="viewcode-back" href="../../../mixins.html#ceda_datapoint.mixins.properties.PropertiesMixin.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additionals</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">additionals</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all properties of this Mixin&quot;&quot;&quot;</span>
 
         <span class="n">additionals</span> <span class="o">=</span> <span class="n">additionals</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -123,7 +124,7 @@
             <span class="s1">&#39;stac_attributes&#39;</span><span class="p">,</span><span class="s1">&#39;variables&#39;</span><span class="p">,</span>
             <span class="s1">&#39;units&#39;</span>
         <span class="p">]</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="n">additionals</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PropertiesMixin</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="n">additionals</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>

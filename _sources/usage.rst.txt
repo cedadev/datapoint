@@ -137,9 +137,9 @@ which returns 10 items, from which we can pull a specific dataset.
    >>> search_basic = client.search(
    >>>     collections=['cmip6'],
    >>>     query=[
-   >>>         'experiment_id=ssp585',
-   >>>         'activity_id=ScenarioMIP',
-   >>>         'institution_id=KIOST',
+   >>>         'cmip6:experiment_id=ssp585',
+   >>>         'cmip6:activity_id=ScenarioMIP',
+   >>>         'cmip6:institution_id=KIOST',
    >>>     ],
    >>>     max_items = 10
    >>> )
@@ -407,18 +407,18 @@ Example query where the single-search selections will be applied:
 .. code::
 
    >>> client.search(
-      collections=['example_collection'],
+      collections=['example_collection'], # Any nested collections will now also be searched.
       intersects={
          "type": "Polygon",
          "coordinates": [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],
-      },
+      }, # Intersection also applied to xarray Dataset
       datetime='2025-01-01/2025-12-31',
       query=[
-         'experiment_id':'001',
-         'variables':['clt','sst']
+         'cmip6:experiment_id=001',
+         'variables=clt',
       ],
       data_selection={
-         'variables':['clt','sst']
+         'variables':['clt'] # Alternative variable search
          'sel':{
             'nv':slice(0,5)
          }

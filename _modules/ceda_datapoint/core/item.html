@@ -245,16 +245,20 @@
 
 <div class="viewcode-block" id="DataPointItem.help">
 <a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.help">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Help method for this class&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointItem Help:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.info() - Get information about this item&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.get_cloud_product() - Get a particular cloud product by index&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.get_assets() - Get a list of BasicAsset objects describing the Item assets.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.get_assets_dict() - Get the STAC assets as a dictionary.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.get_data_files() - Get a list of hrefs for all non-Cloud files.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.collect_cloud_assets() - Collect cloud products into a cluster&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.open_dataset() - Open a specific dataset (default 0) attributed to this item&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.list_cloud_formats() - Get a list of the cloud formats available for this item.&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; item.display_cloud_formats() - Display the list of cloud formats available.&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cloud_assets&#39;</span><span class="p">])</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointItem</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cloud_assets&#39;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DataPointItem.info">

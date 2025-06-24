@@ -106,11 +106,11 @@ access our collection, but DataPoint is unique in that it is automatically confi
 <span class="go">   }, # Intersection also applied to xarray Dataset</span>
 <span class="go">   datetime=&#39;2025-01-01/2025-12-31&#39;,</span>
 <span class="go">   query=[</span>
-<span class="go">      &#39;experiment_id&#39;:&#39;001&#39;,</span>
-<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;]</span>
+<span class="go">      &#39;cmip6:experiment_id=001&#39;,</span>
+<span class="go">      &#39;variables=clt&#39;,</span>
 <span class="go">   ],</span>
 <span class="go">   data_selection={</span>
-<span class="go">      &#39;variables&#39;:[&#39;clt&#39;,&#39;sst&#39;] # Alternative variable search</span>
+<span class="go">      &#39;variables&#39;:[&#39;clt&#39;] # Alternative variable search</span>
 <span class="go">      &#39;sel&#39;:{</span>
 <span class="go">         &#39;nv&#39;:slice(0,5)</span>
 <span class="go">      }</span>
