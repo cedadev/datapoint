@@ -21,11 +21,11 @@ Example search
    }, # Intersection also applied to xarray Dataset
    datetime='2025-01-01/2025-12-31',
    query=[
-      'experiment_id':'001',
-      'variables':['clt','sst']
+      'cmip6:experiment_id=001',
+      'variables=clt',
    ],
    data_selection={
-      'variables':['clt','sst'] # Alternative variable search
+      'variables':['clt'] # Alternative variable search
       'sel':{
          'nv':slice(0,5)
       }
@@ -49,6 +49,6 @@ pip install ceda-datapoint
 See the documentation for a more in-depth description of how to run a search query and access data.
 ```
 from ceda_datapoint import DataPointClient
-client = DataPointClient(org='CEDA)
+client = DataPointClient(org='CEDA')
 # Continue to perform searches and access data
 ```
