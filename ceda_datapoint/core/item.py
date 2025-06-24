@@ -364,6 +364,13 @@ class DataPointItem(PropertiesMixin):
                     mapper=mapper, data_selection=self._data_selection)
                 if show_unreachable or a.visibility != 'unreachable':
                     asset_list.append(a)
+                else:
+                    if a.visibility == 'unreachable':
+                        logger.warning(
+                            f'Dataset for {self._id} not reachable - use '
+                            'show_unreachable=True in search.collect_cloud_assets() '
+                            'to obtain the product object.'
+                        )
             
 
         if len(asset_list) == 0:
