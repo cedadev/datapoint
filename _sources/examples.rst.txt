@@ -5,7 +5,7 @@ Example Use Cases
 Please refer to the following for recommended cases of when DataPoint will suit your needs.
 
 Where to use DataPoint
----------------------
+----------------------
 
 - Quickly identifying which datasets/IDs are relevant to your work
 - Easily selecting/plotting a subset of the data over a specific region/timestep.

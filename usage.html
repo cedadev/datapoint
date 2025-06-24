@@ -108,15 +108,14 @@ CEDA’s DataPoint package, installable with
 <p>To begin we can import the datapoint
 module and start using the search client.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPointClient</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">DataPointClient</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">&#39;CEDA&#39;</span><span class="p">,</span> <span class="n">hash_token</span><span class="o">=</span><span class="s1">&#39;lonestar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">DataPointClient</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">&#39;CEDA&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The hash token and organisation are optional parameters. By default the
-organisation will be CEDA and the hash token will be auto-generated to
-help the user keep track of <code class="docutils literal notranslate"><span class="pre">client</span></code>, <code class="docutils literal notranslate"><span class="pre">search</span></code> and <code class="docutils literal notranslate"><span class="pre">item</span></code> objects
-and which are their parent objects. All objects contain a few basic
-methods, like <code class="docutils literal notranslate"><span class="pre">help</span></code> and <code class="docutils literal notranslate"><span class="pre">info</span></code> to get the set of public methods and
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The organisation defaults to CEDA if not supplied. You can specify a known organisation, or specific <code class="docutils literal notranslate"><span class="pre">url</span></code> for a public STAC API endpoint. There is also a hidden <code class="docutils literal notranslate"><span class="pre">hash_token</span></code> that can be supplied, whose sole purpose is to ensure object IDs are consistent for a given token. This is not necessary for use cases beyond the datapoint testing environment. All objects contain a few basic methods, like <code class="docutils literal notranslate"><span class="pre">help</span></code> and <code class="docutils literal notranslate"><span class="pre">info</span></code> to get the set of public methods and
 some info about the object respectively.</p>
+</div>
 <section id="general-info">
 <h2>General Info<a class="headerlink" href="#general-info" title="Link to this heading"></a></h2>
 <p>All <code class="docutils literal notranslate"><span class="pre">DataPoint</span></code> objects have some standard methods for retrieving
@@ -135,18 +134,20 @@ example</p>
 <section id="client-and-search">
 <h2>Client and Search<a class="headerlink" href="#client-and-search" title="Link to this heading"></a></h2>
 <p>As stated above, the client and other objects contain <code class="docutils literal notranslate"><span class="pre">help</span></code> and
-<code class="docutils literal notranslate"><span class="pre">info</span></code> methods to print some basic information that might be helpful.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
-<span class="go">&lt;DataPointClient: CEDA-333146&gt;</span>
-<span class="go"> - Client for DataPoint searches via https://api.stac.ceda.ac.uk</span>
+<code class="docutils literal notranslate"><span class="pre">info</span></code> methods to print some basic information that might be helpful. The <code class="docutils literal notranslate"><span class="pre">help</span></code> method is also now a <code class="docutils literal notranslate"><span class="pre">&#64;classmethod</span></code> for all objects, so can be called directly from the class constructor.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DataPointClient</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
 <span class="go">DataPointClient Help:</span>
-<span class="go"> &gt; client.info() - Get information about this client.</span>
-<span class="go"> &gt; client.list_query_terms() - List of queryable terms for a specific collection</span>
-<span class="go"> &gt; client.display_query_terms() - Prints query terms to the terminal.</span>
-<span class="go"> &gt; client.list_collections() - Get list of all collections known to this client.</span>
-<span class="go"> &gt; client.display_collections() - Print collections and their descriptions</span>
-<span class="go"> &gt; client.search() - perform a search operation. For example syntax see the documentation.</span>
+<span class="go">Parameters:</span>
+<span class="go">&gt; org: Organisation (CEDA default)</span>
+<span class="go">&gt; url: Direct URL to STAC API - default CEDA</span>
+<span class="go">&gt; mappings: Mapping dict, see documentation for use cases.</span>
+<span class="go">Methods:</span>
+<span class="go">&gt; client.info() - Get information about this client.</span>
+<span class="go">&gt; client.list_query_terms() - List of queryable terms for a specific collection</span>
+<span class="go">&gt; client.display_query_terms() - Prints query terms to the terminal.</span>
+<span class="go">&gt; client.list_collections() - Get list of all collections known to this client.</span>
+<span class="go">&gt; client.display_collections() - Print collections and their descriptions</span>
+<span class="go">&gt; client.search() - perform a search operation. For example syntax see the documentation.</span>
 <span class="go">Properties:  id, meta, collection</span>
 <span class="go">See the documentation at https://cedadev.github.io/datapoint/</span>
 </pre></div>
@@ -156,52 +157,11 @@ client under the STAC API, and the queryable terms for each of those
 collections. Alternatively these can be displayed by substituting
 <code class="docutils literal notranslate"><span class="pre">list</span></code> for <code class="docutils literal notranslate"><span class="pre">display</span></code>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">list_collections</span><span class="p">()</span>
-<span class="go">[&#39;cci&#39;,</span>
-<span class="go"> &#39;cmip6&#39;,</span>
-<span class="go"> &#39;cordex&#39;,</span>
-<span class="go"> &#39;eocis-sst-cdrv3&#39;,</span>
-<span class="go"> &#39;eocis-sst-cdrv3-climatology&#39;,</span>
-<span class="go"> &#39;land_cover&#39;,</span>
-<span class="go"> &#39;sentinel1&#39;,</span>
-<span class="go"> &#39;sentinel2_ard&#39;,</span>
-<span class="go"> &#39;ukcp&#39;]</span>
+<span class="go">[&#39;cmip6&#39;, &#39;cordex&#39;, &#39;eocis-aerosol-slstr-daily-s3a&#39;, &#39;eocis-aerosol-slstr-daily-s3b&#39;, &#39;eocis-aerosol-slstr-monthly-s3a&#39;, &#39;eocis-aerosol-slstr-monthly-s3b&#39;, &#39;eocis-arctic-sea-ice-thickness-monthly&#39;, &#39;eocis-lst-s3a-day&#39;, &#39;eocis-lst-s3a-night&#39;, &#39;eocis-lst-s3b-day&#39;, &#39;eocis-lst-s3b-night&#39;, &#39;eocis-sst-cdrv3&#39;, &#39;land_cover&#39;, &#39;sentinel1&#39;, &#39;sentinel1_ard&#39;, &#39;sentinel2_ard&#39;, &#39;ukcp&#39;]</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">list_query_terms</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="s1">&#39;cmip6&#39;</span><span class="p">)</span>
-<span class="go">[&#39;datetime&#39;,</span>
-<span class="go"> &#39;start_datetime&#39;,</span>
-<span class="go"> &#39;end_datetime&#39;,</span>
-<span class="go"> &#39;access&#39;,</span>
-<span class="go"> &#39;index_node&#39;,</span>
-<span class="go"> &#39;latest&#39;,</span>
-<span class="go"> &#39;pid&#39;,</span>
-<span class="go"> &#39;replica&#39;,</span>
-<span class="go"> &#39;retracted&#39;,</span>
-<span class="go"> &#39;instance_id&#39;,</span>
-<span class="go"> &#39;citation_url&#39;,</span>
-<span class="go"> &#39;variable_long_name&#39;,</span>
-<span class="go"> &#39;variable_units&#39;,</span>
-<span class="go"> &#39;cf_standard_name&#39;,</span>
-<span class="go"> &#39;activity_id&#39;,</span>
-<span class="go"> &#39;data_specs_version&#39;,</span>
-<span class="go"> &#39;experiment_title&#39;,</span>
-<span class="go"> &#39;frequency&#39;,</span>
-<span class="go"> &#39;further_info_url&#39;,</span>
-<span class="go"> &#39;grid&#39;,</span>
-<span class="go"> &#39;grid_label&#39;,</span>
-<span class="go"> &#39;institution_id&#39;,</span>
-<span class="go"> &#39;mip_era&#39;,</span>
-<span class="go"> &#39;source_id&#39;,</span>
-<span class="go"> &#39;source_type&#39;,</span>
-<span class="go"> &#39;experiment_id&#39;,</span>
-<span class="go"> &#39;sub_experiment_id&#39;,</span>
-<span class="go"> &#39;nominal_resolution&#39;,</span>
-<span class="go"> &#39;table_id&#39;,</span>
-<span class="go"> &#39;variable_id&#39;,</span>
-<span class="go"> &#39;variant_label&#39;,</span>
-<span class="go"> &#39;levels&#39;,</span>
-<span class="go"> &#39;updated&#39;,</span>
-<span class="go"> &#39;created&#39;]</span>
+<span class="go">[&#39;title&#39;, &#39;datetime&#39;, &#39;updated&#39;, &#39;start_datetime&#39;, &#39;end_datetime&#39;, &#39;product&#39;, &#39;project&#39;, &#39;model_cohort&#39;, &#39;realm&#39;, &#39;cmip6:access&#39;, &#39;cmip6:retracted&#39;, &#39;cmip6:citation_url&#39;, &#39;cmip6:variable_long_name&#39;, &#39;cmip6:variable_units&#39;, &#39;cmip6:cf_standard_name&#39;, &#39;cmip6:activity_id&#39;, &#39;cmip6:data_specs_version&#39;, &#39;cmip6:experiment_title&#39;, &#39;cmip6:frequency&#39;, &#39;cmip6:further_info_url&#39;, &#39;cmip6:grid&#39;, &#39;cmip6:grid_label&#39;, &#39;cmip6:institution_id&#39;, &#39;cmip6:mip_era&#39;, &#39;cmip6:source_id&#39;, &#39;cmip6:source_type&#39;, &#39;cmip6:experiment_id&#39;, &#39;cmip6:sub_experiment_id&#39;, &#39;cmip6:nominal_resolution&#39;, &#39;cmip6:table_id&#39;, &#39;cmip6:variable_id&#39;, &#39;cmip6:variant_label&#39;, &#39;created&#39;]</span>
 </pre></div>
 </div>
 <p>Now we have some basic information about the collections and their
@@ -211,6 +171,10 @@ search terms, we can try searching for some data.</p>
 <h2>Simple dataset access example<a class="headerlink" href="#simple-dataset-access-example" title="Link to this heading"></a></h2>
 <p>Here we present a very basic search across the <code class="docutils literal notranslate"><span class="pre">cmip6</span></code> STAC collection
 which returns 10 items, from which we can pull a specific dataset.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For CMIP6 users please be aware, there is limited coverage for cloud-optimised data formats across the <code class="docutils literal notranslate"><span class="pre">cmip6</span></code> collection. This collection is being expanded at CEDA, but if you would like to register your interest in expanding this collection please contact the CEDA helpdesk.</p>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">search_basic</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cmip6&#39;</span><span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">query</span><span class="o">=</span><span class="p">[</span>
@@ -224,7 +188,7 @@ which returns 10 items, from which we can pull a specific dataset.</p>
 <span class="go">&lt;DataPointSearch: CEDA-333146-139631 ({&#39;collections&#39;: [&#39;cmip6&#39;], &#39;max_items&#39;: 10, &#39;query&#39;: 3})&gt;</span>
 <span class="go"> - url: https://api.stac.ceda.ac.uk</span>
 <span class="go"> - organisation: CEDA</span>
-<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;experiment_id=ssp585&#39;, &#39;activity_id=ScenarioMIP&#39;, &#39;institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
+<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;cmip6:experiment_id=ssp585&#39;, &#39;cmip6:activity_id=ScenarioMIP&#39;, &#39;cmip6:institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
 </pre></div>
 </div>
 <p>From our search we can collect the cloud assets into a <code class="docutils literal notranslate"><span class="pre">cluster</span></code>,
@@ -232,7 +196,7 @@ index the cluster to get a specific cloud product, then open that cloud
 product into an xarray dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collect the cloud products from this search into a single cluster</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cluster</span> <span class="o">=</span> <span class="n">search_basic</span><span class="o">.</span><span class="n">collect_cloud_assets</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">product</span> <span class="o">=</span> <span class="n">cluster</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># Index the cluster to find the 3rd product (Note: you can also use the ID)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">product</span> <span class="o">=</span> <span class="n">cluster</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># Index the cluster to find the 3rd product (Note: you can also use the ID of the asset)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: Here we have used a specific item which is known to exist.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">()</span>
@@ -267,35 +231,45 @@ product into an xarray dataset.</p>
 </div>
 <p>Alternatively we can open the dataset directly from the search if we
 already know the ID of the specific dataset.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">search_basic</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">search_basic</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s1">&#39;CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106-reference_file&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
 <span class="go">&lt;xarray.Dataset&gt; Size: 76MB</span>
 <span class="go">Dimensions:    (lat: 96, bnds: 2, lon: 192, time: 1032)</span>
 <span class="go">Coordinates:</span>
-<span class="go">  * lat        (lat) float64 768B -90.0 -88.11 -86.21 ... 86.21 88.11 90.0</span>
-<span class="go">  * lon        (lon) float64 2kB 0.9375 2.812 4.688 6.563 ... 355.3 357.2 359.1</span>
-<span class="go">  * time       (time) object 8kB 2015-01-17 12:00:00 ... 2100-12-17 12:00:00</span>
+<span class="go">* lat        (lat) float64 768B -90.0 -88.11 -86.21 ... 86.21 88.11 90.0</span>
+<span class="go">* lon        (lon) float64 2kB 0.9375 2.812 4.688 6.563 ... 355.3 357.2 359.1</span>
+<span class="go">* time       (time) object 8kB 2015-01-17 12:00:00 ... 2100-12-17 12:00:00</span>
 <span class="go">Dimensions without coordinates: bnds</span>
 <span class="go">Data variables:</span>
-<span class="go">    lat_bnds   (lat, bnds) float64 2kB dask.array&lt;chunksize=(96, 2), meta=np.ndarray&gt;</span>
-<span class="go">    lon_bnds   (lon, bnds) float64 3kB dask.array&lt;chunksize=(192, 2), meta=np.ndarray&gt;</span>
-<span class="go">    time_bnds  (time, bnds) object 17kB dask.array&lt;chunksize=(1, 2), meta=np.ndarray&gt;</span>
-<span class="go">    vas        (time, lat, lon) float32 76MB dask.array&lt;chunksize=(1, 96, 192), meta=np.ndarray&gt;</span>
+<span class="go">   lat_bnds   (lat, bnds) float64 2kB ...</span>
+<span class="go">   lon_bnds   (lon, bnds) float64 3kB ...</span>
+<span class="go">   time_bnds  (time, bnds) object 17kB ...</span>
+<span class="go">   vas        (time, lat, lon) float32 76MB ...</span>
 <span class="go">Attributes: (12/47)</span>
-<span class="go">    Conventions:            CF-1.7 CMIP-6.2</span>
-<span class="go">    activity_id:            ScenarioMIP</span>
-<span class="go">    branch_method:          standard</span>
-<span class="go">    branch_time_in_child:   60266.0</span>
-<span class="go">    branch_time_in_parent:  60266.0</span>
-<span class="go">    cmor_version:           3.5.0</span>
-<span class="go">    ...                     ...</span>
-<span class="go">    table_id:               Amon</span>
-<span class="go">    table_info:             Creation Date:(30 April 2019) MD5:cc2ae51c23960ce...</span>
-<span class="go">    title:                  KIOST-ESM output prepared for CMIP6</span>
-<span class="go">    tracking_id:            hdl:21.14100/7640f386-9b1b-4803-a489-ab4f524b9eba</span>
-<span class="go">    variable_id:            vas</span>
-<span class="go">    variant_label:          r1i1p1f1</span>
+<span class="go">   Conventions:            CF-1.7 CMIP-6.2</span>
+<span class="go">   activity_id:            ScenarioMIP</span>
+<span class="go">   branch_method:          standard</span>
+<span class="go">   branch_time_in_child:   60266.0</span>
+<span class="go">   branch_time_in_parent:  60266.0</span>
+<span class="go">   cmor_version:           3.5.0</span>
+<span class="go">   ...                     ...</span>
+<span class="go">   table_id:               Amon</span>
+<span class="go">   table_info:             Creation Date:(30 April 2019) MD5:cc2ae51c23960ce...</span>
+<span class="go">   title:                  KIOST-ESM output prepared for CMIP6</span>
+<span class="go">   tracking_id:            hdl:21.14100/7640f386-9b1b-4803-a489-ab4f524b9eba</span>
+<span class="go">   variable_id:            vas</span>
+<span class="go">   variant_label:          r1i1p1f1</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>Opening datasets directly from the search object may involve collecting assets from other items in the search, which may result in warnings - therefore it is not recommended to open a dataset directly from the search. Instead ensure your search has refined the set of items to just the set you are interested in, then collect assets using the <code class="docutils literal notranslate"><span class="pre">collect_cloud_assets()</span></code> method. This is to avoid warnings like:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Dataset</span> <span class="pre">for</span> <span class="pre">CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.3hr.vas.gr1.v20200825</span> <span class="pre">not</span> <span class="pre">reachable</span> <span class="pre">-</span> <span class="pre">use</span> <span class="pre">show_unreachable=True</span> <span class="pre">in</span> <span class="pre">search.collect_cloud_assets()</span> <span class="pre">to</span> <span class="pre">obtain</span> <span class="pre">the</span> <span class="pre">product</span> <span class="pre">object.</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">dataset</span> <span class="pre">from</span> <span class="pre">['kerchunk',</span> <span class="pre">'CFA',</span> <span class="pre">'cog',</span> <span class="pre">'zarr']</span> <span class="pre">found</span> <span class="pre">(id=CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.3hr.vas.gr1.v20200825)</span></code></p></li>
+</ul>
+</dd>
+</dl>
 </div>
 </section>
 <section id="more-about-searches">
@@ -309,24 +283,25 @@ searched terms in the representation of this object.</p>
 <span class="go">&lt;DataPointSearch: CEDA-333146-139631 ({&#39;collections&#39;: [&#39;cmip6&#39;], &#39;max_items&#39;: 10, &#39;query&#39;: 3})&gt;</span>
 <span class="go"> - url: https://api.stac.ceda.ac.uk</span>
 <span class="go"> - organisation: CEDA</span>
-<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;experiment_id=ssp585&#39;, &#39;activity_id=ScenarioMIP&#39;, &#39;institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
+<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;cmip6:experiment_id=ssp585&#39;, &#39;cmip6:activity_id=ScenarioMIP&#39;, &#39;cmip6:institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
 <span class="go"> - products: 10</span>
 </pre></div>
 </div>
 <p>We can again use the standard methods to get some insight into this
 object.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">search_basic</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">search_basic</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
 <span class="go">&lt;DataPointSearch: CEDA-333146-139631 ({&#39;collections&#39;: [&#39;cmip6&#39;], &#39;max_items&#39;: 10, &#39;query&#39;: 3})&gt;</span>
 <span class="go"> - url: https://api.stac.ceda.ac.uk</span>
 <span class="go"> - organisation: CEDA</span>
 <span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;experiment_id=ssp585&#39;, &#39;activity_id=ScenarioMIP&#39;, &#39;institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
 <span class="go"> - products: 10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_basic</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
 <span class="go">DataPointSearch Help:</span>
-<span class="go"> &gt; search.info() - General information about this search</span>
-<span class="go"> &gt; search.collect_cloud_assets() - Collect the cloud products into a `cluster`</span>
-<span class="go"> &gt; search.display_assets() - List the names of assets for each item in this search</span>
-<span class="go"> &gt; search.display_cloud_assets() - List the cloud format types for each item in this search</span>
+<span class="go">&gt; search.info() - General information about this search</span>
+<span class="go">&gt; search.open_dataset() - Directly open dataset from search based on asset ID</span>
+<span class="go">&gt; search.collect_cloud_assets() - Collect the cloud products into a `cluster`</span>
+<span class="go">&gt; search.display_assets() - List the names of assets for each item in this search</span>
+<span class="go">&gt; search.display_cloud_assets() - List the cloud format types for each item in this search</span>
 <span class="go">Properties:  id, meta, collection, items, assets</span>
 <span class="go">See the documentation at https://cedadev.github.io/datapoint/</span>
 </pre></div>
@@ -400,46 +375,39 @@ from the <code class="docutils literal notranslate"><span class="pre">items</spa
 <span class="go">  - attributes: 34</span>
 <span class="go">  - stac_attributes: 8</span>
 <span class="go"> Properties:</span>
-<span class="go">  - datetime: 2058-01-01T12:00:00Z</span>
-<span class="go">  - start_datetime: 2015-01-17T12:00:00Z</span>
-<span class="go">  - end_datetime: 2100-12-17T12:00:00Z</span>
-<span class="go">  - access: [&#39;HTTPServer&#39;]</span>
-<span class="go">  - index_node: None</span>
-<span class="go">  - latest: True</span>
-<span class="go">  - pid: None</span>
-<span class="go">  - replica: False</span>
-<span class="go">  - retracted: False</span>
-<span class="go">  - instance_id: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106</span>
-<span class="go">  - citation_url: http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106.json</span>
-<span class="go">  - variable_long_name: Northward Near-Surface Wind</span>
-<span class="go">  - variable_units: m s-1</span>
-<span class="go">  - cf_standard_name: northward_wind</span>
-<span class="go">  - activity_id: ScenarioMIP</span>
-<span class="go">  - data_specs_version: 01.00.30</span>
-<span class="go">  - experiment_title: update of RCP8.5 based on SSP5</span>
-<span class="go">  - frequency: mon</span>
-<span class="go">  - further_info_url: https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1</span>
-<span class="go">  - grid: atmos data regridded from Cubed-sphere (c48) to 94X192</span>
-<span class="go">  - grid_label: gr1</span>
-<span class="go">  - institution_id: KIOST</span>
-<span class="go">  - mip_era: CMIP6</span>
-<span class="go">  - source_id: KIOST-ESM</span>
-<span class="go">  - source_type: AGCM</span>
-<span class="go">  - experiment_id: ssp585</span>
-<span class="go">  - sub_experiment_id: none</span>
-<span class="go">  - nominal_resolution: 250 km</span>
-<span class="go">  - table_id: Amon</span>
-<span class="go">  - variable_id: vas</span>
-<span class="go">  - variant_label: r1i1p1f1</span>
-<span class="go">  - levels: None</span>
-<span class="go">  - updated: 2024-02-20T22:14:50.735178Z</span>
-<span class="go">  - created: 2024-02-20T22:14:50.735178Z,</span>
-<span class="go"> &#39;CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319&#39;: &lt;DataPointItem: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319 (Collection: cmip6)&gt;</span>
-<span class="go">  - url: https://api.stac.ceda.ac.uk</span>
-<span class="go">  - organisation: CEDA</span>
-<span class="go">  - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;experiment_id=ssp585&#39;, &#39;activity_id=ScenarioMIP&#39;, &#39;institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
-<span class="go">  - collection: cmip6</span>
-<span class="go">  - item: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319</span>
+<span class="go">- title: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.3hr.huss.gr1.v20200825</span>
+<span class="go">- datetime: 2057-07-02T01:30:00Z</span>
+<span class="go">- updated: 2025-01-25T04:44:50.147706Z</span>
+<span class="go">- start_datetime: 2015-01-01T03:00:00Z</span>
+<span class="go">- end_datetime: 2100-01-01T00:00:00Z</span>
+<span class="go">- product: model-output</span>
+<span class="go">- project: CMIP6</span>
+<span class="go">- model_cohort: Registered</span>
+<span class="go">- realm: [&#39;atmos&#39;]</span>
+<span class="go">- cmip6:access: [&#39;HTTPServer&#39;]</span>
+<span class="go">- cmip6:retracted: False</span>
+<span class="go">- cmip6:citation_url: http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.3hr.huss.gr1.v20200825.json</span>
+<span class="go">- cmip6:variable_long_name: Near-Surface Specific Humidity</span>
+<span class="go">- cmip6:variable_units: 1</span>
+<span class="go">- cmip6:cf_standard_name: specific_humidity</span>
+<span class="go">- cmip6:activity_id: ScenarioMIP</span>
+<span class="go">- cmip6:data_specs_version: 01.00.30</span>
+<span class="go">- cmip6:experiment_title: update of RCP8.5 based on SSP5</span>
+<span class="go">- cmip6:frequency: 3hrPt</span>
+<span class="go">- cmip6:further_info_url: https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1</span>
+<span class="go">- cmip6:grid: atmos data regridded from Cubed-sphere (c48) to 94X192</span>
+<span class="go">- cmip6:grid_label: gr1</span>
+<span class="go">- cmip6:institution_id: KIOST</span>
+<span class="go">- cmip6:mip_era: CMIP6</span>
+<span class="go">- cmip6:source_id: KIOST-ESM</span>
+<span class="go">- cmip6:source_type: AGCM</span>
+<span class="go">- cmip6:experiment_id: ssp585</span>
+<span class="go">- cmip6:sub_experiment_id: none</span>
+<span class="go">- cmip6:nominal_resolution: 250 km</span>
+<span class="go">- cmip6:table_id: 3hr</span>
+<span class="go">- cmip6:variable_id: huss</span>
+<span class="go">- cmip6:variant_label: r1i1p1f1</span>
+<span class="go">- created: 2025-01-25T04:44:50.147706Z,</span>
 <span class="go">...}</span>
 </pre></div>
 </div>
@@ -508,7 +476,7 @@ open all the cloud datasets of different types.</p>
 <span class="go">&lt;DataPointCluster: CEDA-333146-139631-409864 (Datasets: 10)&gt;</span>
 <span class="go"> - url: https://api.stac.ceda.ac.uk</span>
 <span class="go"> - organisation: CEDA</span>
-<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;experiment_id=ssp585&#39;, &#39;activity_id=ScenarioMIP&#39;, &#39;institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
+<span class="go"> - search_terms: {&#39;collections&#39;: [&#39;cmip6&#39;], &#39;query&#39;: [&#39;cmip6:experiment_id=ssp585&#39;, &#39;cmip6:activity_id=ScenarioMIP&#39;, &#39;cmip6:institution_id=KIOST&#39;], &#39;max_items&#39;: 10}</span>
 <span class="go"> - products: 10</span>
 <span class="go">Products:</span>
 <span class="go"> - CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106-reference_file: kerchunk</span>
@@ -568,38 +536,7 @@ search object.</p>
 <span class="go">  - datetime: 2058-01-01T12:00:00Z</span>
 <span class="go">  - start_datetime: 2015-01-17T12:00:00Z</span>
 <span class="go">  - end_datetime: 2100-12-17T12:00:00Z</span>
-<span class="go">  - access: [&#39;HTTPServer&#39;]</span>
-<span class="go">  - index_node: None</span>
-<span class="go">  - latest: True</span>
-<span class="go">  - pid: None</span>
-<span class="go">  - replica: False</span>
-<span class="go">  - retracted: False</span>
-<span class="go">  - instance_id: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106</span>
-<span class="go">  - citation_url: http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106.json</span>
-<span class="go">  - variable_long_name: Northward Near-Surface Wind</span>
-<span class="go">  - variable_units: m s-1</span>
-<span class="go">  - cf_standard_name: northward_wind</span>
-<span class="go">  - activity_id: ScenarioMIP</span>
-<span class="go">  - data_specs_version: 01.00.30</span>
-<span class="go">  - experiment_title: update of RCP8.5 based on SSP5</span>
-<span class="go">  - frequency: mon</span>
-<span class="go">  - further_info_url: https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1</span>
-<span class="go">  - grid: atmos data regridded from Cubed-sphere (c48) to 94X192</span>
-<span class="go">  - grid_label: gr1</span>
-<span class="go">  - institution_id: KIOST</span>
-<span class="go">  - mip_era: CMIP6</span>
-<span class="go">  - source_id: KIOST-ESM</span>
-<span class="go">  - source_type: AGCM</span>
-<span class="go">  - experiment_id: ssp585</span>
-<span class="go">  - sub_experiment_id: none</span>
-<span class="go">  - nominal_resolution: 250 km</span>
-<span class="go">  - table_id: Amon</span>
-<span class="go">  - variable_id: vas</span>
-<span class="go">  - variant_label: r1i1p1f1</span>
-<span class="go">  - levels: None</span>
-<span class="go">  - updated: 2024-02-20T22:14:50.735178Z</span>
-<span class="go">  - created: 2024-02-20T22:14:50.735178Z,</span>
-<span class="go">...]</span>
+<span class="go">  ...]</span>
 </pre></div>
 </div>
 </section>
@@ -626,37 +563,7 @@ representation above):</p>
 <span class="go"> - datetime: 2058-01-01T12:00:00Z</span>
 <span class="go"> - start_datetime: 2015-01-17T12:00:00Z</span>
 <span class="go"> - end_datetime: 2100-12-17T12:00:00Z</span>
-<span class="go"> - access: [&#39;HTTPServer&#39;]</span>
-<span class="go"> - index_node: None</span>
-<span class="go"> - latest: True</span>
-<span class="go"> - pid: None</span>
-<span class="go"> - replica: False</span>
-<span class="go"> - retracted: False</span>
-<span class="go"> - instance_id: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106</span>
-<span class="go"> - citation_url: http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106.json</span>
-<span class="go"> - variable_long_name: Northward Near-Surface Wind</span>
-<span class="go"> - variable_units: m s-1</span>
-<span class="go"> - cf_standard_name: northward_wind</span>
-<span class="go"> - activity_id: ScenarioMIP</span>
-<span class="go"> - data_specs_version: 01.00.30</span>
-<span class="go"> - experiment_title: update of RCP8.5 based on SSP5</span>
-<span class="go"> - frequency: mon</span>
-<span class="go"> - further_info_url: https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1</span>
-<span class="go"> - grid: atmos data regridded from Cubed-sphere (c48) to 94X192</span>
-<span class="go"> - grid_label: gr1</span>
-<span class="go"> - institution_id: KIOST</span>
-<span class="go"> - mip_era: CMIP6</span>
-<span class="go"> - source_id: KIOST-ESM</span>
-<span class="go"> - source_type: AGCM</span>
-<span class="go"> - experiment_id: ssp585</span>
-<span class="go"> - sub_experiment_id: none</span>
-<span class="go"> - nominal_resolution: 250 km</span>
-<span class="go"> - table_id: Amon</span>
-<span class="go"> - variable_id: vas</span>
-<span class="go"> - variant_label: r1i1p1f1</span>
-<span class="go"> - levels: None</span>
-<span class="go"> - updated: 2024-02-20T22:14:50.735178Z</span>
-<span class="go"> - created: 2024-02-20T22:14:50.735178Z</span>
+<span class="go"> ...</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">CloudProduct</span></code> object wraps a single dataset meaning we don’t have
@@ -681,37 +588,7 @@ including all the attributes belonging to the parent Item.</p>
 <span class="go"> - datetime: 2058-01-01T12:00:00Z</span>
 <span class="go"> - start_datetime: 2015-01-17T12:00:00Z</span>
 <span class="go"> - end_datetime: 2100-12-17T12:00:00Z</span>
-<span class="go"> - access: [&#39;HTTPServer&#39;]</span>
-<span class="go"> - index_node: None</span>
-<span class="go"> - latest: True</span>
-<span class="go"> - pid: None</span>
-<span class="go"> - replica: False</span>
-<span class="go"> - retracted: False</span>
-<span class="go"> - instance_id: CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106</span>
-<span class="go"> - citation_url: http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106.json</span>
-<span class="go"> - variable_long_name: Northward Near-Surface Wind</span>
-<span class="go"> - variable_units: m s-1</span>
-<span class="go"> - cf_standard_name: northward_wind</span>
-<span class="go"> - activity_id: ScenarioMIP</span>
-<span class="go"> - data_specs_version: 01.00.30</span>
-<span class="go"> - experiment_title: update of RCP8.5 based on SSP5</span>
-<span class="go"> - frequency: mon</span>
-<span class="go"> - further_info_url: https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1</span>
-<span class="go"> - grid: atmos data regridded from Cubed-sphere (c48) to 94X192</span>
-<span class="go"> - grid_label: gr1</span>
-<span class="go"> - institution_id: KIOST</span>
-<span class="go"> - mip_era: CMIP6</span>
-<span class="go"> - source_id: KIOST-ESM</span>
-<span class="go"> - source_type: AGCM</span>
-<span class="go"> - experiment_id: ssp585</span>
-<span class="go"> - sub_experiment_id: none</span>
-<span class="go"> - nominal_resolution: 250 km</span>
-<span class="go"> - table_id: Amon</span>
-<span class="go"> - variable_id: vas</span>
-<span class="go"> - variant_label: r1i1p1f1</span>
-<span class="go"> - levels: None</span>
-<span class="go"> - updated: 2024-02-20T22:14:50.735178Z</span>
-<span class="go"> - created: 2024-02-20T22:14:50.735178Z</span>
+<span class="go"> ...</span>
 <span class="go">DataPointCloudProduct Help:</span>
 <span class="go"> &gt; product.info() - Get information about this cloud product.</span>
 <span class="go"> &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)</span>
@@ -720,40 +597,41 @@ including all the attributes belonging to the parent Item.</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cloud1</span><span class="o">.</span><span class="n">attributes</span>
-<span class="go">{&#39;datetime&#39;: &#39;2058-01-01T12:00:00Z&#39;,</span>
-<span class="go"> &#39;start_datetime&#39;: &#39;2015-01-17T12:00:00Z&#39;,</span>
-<span class="go"> &#39;end_datetime&#39;: &#39;2100-12-17T12:00:00Z&#39;,</span>
-<span class="go"> &#39;access&#39;: [&#39;HTTPServer&#39;],</span>
-<span class="go"> &#39;index_node&#39;: None,</span>
-<span class="go"> &#39;latest&#39;: True,</span>
-<span class="go"> &#39;pid&#39;: None,</span>
-<span class="go"> &#39;replica&#39;: False,</span>
-<span class="go"> &#39;retracted&#39;: False,</span>
-<span class="go"> &#39;instance_id&#39;: &#39;CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106&#39;,</span>
-<span class="go"> &#39;citation_url&#39;: &#39;http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106.json&#39;,</span>
-<span class="go"> &#39;variable_long_name&#39;: &#39;Northward Near-Surface Wind&#39;,</span>
-<span class="go"> &#39;variable_units&#39;: &#39;m s-1&#39;,</span>
-<span class="go"> &#39;cf_standard_name&#39;: &#39;northward_wind&#39;,</span>
-<span class="go"> &#39;activity_id&#39;: &#39;ScenarioMIP&#39;,</span>
-<span class="go"> &#39;data_specs_version&#39;: &#39;01.00.30&#39;,</span>
-<span class="go"> &#39;experiment_title&#39;: &#39;update of RCP8.5 based on SSP5&#39;,</span>
-<span class="go"> &#39;frequency&#39;: &#39;mon&#39;,</span>
-<span class="go"> &#39;further_info_url&#39;: &#39;https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1&#39;,</span>
-<span class="go"> &#39;grid&#39;: &#39;atmos data regridded from Cubed-sphere (c48) to 94X192&#39;,</span>
-<span class="go"> &#39;grid_label&#39;: &#39;gr1&#39;,</span>
-<span class="go"> &#39;institution_id&#39;: &#39;KIOST&#39;,</span>
-<span class="go"> &#39;mip_era&#39;: &#39;CMIP6&#39;,</span>
-<span class="go"> &#39;source_id&#39;: &#39;KIOST-ESM&#39;,</span>
-<span class="go"> &#39;source_type&#39;: &#39;AGCM&#39;,</span>
-<span class="go"> &#39;experiment_id&#39;: &#39;ssp585&#39;,</span>
-<span class="go"> &#39;sub_experiment_id&#39;: &#39;none&#39;,</span>
-<span class="go"> &#39;nominal_resolution&#39;: &#39;250 km&#39;,</span>
-<span class="go"> &#39;table_id&#39;: &#39;Amon&#39;,</span>
-<span class="go"> &#39;variable_id&#39;: &#39;vas&#39;,</span>
-<span class="go"> &#39;variant_label&#39;: &#39;r1i1p1f1&#39;,</span>
-<span class="go"> &#39;levels&#39;: None,</span>
-<span class="go"> &#39;updated&#39;: &#39;2024-02-20T22:14:50.735178Z&#39;,</span>
-<span class="go"> &#39;created&#39;: &#39;2024-02-20T22:14:50.735178Z&#39;}</span>
+<span class="go">{</span>
+<span class="go">   &#39;title&#39;: &#39;CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319&#39;,</span>
+<span class="go">   &#39;datetime&#39;: &#39;2058-01-01T12:00:00Z&#39;,</span>
+<span class="go">   &#39;updated&#39;: &#39;2025-01-24T20:07:50.344473Z&#39;,</span>
+<span class="go">   &#39;start_datetime&#39;: &#39;2015-01-17T12:00:00Z&#39;,</span>
+<span class="go">   &#39;end_datetime&#39;: &#39;2100-12-17T12:00:00Z&#39;,</span>
+<span class="go">   &#39;product&#39;: &#39;model-output&#39;,</span>
+<span class="go">   &#39;project&#39;: &#39;CMIP6&#39;,</span>
+<span class="go">   &#39;model_cohort&#39;: &#39;Registered&#39;,</span>
+<span class="go">   &#39;realm&#39;: [&#39;atmos&#39;],</span>
+<span class="go">   &#39;cmip6:access&#39;: [&#39;HTTPServer&#39;],</span>
+<span class="go">   &#39;cmip6:retracted&#39;: False,</span>
+<span class="go">   &#39;cmip6:citation_url&#39;: &#39;http://cera-www.dkrz.de/WDCC/meta/CMIP6/CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.uas.gr1.v20210319.json&#39;,</span>
+<span class="go">   &#39;cmip6:variable_long_name&#39;: &#39;Eastward Near-Surface Wind&#39;,</span>
+<span class="go">   &#39;cmip6:variable_units&#39;: &#39;m s-1&#39;,</span>
+<span class="go">   &#39;cmip6:cf_standard_name&#39;: &#39;eastward_wind&#39;,</span>
+<span class="go">   &#39;cmip6:activity_id&#39;: &#39;ScenarioMIP&#39;,</span>
+<span class="go">   &#39;cmip6:data_specs_version&#39;: &#39;01.00.30&#39;,</span>
+<span class="go">   &#39;cmip6:experiment_title&#39;: &#39;update of RCP8.5 based on SSP5&#39;,</span>
+<span class="go">   &#39;cmip6:frequency&#39;: &#39;mon&#39;,</span>
+<span class="go">   &#39;cmip6:further_info_url&#39;: &#39;https://furtherinfo.es-doc.org/CMIP6.KIOST.KIOST-ESM.ssp585.none.r1i1p1f1&#39;,</span>
+<span class="go">   &#39;cmip6:grid&#39;: &#39;atmos data regridded from Cubed-sphere (c48) to 94X192&#39;,</span>
+<span class="go">   &#39;cmip6:grid_label&#39;: &#39;gr1&#39;,</span>
+<span class="go">   &#39;cmip6:institution_id&#39;: &#39;KIOST&#39;,</span>
+<span class="go">   &#39;cmip6:mip_era&#39;: &#39;CMIP6&#39;,</span>
+<span class="go">   &#39;cmip6:source_id&#39;: &#39;KIOST-ESM&#39;,</span>
+<span class="go">   &#39;cmip6:source_type&#39;: &#39;AGCM&#39;,</span>
+<span class="go">   &#39;cmip6:experiment_id&#39;: &#39;ssp585&#39;,</span>
+<span class="go">   &#39;cmip6:sub_experiment_id&#39;: &#39;none&#39;,</span>
+<span class="go">   &#39;cmip6:nominal_resolution&#39;: &#39;250 km&#39;,</span>
+<span class="go">   &#39;cmip6:table_id&#39;: &#39;Amon&#39;,</span>
+<span class="go">   &#39;cmip6:variable_id&#39;: &#39;uas&#39;,</span>
+<span class="go">   &#39;cmip6:variant_label&#39;: &#39;r1i1p1f1&#39;,</span>
+<span class="go">   &#39;created&#39;: &#39;2025-01-24T20:07:50.344473Z&#39;</span>
+<span class="go">}</span>
 </pre></div>
 </div>
 <p>We can now use the <code class="docutils literal notranslate"><span class="pre">open_dataset</span></code> method of this cloud product to
