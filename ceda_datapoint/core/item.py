@@ -177,9 +177,8 @@ class DataPointItem(PropertiesMixin):
 
     def get_cloud_product(
             self, 
-            id: int = 0,
+            id: Union[int,str,None] = 0,
             priority: list = None,
-            show_unreachable: bool = False,
             asset_mappings: dict = None,
         ) -> DataPointCloudProduct:
         """
@@ -192,29 +191,20 @@ class DataPointItem(PropertiesMixin):
         :param priority: (list) Order by which to open a set of datasets.
         """
 
-        product = self._load_cloud_assets(
-            priority=priority,
-            show_unreachable=show_unreachable,
-            asset_mappings=asset_mappings)
+        if id is None:
+            # Use priority to determine asset to load.
+            for p in priority:
+                if p in self.cloud_assets:
+                    id = p
 
-        if isinstance(product, DataPointCloudProduct):
-            if isinstance(id, int) and id != 0:
-                raise IndexError(
-                    f'Item contains only one cloud product - cannot access {id}'
-                )
-            elif isinstance(id, str):
-                if product.id != id:
-                    raise ValueError(
-                        f'Requested ID ({id}) not found - available: ({product.id})'
-                    )
-            return product
-        elif isinstance(product, DataPointCluster):
-            return product[id]
-        else:
-            logger.warning(
-                'Item failed to retrieve a dataset'
+        if id is None:
+            raise ValueError(
+                'No "id" specified for obtaining a dataset and priority list was exhausted. ' \
+                f'Available assets: {self.cloud_assets}'
             )
-            return None
+
+        return self.load_single_cloud_asset(
+            id, asset_mappings=asset_mappings)
         
     def open_dataset(
             self, 
@@ -309,6 +299,33 @@ class DataPointItem(PropertiesMixin):
         for i in self.cloud_assets:
             print(f'{i[0]}: {i[1]}')
 
+    def load_single_cloud_asset(
+            self,
+            asset_id,
+            cf: str = None,
+            order: int = 0,
+            asset_mappings: dict = None,
+            ) -> DataPointCloudProduct:
+        """
+        Load a single cloud asset - without construction of a cluster.
+        """
+        
+        mapper = None
+        if asset_mappings is not None:
+            mapper = DataPointMapper(mappings=asset_mappings)
+
+        if isinstance(asset_id,int):
+            asset_id = self._cloud_assets[asset_id][0]
+        
+        plain_asset = self._assets[asset_id]
+        cf = cf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
+
+        return DataPointCloudProduct(
+            plain_asset.to_dict(), 
+            id=asset_id, cf=cf, meta=self._meta, order=order,
+            stac_attrs=self._stac_attrs, properties=self._properties,
+            mapper=mapper, data_selection=self._data_selection)
+
     def _identify_cloud_assets(self) -> None:
         """
         Create the tuple set of asset names and cloud formats
@@ -347,25 +364,18 @@ class DataPointItem(PropertiesMixin):
 
         file_formats = list(method_format.values())
 
-        mapper = None
-        if asset_mappings is not None:
-            mapper = DataPointMapper(mappings=asset_mappings)
-
         priority = priority or file_formats
 
         asset_list = []
         for id, cf in self._cloud_assets:
-            asset = self._assets[id]
             
             if cf in priority:
-                # Register this asset as a DataPointCloudProduct
                 order = priority.index(cf)
                 asset_id = f'{self._id}-{id}'
-                a = DataPointCloudProduct(
-                    asset.to_dict(), 
-                    id=asset_id, cf=cf, order=order, meta=self._meta,
-                    stac_attrs=self._stac_attrs, properties=self._properties,
-                    mapper=mapper, data_selection=self._data_selection)
+                a = self.load_single_cloud_asset(
+                    asset_id, cf=cf,
+                    order=order, asset_mappings=asset_mappings
+                )
                 if show_unreachable or a.visibility != 'unreachable':
                     asset_list.append(a)
                 else:

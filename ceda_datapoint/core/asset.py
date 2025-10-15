@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Union
+import pandas as pd
 
 from ceda_datapoint.mixins import PropertiesMixin
 from ceda_datapoint.utils import logstream
@@ -115,6 +116,10 @@ class BasicAsset(PropertiesMixin):
         #print(' > asset.open_asset() - Not implemented for v0.5')
         super(BasicAsset, cls).help(additionals=additionals)
 
+    @property
+    def href(self) -> str:
+        """Read-only href property"""
+        return self._mapper.get('href',self._asset_stac)
 
     def __str__(self):
         """String representation of the asset"""
@@ -122,11 +127,15 @@ class BasicAsset(PropertiesMixin):
 
     def open_asset(
             self,
+            open_as: str = None,
             **kwargs
         ) -> Any:
         """
         Open different asset files with the correct implementation
         """
+
+        if self._asset_type == 'text/csv' or open_as == 'csv':
+            return pd.read_csv(self.href, **kwargs)
 
         raise NotImplementedError(
             'This feature is not yet implemented for datapoint v0.5'

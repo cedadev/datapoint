@@ -162,11 +162,6 @@ class DataPointCloudProduct(BasicAsset):
     def cloud_format(self) -> str:
         """Read-only property"""
         return self._cloud_format
-    
-    @property
-    def href(self) -> str:
-        """Read-only href property"""
-        return self._mapper.get('href',self._asset_stac)
 
     @classmethod
     def help(cls) -> None:

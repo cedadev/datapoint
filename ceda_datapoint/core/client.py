@@ -164,11 +164,15 @@ class DataPointSearch(UIMixin):
         :param priority: (list) Order by which to open a set of datasets.
         
         """
-        return self.collect_cloud_assets(
-            mode=mode, 
-            combine=combine, 
-            priority=priority,
-            mappings=mappings).open_dataset(id,**kwargs)
+        if mode != 'xarray':
+            raise NotImplementedError('No other modes currently implemented than default xarray')
+        if combine:
+            raise NotImplementedError('Combine method not currently implemented')
+
+        item_id = '-'.join(id.split('-')[:-1])
+        asset_id = id.split('-')[-1]
+        item = self._item_set[item_id]
+        return item.open_dataset(asset_id, priority, mappings=mappings, **kwargs)
 
     def collect_cloud_assets(
             self,
@@ -390,21 +394,35 @@ class DataPointClient(UIMixin):
             else:
                 logger.warning(f'Collection {collection} was not found.')
             return
-        
         for coll in colls:
             print(f'{coll}: {self.list_query_terms(coll)}')
 
-    def list_collections(self) -> list:
+    def list_collections(self, parent: str = None) -> list:
         """
         Return a list of the names of collections for this Client
         """
-        return [coll.id for coll in self._client.get_collections()]
+        if parent is None:
+            return [coll.id for coll in self._client.get_collections()]
+        else:
+            return [
+                link.href.split('/')[-1] 
+                for link in self._client.get_collection(parent).get_links()
+                if link.rel == 'child'
+            ]
     
-    def display_collections(self):
+    def display_collections(self, parent: str = None):
         """
         Display the list of collections with their descriptions"""
-        for coll in self._client.get_collections():
-            print(f'{coll.id}: {coll.description}')
+        if parent is None:
+            for coll in self._client.get_collections():
+                print(f'{coll.id}: {coll.description}')
+        
+        else:
+            pcoll = self._client.get_collection(parent)
+            print(f'Collection: {parent}')
+            for link in pcoll.get_links():
+                if link.rel == 'child':
+                    print(f" > {link.href.split('/')[-1]}")
 
     def search(
             self, 
