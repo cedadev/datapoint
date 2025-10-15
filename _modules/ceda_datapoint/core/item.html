@@ -274,9 +274,8 @@
 <a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.get_cloud_product">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_cloud_product</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> 
-            <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">priority</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">show_unreachable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">asset_mappings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointCloudProduct</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -289,29 +288,20 @@
 <span class="sd">        :param priority: (list) Order by which to open a set of datasets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">product</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_cloud_assets</span><span class="p">(</span>
-            <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span>
-            <span class="n">show_unreachable</span><span class="o">=</span><span class="n">show_unreachable</span><span class="p">,</span>
-            <span class="n">asset_mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Use priority to determine asset to load.</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">priority</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud_assets</span><span class="p">:</span>
+                    <span class="nb">id</span> <span class="o">=</span> <span class="n">p</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">DataPointCloudProduct</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;Item contains only one cloud product - cannot access </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="nb">id</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;Requested ID (</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">) not found - available: (</span><span class="si">{</span><span class="n">product</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">)&#39;</span>
-                    <span class="p">)</span>
-            <span class="k">return</span> <span class="n">product</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">DataPointCluster</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">product</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s1">&#39;Item failed to retrieve a dataset&#39;</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;No &quot;id&quot; specified for obtaining a dataset and priority list was exhausted. &#39;</span> \
+                <span class="sa">f</span><span class="s1">&#39;Available assets: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud_assets</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_single_cloud_asset</span><span class="p">(</span>
+            <span class="nb">id</span><span class="p">,</span> <span class="n">asset_mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span></div>
 
         
 <div class="viewcode-block" id="DataPointItem.open_dataset">
@@ -428,6 +418,36 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="DataPointItem.load_single_cloud_asset">
+<a class="viewcode-back" href="../../../core_item.html#ceda_datapoint.core.item.DataPointItem.load_single_cloud_asset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_single_cloud_asset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">asset_id</span><span class="p">,</span>
+            <span class="n">cf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">asset_mappings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataPointCloudProduct</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a single cloud asset - without construction of a cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">mapper</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">asset_mappings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mapper</span> <span class="o">=</span> <span class="n">DataPointMapper</span><span class="p">(</span><span class="n">mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">asset_id</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+            <span class="n">asset_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span><span class="p">[</span><span class="n">asset_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">plain_asset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">[</span><span class="n">asset_id</span><span class="p">]</span>
+        <span class="n">cf</span> <span class="o">=</span> <span class="n">cf</span> <span class="ow">or</span> <span class="n">identify_cloud_type</span><span class="p">(</span><span class="n">asset_id</span><span class="p">,</span> <span class="n">plain_asset</span><span class="p">,</span> <span class="n">asset_mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">DataPointCloudProduct</span><span class="p">(</span>
+            <span class="n">plain_asset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> 
+            <span class="nb">id</span><span class="o">=</span><span class="n">asset_id</span><span class="p">,</span> <span class="n">cf</span><span class="o">=</span><span class="n">cf</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">stac_attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">,</span>
+            <span class="n">mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span> <span class="n">data_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="p">)</span></div>
+
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_identify_cloud_assets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create the tuple set of asset names and cloud formats</span>
@@ -466,25 +486,18 @@
 
         <span class="n">file_formats</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">method_format</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-        <span class="n">mapper</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">asset_mappings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">mapper</span> <span class="o">=</span> <span class="n">DataPointMapper</span><span class="p">(</span><span class="n">mappings</span><span class="o">=</span><span class="n">asset_mappings</span><span class="p">)</span>
-
         <span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span> <span class="ow">or</span> <span class="n">file_formats</span>
 
         <span class="n">asset_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">cf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_assets</span><span class="p">:</span>
-            <span class="n">asset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assets</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
             
             <span class="k">if</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">priority</span><span class="p">:</span>
-                <span class="c1"># Register this asset as a DataPointCloudProduct</span>
                 <span class="n">order</span> <span class="o">=</span> <span class="n">priority</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
                 <span class="n">asset_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="n">DataPointCloudProduct</span><span class="p">(</span>
-                    <span class="n">asset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> 
-                    <span class="nb">id</span><span class="o">=</span><span class="n">asset_id</span><span class="p">,</span> <span class="n">cf</span><span class="o">=</span><span class="n">cf</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span>
-                    <span class="n">stac_attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stac_attrs</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">,</span>
-                    <span class="n">mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span> <span class="n">data_selection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="p">)</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_single_cloud_asset</span><span class="p">(</span>
+                    <span class="n">asset_id</span><span class="p">,</span> <span class="n">cf</span><span class="o">=</span><span class="n">cf</span><span class="p">,</span>
+                    <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">asset_mappings</span><span class="o">=</span><span class="n">asset_mappings</span>
+                <span class="p">)</span>
                 <span class="k">if</span> <span class="n">show_unreachable</span> <span class="ow">or</span> <span class="n">a</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s1">&#39;unreachable&#39;</span><span class="p">:</span>
                     <span class="n">asset_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>

@@ -261,11 +261,15 @@
 <span class="sd">        :param priority: (list) Order by which to open a set of datasets.</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">collect_cloud_assets</span><span class="p">(</span>
-            <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> 
-            <span class="n">combine</span><span class="o">=</span><span class="n">combine</span><span class="p">,</span> 
-            <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span>
-            <span class="n">mappings</span><span class="o">=</span><span class="n">mappings</span><span class="p">)</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;No other modes currently implemented than default xarray&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">combine</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Combine method not currently implemented&#39;</span><span class="p">)</span>
+
+        <span class="n">item_id</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">asset_id</span> <span class="o">=</span> <span class="nb">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_set</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">item</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">asset_id</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">mappings</span><span class="o">=</span><span class="n">mappings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataPointSearch.collect_cloud_assets">
@@ -511,27 +515,41 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Collection </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s1"> was not found.&#39;</span><span class="p">)</span>
             <span class="k">return</span>
-        
         <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="n">colls</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">list_query_terms</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataPointClient.list_collections">
 <a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.list_collections">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">list_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of the names of collections for this Client</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">()]</span></div>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> 
+                <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">get_links</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">rel</span> <span class="o">==</span> <span class="s1">&#39;child&#39;</span>
+            <span class="p">]</span></div>
 
     
 <div class="viewcode-block" id="DataPointClient.display_collections">
 <a class="viewcode-back" href="../../../core_client.html#ceda_datapoint.core.client.DataPointClient.display_collections">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">display_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display the list of collections with their descriptions&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">coll</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collections</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">coll</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pcoll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Collection: </span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">pcoll</span><span class="o">.</span><span class="n">get_links</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">rel</span> <span class="o">==</span> <span class="s1">&#39;child&#39;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &gt; </span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataPointClient.search">
