@@ -1,6 +1,6 @@
 [project]
 name = "ceda-datapoint"
-version = "0.5.2"
+version = "0.6.0"
 description = "Datapoint provides python-based search/access tools for using data primarily from the CEDA Archive."
 authors = [
     {name = "Daniel Westwood",email = "daniel.westwood@stfc.ac.uk"}
