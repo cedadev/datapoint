@@ -7,7 +7,7 @@ import ssl
 
 import matplotlib.pyplot as plt
 
-kfile = '/gws/ssde/j25b/eds_ai/high5/data/processing/padocc/in_progress/ukcp/land-cpm_uk_5km_rcp85_01_sfcWind_1hr/in_progress/ukcp1/ukcp_land-cpm_5km_rcp85_01_sfcWind_1hr/k1.0a.json'
+kfile = '/gws/ssde/j25b/eds_ai/high5/data/processing/complete/data/ukcp_land-cpm_5km_rcp85_01_sfcWind_1hr.kr1.0.json'
 CERT_FILE = "/home/users/dwest77/.globus/certificate-file"
 
 use_token = ('--token' in sys.argv)
@@ -67,8 +67,10 @@ else:
 if __name__ == '__main__':
 
     print('Accessing Dataset', remote_options)
-    ds = xr.open_dataset(kfile, engine='kerchunk', backend_kwargs={'storage_options':remote_options})
-    print(ds)
+    ds = xr.open_dataset(kfile, engine='kerchunk', storage_options={'remote_options':remote_options})
+    #print(ds)
 
-#mapper = fsspec.get_mapper("reference://", fo=refs, remote_options=remote_options) 
-#ds = xr.open_zarr(mapper, consolidated=False)
+    #mapper = fsspec.get_mapper("reference://", fo=kfile, remote_options=remote_options) 
+    #ds = xr.open_zarr(mapper, consolidated=False)
+
+    print(ds)
