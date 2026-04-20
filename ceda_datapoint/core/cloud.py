@@ -194,7 +194,8 @@ class DataPointCloudProduct(BasicAsset):
             **kwargs
         ) -> xr.Dataset:
         """
-        Open the dataset for this product (in xarray).
+        Open the dataset for this product in xarray.
+
         Specific methods to open cloud formats are private since
         the method should be determined by internal values not user
         input.
@@ -241,6 +242,21 @@ class DataPointCloudProduct(BasicAsset):
                 'The requested resource could not be located: '
                 f'{self.href}'
             )
+
+    def open_dataset_with_cf(
+            self,
+            local_only: bool = False,
+            prepare_data: bool = True,
+            **kwargs
+        ) -> cf.FieldList:
+        """
+        Open the dataset for this product with cf-python.
+
+        Returns a cf.FieldList object of one or more cf.Field objects.
+
+        TODO detailed docs.
+        """
+        pass
 
     def _open_kerchunk(
             self,
@@ -535,16 +551,16 @@ class DataPointCluster(UIMixin):
         
         :param id:      (str) The ID or index of the dataset in the resulting cluster.
         
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
+        :param mode:    (str) The type of dataset to be returned: 'xarray' or 'cf'.
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths."""
             
-        if mode != 'xarray':
+        if mode not in ('xarray', 'cf'):
             raise NotImplementedError(
-                'Only "xarray" mode currently implemented - cf-python is a future option'
+                f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
             )
-        
+
         local_only = local_only or self._local_only
         
         if isinstance(id, int):
@@ -557,7 +573,11 @@ class DataPointCluster(UIMixin):
             return None
         
         product = self._products[id]
-        return product.open_dataset(local_only=local_only, **kwargs)
+
+        if mode == 'xarray':
+            return product.open_dataset(local_only=local_only, **kwargs)
+        elif mode == 'cf':
+            return product.open_dataset_with_cf(local_only=local_only, **kwargs)
 
     def open_datasets(self):
         raise NotImplementedError(
