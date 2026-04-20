@@ -188,13 +188,14 @@ class DataPointCloudProduct(BasicAsset):
         return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
 
     def open_dataset(
-            self, 
+            self,
+            mode: str,
             local_only: bool = False,
             prepare_data: bool = True,
             **kwargs
-        ) -> xr.Dataset:
+        ):  # TODO type hint?
         """
-        Open the dataset for this product in xarray.
+        Open the dataset for this product.
 
         Specific methods to open cloud formats are private since
         the method should be determined by internal values not user
@@ -219,6 +220,34 @@ class DataPointCloudProduct(BasicAsset):
                 'to open this dataset.'
             )
 
+        if mode == 'xarray':
+            open_dataset_with_xr(
+                self,
+                local_only: bool = False,
+                prepare_data: bool = True,
+                **kwargs
+            )
+        elif mode == 'cf':
+            open_dataset_with_cf(
+                self,
+                local_only: bool = False,
+                prepare_data: bool = True,
+                **kwargs
+            )
+
+    def open_dataset_with_xr(
+            self,
+            local_only: bool = False,
+            prepare_data: bool = True,
+            **kwargs
+        ) -> xr.Dataset:
+        """
+        Open the dataset for this product with cf-python.
+
+        Returns a cf.FieldList object of one or more cf.Field objects.
+
+        TODO detailed docs.
+        """
         try:
             if self._cloud_format == 'kerchunk':
                 ds = self._open_kerchunk(local_only=local_only, **kwargs)
@@ -232,7 +261,7 @@ class DataPointCloudProduct(BasicAsset):
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
-            
+
             return self._prepare_dataset(ds, prepare_data=prepare_data)
 
         except ValueError as err:
@@ -256,7 +285,7 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
-        pass
+        pass  # TODO
 
     def _open_kerchunk(
             self,
