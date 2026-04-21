@@ -316,7 +316,7 @@ class DataPointItem(PropertiesMixin):
 
         if isinstance(asset_id,int):
             asset_id = self._cloud_assets[asset_id][0]
-        
+
         plain_asset = self._assets[asset_id]
         cf = cf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
 

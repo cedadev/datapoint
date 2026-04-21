@@ -7,6 +7,7 @@ import logging
 import os
 from typing import Any, Union
 
+import cf
 import fsspec
 import requests
 import rioxarray as rxr
@@ -77,6 +78,7 @@ def _find_spatial_dims(ds) -> Union[list,None]:
     else:
         return [lat, lon]
 
+
 class DataPointCloudProduct(BasicAsset):
     """
     Object for storing and manipulating a single cloud product
@@ -119,9 +121,9 @@ class DataPointCloudProduct(BasicAsset):
         :param properties:  (dict) Properties of the item in the ``properties`` field.
         """
 
-        if mode != 'xarray':
+        if mode not in ('xarray', 'cf'):
             raise NotImplementedError(
-                'Only "xarray" mode currently implemented - cf-python is a future option'
+                f'Bad mode value {mode}: only "xarray" and "cf" are valid modes.'
             )
         
         super().__init__(
@@ -204,6 +206,7 @@ class DataPointCloudProduct(BasicAsset):
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
         """
+        print("THIS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         if not self._cloud_format:
             raise ValueError(
                 'No cloud format given for this dataset'
@@ -220,20 +223,7 @@ class DataPointCloudProduct(BasicAsset):
                 'to open this dataset.'
             )
 
-        if mode == 'xarray':
-            open_dataset_with_xr(
-                self,
-                local_only,
-                prepare_data,
-                **kwargs
-            )
-        elif mode == 'cf':
-            open_dataset_with_cf(
-                self,
-                local_only,
-                prepare_data,
-                **kwargs
-            )
+
 
     def open_dataset_with_xr(
             self,
@@ -613,7 +603,8 @@ class DataPointCluster(UIMixin):
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths."""
-            
+
+        print("-------------------------------------------- HERE")
         if mode not in ('xarray', 'cf'):
             raise NotImplementedError(
                 f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
@@ -633,7 +624,7 @@ class DataPointCluster(UIMixin):
         product = self._products[id]
 
         if mode == 'xarray':
-            return product.open_dataset(local_only=local_only, **kwargs)
+            return product.open_dataset_with_xr(local_only=local_only, **kwargs)
         elif mode == 'cf':
             return product.open_dataset_with_cf(local_only=local_only, **kwargs)
 
