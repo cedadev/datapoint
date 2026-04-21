@@ -223,15 +223,15 @@ class DataPointCloudProduct(BasicAsset):
         if mode == 'xarray':
             open_dataset_with_xr(
                 self,
-                local_only: bool = False,
-                prepare_data: bool = True,
+                local_only,
+                prepare_data,
                 **kwargs
             )
         elif mode == 'cf':
             open_dataset_with_cf(
                 self,
-                local_only: bool = False,
-                prepare_data: bool = True,
+                local_only,
+                prepare_data,
                 **kwargs
             )
 
@@ -285,7 +285,36 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
-        pass  # TODO
+        print("SELF IS:", self, type(self))
+        print("ALL INPUT KW/ARGS ARE:", local_only, kwargs)
+        # TODO process kwargs for a cf read
+
+        dataset = None  # create this as main read arg input
+        try:
+            if self._cloud_format in ('zarr', 'kerchunk'):
+                # Open Zarr or kerchunk via Zarr to cf
+                fl = cf.read(dataset)
+            elif self._cloud_format == 'CFA':
+                # Open CFA
+                fl = cf.read(dataset, cfa="field")
+            else:
+                # Note unlike xarray case, not supporting the 'cog' case -
+                # what to do about that since I don't think we support
+                # it in cf?
+                raise ValueError(
+                    'Cloud format not recognised - must be one of ("kerchunk", "CFA", '
+                    '"zarr") for opening in the "cf" mode.'
+                )
+
+            return fl
+
+        except ValueError as err:
+            raise err
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                'The requested resource could not be located: '
+                f'{self.href}'
+            )
 
     def _open_kerchunk(
             self,
