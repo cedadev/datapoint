@@ -187,61 +187,6 @@ class DataPointCloudProduct(BasicAsset):
         """
         return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
 
-    def open_dataset(
-            self, 
-            local_only: bool = False,
-            prepare_data: bool = True,
-            **kwargs
-        ) -> xr.Dataset:
-        """
-        Open the dataset for this product (in xarray).
-        Specific methods to open cloud formats are private since
-        the method should be determined by internal values not user
-        input.
-
-        :param local_only:  (bool) Switch to using local-only files - DataPoint will
-            convert all hrefs and internal Kerchunk links to use local paths.
-        """
-        if not self._cloud_format:
-            raise ValueError(
-                'No cloud format given for this dataset'
-            )
-        
-        if self.href is None:
-            raise ValueError(
-                'Cloud assets with no "href" are not supported'
-            )
-        
-        if self.visibility == 'local-only' and not local_only:
-            raise ValueError(
-                'Href not reachable via https, please use `local_only=True` '
-                'to open this dataset.'
-            )
-
-        try:
-            if self._cloud_format == 'kerchunk':
-                ds = self._open_kerchunk(local_only=local_only, **kwargs)
-            elif self._cloud_format == 'CFA':
-                ds = self._open_cfa(**kwargs)
-            elif self._cloud_format == 'zarr':
-                ds = self._open_zarr(**kwargs)
-            elif self._cloud_format == 'cog':
-                ds = self._open_cog(**kwargs)
-            else:
-                raise ValueError(
-                    'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
-                )
-            
-            return self._prepare_dataset(ds, prepare_data=prepare_data)
-
-        except ValueError as err:
-            raise err
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                'The requested resource could not be located: '
-                f'{self.href}'
-            )
-
     def _open_kerchunk(
             self,
             local_only: bool = False,
