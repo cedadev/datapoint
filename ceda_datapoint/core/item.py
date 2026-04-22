@@ -371,9 +371,8 @@ class DataPointItem(PropertiesMixin):
             
             if cf in priority:
                 order = priority.index(cf)
-                asset_id = f'{self._id}-{id}'
                 a = self.load_single_cloud_asset(
-                    asset_id, cf=cf,
+                    id, cf=cf,
                     order=order, asset_mappings=asset_mappings
                 )
                 if show_unreachable or a.visibility != 'unreachable':

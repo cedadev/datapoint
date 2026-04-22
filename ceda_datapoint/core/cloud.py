@@ -189,6 +189,7 @@ class DataPointCloudProduct(BasicAsset):
 
     def open_dataset(
             self, 
+            mode: str = 'xarray',
             local_only: bool = False,
             prepare_data: bool = True,
             **kwargs
@@ -202,6 +203,9 @@ class DataPointCloudProduct(BasicAsset):
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
         """
+        if mode != 'xarray':
+            raise NotImplementedError('Non-xarray opening is not implemented for cloud products yet.')
+
         if not self._cloud_format:
             raise ValueError(
                 'No cloud format given for this dataset'
