@@ -281,9 +281,13 @@ class DataPointCloudProduct(BasicAsset):
 
         dataset = None  # create this as main read arg input
         try:
-            if self._cloud_format in ('zarr', 'kerchunk'):
-                # Open Zarr or kerchunk via Zarr to cf
+            if self._cloud_format == 'zarr':
+                # Open Zarr to cf
                 fl = cf.read(dataset)
+            if self._cloud_format == 'kerchunk':
+                # Open kerchunk to cf
+                # Use: self.href
+                fl = cf.read(self.href)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")

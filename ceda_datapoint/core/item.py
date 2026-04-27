@@ -317,6 +317,10 @@ class DataPointItem(PropertiesMixin):
         if isinstance(asset_id,int):
             asset_id = self._cloud_assets[asset_id][0]
 
+        print(
+            "ASSETS ARE:", self._assets, "KEYS:", self._assets.keys(),
+            "ID IS:", asset_id
+        )
         plain_asset = self._assets[asset_id]
         cf = cf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
 
@@ -372,8 +376,10 @@ class DataPointItem(PropertiesMixin):
             if cf in priority:
                 order = priority.index(cf)
                 asset_id = f'{self._id}-{id}'
+                ###print("CID IS", id)
+
                 a = self.load_single_cloud_asset(
-                    asset_id, cf=cf,
+                    id, cf=cf,  # SLB DW change here
                     order=order, asset_mappings=asset_mappings
                 )
                 if show_unreachable or a.visibility != 'unreachable':

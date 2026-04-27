@@ -104,11 +104,12 @@ def run_tests():
     cluster = setup_cluster(print_info=False)[2]
 
     test_product_ids = [
-        2,
-        'CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106-reference_file',
+        0,
+        # 2,
+        # 'CMIP6.ScenarioMIP.KIOST.KIOST-ESM.ssp585.r1i1p1f1.Amon.vas.gr1.v20191106-reference_file',
     ]
     for product in test_product_ids:
-        ###test_xarray_open(cluster, product, print_info=False)
+        test_xarray_open(cluster, product, print_info=False)
         test_cf_open(cluster, product, print_info=False)
         print(f">>>>>>>>>>>>>>>>>>>>>> Pass for {product}")
 
