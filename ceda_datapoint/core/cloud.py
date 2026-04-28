@@ -125,6 +125,7 @@ class DataPointCloudProduct(BasicAsset):
             raise NotImplementedError(
                 f'Bad mode value {mode}: only "xarray" and "cf" are valid modes.'
             )
+        self.mode = mode
         
         super().__init__(
             asset_stac,
@@ -222,7 +223,6 @@ class DataPointCloudProduct(BasicAsset):
                 'to open this dataset.'
             )
 
-
     def open_dataset_with_xr(
             self,
             local_only: bool = False,
@@ -236,7 +236,6 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
-        print("CF MODE ACTIVATED!")
         try:
             if self._cloud_format == 'kerchunk':
                 ds = self._open_kerchunk(local_only=local_only, **kwargs)
@@ -607,7 +606,6 @@ class DataPointCluster(UIMixin):
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths."""
 
-        print("-------------------------------------------- HERE")
         if mode not in ('xarray', 'cf'):
             raise NotImplementedError(
                 f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
@@ -627,8 +625,10 @@ class DataPointCluster(UIMixin):
         product = self._products[id]
 
         if mode == 'xarray':
+            print("MODE XARRAY")
             return product.open_dataset_with_xr(local_only=local_only, **kwargs)
         elif mode == 'cf':
+            print("MODE CF")
             return product.open_dataset_with_cf(local_only=local_only, **kwargs)
 
     def open_datasets(self):

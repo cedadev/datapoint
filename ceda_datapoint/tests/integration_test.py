@@ -16,7 +16,11 @@ def setup_cluster(query, collection, verbose=False):
             client.list_query_terms(collection=collection),
         )
 
-    search_basic = client.search(collections=[collection], query=query, max_items=10)
+    search_basic = client.search(
+        collections=[collection],
+        query=query,
+        max_items=10
+    )
     if verbose:
         print(
             search_basic,
@@ -27,7 +31,7 @@ def setup_cluster(query, collection, verbose=False):
             search_basic.items,
         )
 
-    search_basic._load_asset_set()
+    # search_basic._load_asset_set()  # debug
 
     cluster = search_basic.collect_cloud_assets()
     if verbose:
@@ -53,8 +57,8 @@ class TestDataPointIntegration(unittest.TestCase):
         collection = "cmip6"
         query = [
             "cmip6:experiment_id=ssp585",
-            "cmip6:activity_id=ScenarioMIP",
-            "cmip6:institution_id=KIOST",
+            # "cmip6:activity_id=ScenarioMIP",
+            # "cmip6:institution_id=KIOST",
         ]
         cls.client, cls.search_basic, cls.cluster = setup_cluster(
             query, collection, verbose=cls.verbose
@@ -65,32 +69,62 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(self.cluster)
         # TODO further assertions
 
-    def test_open_with_xarray(self):
-        """Test opening datasets in 'xarray' mode."""
-        prod = self.cluster[0]
+    def test_cluster_open_with_xarray(self):
+        """Test opening datasets from a cluster in 'xarray' mode."""
+        cluster = self.cluster
         if self.verbose:
             print(
-                prod,
-                prod.info(),
-                prod.help(),
-                prod.attributes,
+                cluster,
+                cluster.info(),
+                cluster.help(),
             )
 
-        ds = prod.open_dataset(mode="xarray")
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=0, mode="xarray")
         self.assertIsNotNone(ds)
         # TODO further assertions
 
-    def test_open_with_cf(self):
-        """Test opening datasets in 'cf' mode."""
+    def test_cluster_open_with_cf(self):
+        """Test opening datasets from a cluster in 'cf' mode."""
+        cluster = self.cluster
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+            )
+
+        # TODO test with loop over various products (not just id=0 case)
+        fl = cluster.open_dataset(id=0, mode="cf")
+        self.assertIsNotNone(fl)
+        # TODO further assertions
+
+    def test_product_open_with_xarray(self):
+        """Test opening datasets from a product in 'xarray' mode."""
         prod = self.cluster[0]
         if self.verbose:
             print(
                 prod,
                 prod.info(),
                 prod.help(),
-                prod.attributes,
             )
 
+        # TODO test with loop over various products (not just id=0 case)
+        ds = prod.open_dataset(id=0, mode="xarray")
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_product_open_with_cf(self):
+        """Test opening datasets from a product in 'cf' mode."""
+        prod = self.cluster[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+            )
+
+        # TODO test with loop over various products (not just id=0 case)
         fl = prod.open_dataset(mode="cf")
         self.assertIsNotNone(fl)
         # TODO further assertions
