@@ -256,7 +256,8 @@ class DataPointCloudProduct(BasicAsset):
         """
         try:
             if self._cloud_format == 'kerchunk':
-                ds = self._open_kerchunk(local_only=local_only, **kwargs)
+                ds = self._open_kerchunk(
+                    local_only=local_only, **kwargs)
             elif self._cloud_format == 'CFA':
                 ds = self._open_cfa(**kwargs)
             elif self._cloud_format == 'zarr':
@@ -302,8 +303,14 @@ class DataPointCloudProduct(BasicAsset):
                 fl = cf.read(dataset)
             if self._cloud_format == 'kerchunk':
                 # Open kerchunk to cf
-                # Use: self.href
-                fl = cf.read(self.href)
+                href = self.href
+                if local_only:
+                    href = _fetch_kerchunk_make_local(href)
+
+                fs = fsspec.filesystem("reference", fo=href)
+                kerchunk = fs.get_mapper()
+                print("KERCHUNK IS", href, fs, kerchunk)
+                fl = cf.read(kerchunk)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
@@ -345,7 +352,8 @@ class DataPointCloudProduct(BasicAsset):
         mapper_kwargs = mapper_kwargs or {}
                 
         href = self.href
-        mapper_kwargs = self._mapper.get('mapper_kwargs',self._asset_stac) or mapper_kwargs
+        mapper_kwargs = self._mapper.get(
+            'mapper_kwargs',self._asset_stac) or mapper_kwargs
         open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
 
         if local_only:

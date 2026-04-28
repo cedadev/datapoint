@@ -101,6 +101,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
     def test_product_open_with_xarray(self):
         """Test opening datasets from a product in 'xarray' mode."""
+        # TODO test with loop over various products (not just 0 index case)
         prod = self.cluster[0]
         if self.verbose:
             print(
@@ -109,13 +110,13 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.help(),
             )
 
-        # TODO test with loop over various products (not just id=0 case)
         ds = prod.open_dataset(id=0, mode="xarray")
         self.assertIsNotNone(ds)
         # TODO further assertions
 
     def test_product_open_with_cf(self):
         """Test opening datasets from a product in 'cf' mode."""
+        # TODO test with loop over various products (not just 0 index case)
         prod = self.cluster[0]
         if self.verbose:
             print(
@@ -124,7 +125,6 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.help(),
             )
 
-        # TODO test with loop over various products (not just id=0 case)
         fl = prod.open_dataset(mode="cf")
         self.assertIsNotNone(fl)
         # TODO further assertions
