@@ -297,14 +297,31 @@ class DataPointCloudProduct(BasicAsset):
                 # Open Zarr to cf
                 fl = cf.read(self)
             if self._cloud_format == 'kerchunk':
+                # Parse kwargs
+                mapper_kwargs = {}   ###mapper_kwargs or {}
+                mapper_kwargs = self._mapper.get(
+                    'mapper_kwargs',self._asset_stac) or mapper_kwargs
+                open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
+
                 # Open kerchunk to cf
                 href = self.href
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
 
                 print("HREF IS", type(href))
-                fs = fsspec.filesystem("reference", fo=href)
-                kerchunk = fs.get_mapper()
+                fsspec.config.conf["asynchronous"] = False
+
+                fs = fsspec.filesystem(
+                    "reference", fo=href,
+                    #anon=True,
+                    #asynchronous=False,
+                    target_options={"asynchronous": False, "anon": True},
+                    remote_options={"asynchronous": False, "anon": True},
+                    #client_kwargs={"allow_redirects": True},
+                    #target_protocol="https",
+                )
+                print(fs.asynchronous)
+                kerchunk = fs.get_mapper()  ###"")
 
                 # TODO process kwargs
                 open_zarr_kwargs = self._mapper.get(
@@ -318,7 +335,18 @@ class DataPointCloudProduct(BasicAsset):
                 )
                 print("ATTRIUTES ARE", self.attributes)
 
-                fl = cf.read(kerchunk)  ###, **open_zarr_kwargs)
+                # fl = cf.read(kerchunk)
+                # Produces this error, assumes it is UM file type:
+                #
+                #
+                # But this works in cfdm!:
+                import cfdm
+                print("ZARR KWARGS", open_zarr_kwargs)
+                fl = cf.read(kerchunk)  ###, **open_zarr_kwargs)  ###, dataset_type="Kerchunk")  ###, **open_zarr_kwargs)
+                print("FL IS", fl)
+                # zarr:
+                # ValueError: Reference-FS's target filesystem must have
+                # same value of asynchronous
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
