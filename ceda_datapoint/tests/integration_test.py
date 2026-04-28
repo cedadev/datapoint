@@ -5,6 +5,7 @@ from ceda_datapoint import DataPointClient
 
 
 def setup_cluster(query, collection, verbose=False):
+    """Set up and return a Datapoint client, search and cluster."""
     client = DataPointClient(org="CEDA")
     if verbose:
         print(
@@ -12,7 +13,7 @@ def setup_cluster(query, collection, verbose=False):
             client.info(),
             client.help(),
             client.list_collections(),
-            client.list_query_terms(collection="cmip6"),
+            client.list_query_terms(collection=collection),
         )
 
     search_basic = client.search(collections=[collection], query=query, max_items=10)
@@ -60,14 +61,14 @@ class TestDataPointIntegration(unittest.TestCase):
         )
 
     def test_cluster_setup(self):
-        """TODO."""
+        """Test the setting up of a cluster."""
         self.assertIsNotNone(self.cluster)
         # TODO further assertions
 
     def test_open_with_xarray(self):
         """Test opening datasets in 'xarray' mode."""
         prod = self.cluster[0]
-        if False:
+        if self.verbose:
             print(
                 prod,
                 prod.info(),
@@ -82,7 +83,7 @@ class TestDataPointIntegration(unittest.TestCase):
     def test_open_with_cf(self):
         """Test opening datasets in 'cf' mode."""
         prod = self.cluster[0]
-        if True:
+        if self.verbose:
             print(
                 prod,
                 prod.info(),

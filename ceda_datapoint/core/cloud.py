@@ -206,7 +206,6 @@ class DataPointCloudProduct(BasicAsset):
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
         """
-        print("THIS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         if not self._cloud_format:
             raise ValueError(
                 'No cloud format given for this dataset'
@@ -224,7 +223,6 @@ class DataPointCloudProduct(BasicAsset):
             )
 
 
-
     def open_dataset_with_xr(
             self,
             local_only: bool = False,
@@ -238,6 +236,7 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
+        print("CF MODE ACTIVATED!")
         try:
             if self._cloud_format == 'kerchunk':
                 ds = self._open_kerchunk(local_only=local_only, **kwargs)
