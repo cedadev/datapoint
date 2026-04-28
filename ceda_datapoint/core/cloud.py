@@ -223,6 +223,24 @@ class DataPointCloudProduct(BasicAsset):
                 'to open this dataset.'
             )
 
+        if mode == 'xarray':
+            return self.open_dataset_with_xr(
+                local_only=local_only,
+                prepare_data=prepare_data,
+                **kwargs,
+            )
+        elif mode == 'cf':
+            return self.open_dataset_with_cf(
+                local_only=local_only,
+                prepare_data=prepare_data,
+                **kwargs,
+            )
+        else:
+            raise NotImplementedError(
+                f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
+            )
+
+
     def open_dataset_with_xr(
             self,
             local_only: bool = False,
