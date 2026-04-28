@@ -292,25 +292,33 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
-        print("SELF IS:", self, type(self))
-        print("ALL INPUT KW/ARGS ARE:", local_only, kwargs)
-        # TODO process kwargs for a cf read
-
-        dataset = None  # create this as main read arg input
         try:
             if self._cloud_format == 'zarr':
                 # Open Zarr to cf
-                fl = cf.read(dataset)
+                fl = cf.read(self)
             if self._cloud_format == 'kerchunk':
                 # Open kerchunk to cf
                 href = self.href
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
 
+                print("HREF IS", type(href))
                 fs = fsspec.filesystem("reference", fo=href)
                 kerchunk = fs.get_mapper()
-                print("KERCHUNK IS", href, fs, kerchunk)
-                fl = cf.read(kerchunk)
+
+                # TODO process kwargs
+                open_zarr_kwargs = self._mapper.get(
+                    'open_zarr_kwargs', self._asset_stac) or {}
+
+                print("KERCHUNK IS", type(href), fs, kerchunk)
+                print("SELF IS", self, self.__dir__())
+                print(
+                    "OTHERS", self._asset_stac, self.attributes,
+                    self._mapper.get('open_zarr_kwargs', self._asset_stac),
+                )
+                print("ATTRIUTES ARE", self.attributes)
+
+                fl = cf.read(kerchunk)  ###, **open_zarr_kwargs)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
@@ -327,11 +335,11 @@ class DataPointCloudProduct(BasicAsset):
 
         except ValueError as err:
             raise err
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                'The requested resource could not be located: '
-                f'{self.href}'
-            )
+        # except FileNotFoundError:
+        #     raise FileNotFoundError(
+        #         'The requested resource could not be located: '
+        #         f'{self.href}'
+        #     )
 
     def _open_kerchunk(
             self,
