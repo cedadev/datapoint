@@ -85,8 +85,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ceda_datapoint.core.cloud</h1><div class="highlight"><pre>
-<span></span><span class="n">__author__</span>    <span class="o">=</span> <span class="s2">&quot;Daniel Westwood&quot;</span>
-<span class="n">__contact__</span>   <span class="o">=</span> <span class="s2">&quot;daniel.westwood@stfc.ac.uk&quot;</span>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Daniel Westwood&quot;</span>
+<span class="n">__contact__</span> <span class="o">=</span> <span class="s2">&quot;daniel.westwood@stfc.ac.uk&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2024 United Kingdom Research and Innovation&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -94,18 +94,18 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">fsspec</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rxr</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.core.asset</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicAsset</span><span class="p">,</span> <span class="n">DataPointMapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropertiesMixin</span><span class="p">,</span> <span class="n">UIMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">UIMixin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ceda_datapoint.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hash_id</span><span class="p">,</span> <span class="n">logstream</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logstream</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_decode_polygon</span><span class="p">(</span><span class="n">spatial_dims</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -114,29 +114,31 @@
     <span class="n">selects</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spatial_dims</span><span class="p">):</span>
         <span class="n">corners</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coordinates</span><span class="p">]</span>
-        <span class="n">dim_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">corners</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">corners</span><span class="p">))</span>
+        <span class="n">dim_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">corners</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">corners</span><span class="p">))</span>
         <span class="n">selects</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim_range</span>
     <span class="k">return</span> <span class="n">selects</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_decode_datetime</span><span class="p">(</span><span class="n">datetime</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decode pystac datetime to xarray select.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">slice</span><span class="p">(</span><span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">slice</span><span class="p">(</span><span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dt</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_find_spatial_dims</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span><span class="kc">None</span><span class="p">]:</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_spatial_dims</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the names of the spatial dims.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">accepted_lats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;latitude&#39;</span><span class="p">,</span><span class="s1">&#39;Lat&#39;</span><span class="p">,</span><span class="s1">&#39;Latitude&#39;</span><span class="p">]</span>
-    <span class="n">accepted_lons</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span><span class="s1">&#39;longitude&#39;</span><span class="p">,</span><span class="s1">&#39;Lon&#39;</span><span class="p">,</span><span class="s1">&#39;Longitude&#39;</span><span class="p">]</span>
+    <span class="n">accepted_lats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;Lat&quot;</span><span class="p">,</span> <span class="s2">&quot;Latitude&quot;</span><span class="p">]</span>
+    <span class="n">accepted_lons</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;Lon&quot;</span><span class="p">,</span> <span class="s2">&quot;Longitude&quot;</span><span class="p">]</span>
 
     <span class="n">convention</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -148,11 +150,11 @@
 
     <span class="k">if</span> <span class="n">convention</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s1">&#39;Spatial AOI Skipped - Could not identify spatial dims. &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;Accepted dimensions are </span><span class="si">{</span><span class="n">accepted_lats</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="n">accepted_lons</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="s2">&quot;Spatial AOI Skipped - Could not identify spatial dims. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Accepted dimensions are </span><span class="si">{</span><span class="n">accepted_lats</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">accepted_lons</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
-    
+
     <span class="n">lat</span> <span class="o">=</span> <span class="n">accepted_lats</span><span class="p">[</span><span class="n">convention</span><span class="p">]</span>
     <span class="n">lon</span> <span class="o">=</span> <span class="n">accepted_lons</span><span class="p">[</span><span class="n">convention</span><span class="p">]</span>
 
@@ -164,6 +166,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">]</span>
 
+
 <div class="viewcode-block" id="DataPointCloudProduct">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataPointCloudProduct</span><span class="p">(</span><span class="n">BasicAsset</span><span class="p">):</span>
@@ -173,80 +176,80 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">asset_stac</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-            <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">cf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
-            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">stac_attrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">mapper</span><span class="p">:</span> <span class="n">DataPointMapper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">data_selection</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">asset_stac</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stac_attrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mapper</span><span class="p">:</span> <span class="n">DataPointMapper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_selection</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise a single cloud product object. The cloud product has identical</span>
-<span class="sd">        properties and attributes to the parent item, but now represents a single </span>
+<span class="sd">        properties and attributes to the parent item, but now represents a single</span>
 <span class="sd">        reference dataset.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param asset_stac:  (dict) The asset as presented in the stac index.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param id:          (str) Identifier for this cloud product.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param cf:          (str) Cloud format type.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param order:       (int) Unused property relating to priority.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param mode:        (str) Method to use for opening dataset.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param meta:        (dict) DataPoint metadata relating to parent objects.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param stac_attrs:  (dict) Attributes of the item outside the ``properties``.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param properties:  (dict) Properties of the item in the ``properties`` field.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s1">&#39;Only &quot;xarray&quot; mode currently implemented - cf-python is a future option&#39;</span>
             <span class="p">)</span>
-        
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">asset_stac</span><span class="p">,</span>
-            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+            <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
             <span class="n">stac_attrs</span><span class="o">=</span><span class="n">stac_attrs</span><span class="p">,</span>
             <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
             <span class="n">mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span>
         <span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">=</span> <span class="n">cf</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span> <span class="o">=</span> <span class="n">data_selection</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s2">&quot;cloud_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cf</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_visibility</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointCloudProduct: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
-    
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;DataPointCloudProduct: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s2"> (Format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="si">}</span><span class="s2">)&gt;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Representation of this class using the meta components&quot;&quot;&quot;</span>
-        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Attributes:&#39;</span><span class="p">)</span>
+        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Attributes:&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;   &lt;empty&gt;&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
-        
+            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;   &lt;empty&gt;&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
-    
+            <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cloud_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read-only property&quot;&quot;&quot;</span>
@@ -257,11 +260,13 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Display public methods for this object.&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCloudProduct Help:&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.info() - Get information about this cloud product.&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&#39;</span><span class="p">)</span>
-        <span class="c1">#print(&#39; &gt; product.open_asset() - Overrides BasicAsset get method&#39;)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCloudProduct</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">,</span><span class="s1">&#39;cloud_format&#39;</span><span class="p">])</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DataPointCloudProduct Help:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &gt; product.info() - Get information about this cloud product.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot; &gt; product.open_dataset() - Open the dataset for this cloud product (in xarray)&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># print(&#39; &gt; product.open_asset() - Overrides BasicAsset get method&#39;)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCloudProduct</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;cloud_format&quot;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DataPointCloudProduct.info">
@@ -274,11 +279,8 @@
 <div class="viewcode-block" id="DataPointCloudProduct.open_asset">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_asset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">open_asset</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Override for basic asset get function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -288,11 +290,12 @@
 <div class="viewcode-block" id="DataPointCloudProduct.open_dataset">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCloudProduct.open_dataset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">open_dataset</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> 
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">,</span>
+        <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open the dataset for this product (in xarray).</span>
 <span class="sd">        Specific methods to open cloud formats are private since</span>
@@ -302,57 +305,56 @@
 <span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
 <span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Non-xarray opening is not implemented for cloud products yet.&quot;</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;No cloud format given for this dataset&#39;</span>
-            <span class="p">)</span>
-        
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No cloud format given for this dataset&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cloud assets with no &quot;href&quot; are not supported&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">==</span> <span class="s2">&quot;local-only&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">local_only</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Cloud assets with no &quot;href&quot; are not supported&#39;</span>
-            <span class="p">)</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">==</span> <span class="s1">&#39;local-only&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">local_only</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Href not reachable via https, please use `local_only=True` &#39;</span>
-                <span class="s1">&#39;to open this dataset.&#39;</span>
+                <span class="s2">&quot;Href not reachable via https, please use `local_only=True` &quot;</span>
+                <span class="s2">&quot;to open this dataset.&quot;</span>
             <span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;kerchunk&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s2">&quot;kerchunk&quot;</span><span class="p">:</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_kerchunk</span><span class="p">(</span><span class="n">local_only</span><span class="o">=</span><span class="n">local_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;CFA&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s2">&quot;CFA&quot;</span><span class="p">:</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_cfa</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;zarr&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s2">&quot;zarr&quot;</span><span class="p">:</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_zarr</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;cog&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s2">&quot;cog&quot;</span><span class="p">:</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_cog</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s1">&#39;Cloud format not recognised - must be one of (&quot;kerchunk&quot;, &quot;CFA&quot;, &quot;zarr&quot;, &quot;cog&quot;)&#39;</span>
                 <span class="p">)</span>
-            
+
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">prepare_data</span><span class="o">=</span><span class="n">prepare_data</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">err</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="s1">&#39;The requested resource could not be located: &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="s2">&quot;The requested resource could not be located: &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_kerchunk</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">mapper_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">        </span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mapper_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open a kerchunk dataset in xarray</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
 <span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
 
@@ -360,25 +362,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="n">mapper_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-                
+
         <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
-        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mapper_kwargs&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="n">mapper_kwargs</span>
-        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">mapper_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mapper_kwargs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="n">mapper_kwargs</span>
+        <span class="p">)</span>
+        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_zarr_kwargs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">local_only</span><span class="p">:</span>
             <span class="n">href</span> <span class="o">=</span> <span class="n">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;kerchunk&#39;</span><span class="p">,</span><span class="o">**</span><span class="n">open_zarr_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;kerchunk&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">open_zarr_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_cfa</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">cfa_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cfa_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Open a CFA dataset in xarray</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param cfa_options:     (dict) Configuration options to pass to the CFA engine</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -386,54 +389,57 @@
 
         <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
 
-        <span class="n">open_xarray_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_xarray_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+        <span class="n">open_xarray_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_xarray_kwargs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="n">kwargs</span>
 
         <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span>
-            <span class="n">href</span><span class="p">,</span> 
-            <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;CFA&#39;</span><span class="p">,</span> <span class="n">cfa_options</span><span class="o">=</span><span class="n">cfa_options</span><span class="p">,</span> <span class="o">**</span><span class="n">open_xarray_kwargs</span>
+            <span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;CFA&quot;</span><span class="p">,</span> <span class="n">cfa_options</span><span class="o">=</span><span class="n">cfa_options</span><span class="p">,</span> <span class="o">**</span><span class="n">open_xarray_kwargs</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_zarr</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 
-        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_zarr_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+        <span class="n">open_zarr_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_zarr_kwargs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="n">kwargs</span>
 
-        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;zarr&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">open_zarr_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;zarr&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">open_zarr_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_open_cog</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 
-        <span class="n">open_cog_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;open_cog_kwargs&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span> <span class="o">|</span> <span class="n">kwargs</span>
+        <span class="n">open_cog_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mapper</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;open_cog_kwargs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asset_stac</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="n">kwargs</span>
 
         <span class="k">return</span> <span class="n">rxr</span><span class="o">.</span><span class="n">open_rasterio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">,</span> <span class="o">**</span><span class="n">open_cog_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_dataset</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> 
-            <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> 
-            <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">prepare_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform any dataset selections here.&quot;&quot;&quot;</span>
 
-        <span class="n">intersects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;search_terms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;intersects&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">intersects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s2">&quot;search_terms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># Intersection applies to spatial data</span>
 
-        <span class="n">datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;search_terms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s2">&quot;search_terms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># Datetime can only be applied to &#39;time&#39; dimension.</span>
 
-        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;search_terms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;query&#39;</span><span class="p">,[])</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s2">&quot;search_terms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="n">vq</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">ql</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;variables&#39;</span> <span class="ow">in</span> <span class="n">ql</span><span class="p">:</span>
-                <span class="n">vq</span> <span class="o">=</span> <span class="n">ql</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;variables&quot;</span> <span class="ow">in</span> <span class="n">ql</span><span class="p">:</span>
+                <span class="n">vq</span> <span class="o">=</span> <span class="n">ql</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;variables&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">vq</span>
-        <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sel&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
-        <span class="n">isel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isel&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;variables&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">vq</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sel&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">isel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;isel&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="n">spatial_dims</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">intersects</span><span class="p">:</span>
@@ -441,37 +447,37 @@
             <span class="n">spatial_dims</span> <span class="o">=</span> <span class="n">_find_spatial_dims</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">spatial_dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">intersects</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">intersects</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
 
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersects</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">coords</span> <span class="o">=</span> <span class="n">intersects</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersects</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">coords</span> <span class="o">=</span> <span class="n">intersects</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">coords</span> <span class="o">=</span> <span class="n">intersects</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]</span>
+                    <span class="n">coords</span> <span class="o">=</span> <span class="n">intersects</span><span class="p">[</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span>
 
                 <span class="n">select</span> <span class="o">=</span> <span class="n">_decode_polygon</span><span class="p">(</span><span class="n">spatial_dims</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="o">**</span><span class="n">select</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s1">&#39;Unsupported intersection type for Single Search Selection - &#39;</span> \
-                    <span class="s1">&#39;AOI not applied.&#39;</span>
+                    <span class="s2">&quot;Unsupported intersection type for Single Search Selection - &quot;</span>
+                    <span class="s2">&quot;AOI not applied.&quot;</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">datetime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s1">&#39;Datetime selection could not be applied - &#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;no &quot;time&quot; dimension present.&#39;</span>
+                    <span class="s2">&quot;Datetime selection could not be applied - &quot;</span><span class="p">,</span>
+                    <span class="s1">&#39;no &quot;time&quot; dimension present.&#39;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">time_sel</span> <span class="o">=</span> <span class="n">_decode_datetime</span><span class="p">(</span><span class="n">datetime</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">time_sel</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">datetime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">time_sel</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datetime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">time_sel</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">variables</span><span class="p">]</span>
 
             <span class="n">keep_vars</span> <span class="o">=</span> <span class="p">[]</span>
@@ -479,16 +485,16 @@
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="s1">&#39;Variable selection could not be applied - &#39;</span><span class="p">,</span>
-                        <span class="sa">f</span><span class="s1">&#39;no &quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot; variable present.&#39;</span>
+                        <span class="s2">&quot;Variable selection could not be applied - &quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s1">&#39;no &quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&quot; variable present.&#39;</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">keep_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keep_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;No variables kept in current selection - </span><span class="si">{</span><span class="n">variables</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="sa">f</span><span class="s2">&quot;No variables kept in current selection - </span><span class="si">{</span><span class="n">variables</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-            
+
             <span class="n">drop_vars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_vars</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keep_vars</span><span class="p">)))</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">drop_vars</span><span class="p">)</span>
 
@@ -498,31 +504,32 @@
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="o">**</span><span class="n">isel</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ds</span>
-                
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if this product is reachable&quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
             <span class="c1"># Check local path</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;local-only&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;local-only&quot;</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;unreachable&quot;</span>
             <span class="k">return</span>
 
-        <span class="c1"># Check remote link</span>
+        <span class="c1"># Check remote link</span>
         <span class="n">check_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s1">&#39;zarr&#39;</span><span class="p">:</span>
-            <span class="n">check_ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s1">/.zmetadata&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud_format</span> <span class="o">==</span> <span class="s2">&quot;zarr&quot;</span><span class="p">:</span>
+            <span class="n">check_ref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="si">}</span><span class="s2">/.zmetadata&quot;</span>
 
         <span class="n">status</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">check_ref</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
-            <span class="c1"># Check local link</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span><span class="o">=</span><span class="s1">&#39;local-only&#39;</span>
-            <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1"># Check local link</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;local-only&quot;</span>
+            <span class="n">local_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dap.ceda.ac.uk&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">local_ref</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s1">&#39;unreachable&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;unreachable&quot;</span>
             <span class="k">return</span>
         <span class="k">return</span></div>
+
 
 
 <div class="viewcode-block" id="DataPointCluster">
@@ -530,34 +537,33 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">DataPointCluster</span><span class="p">(</span><span class="n">UIMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A set of non-combined datasets opened using the DataPointSearch</span>
-<span class="sd">    ``to_dataset()`` method. Has some additional properties over a </span>
-<span class="sd">    list of datasets. &quot;&quot;&quot;</span>
+<span class="sd">    ``to_dataset()`` method. Has some additional properties over a</span>
+<span class="sd">    list of datasets.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> 
-            <span class="n">products</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
-            <span class="n">parent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-            <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">data_selection</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">show_unreachable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">products</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">parent_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">data_selection</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_unreachable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise a cluster of datasets from a set of assets.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param products:    (list) A list of DataPoint cloud product objects.</span>
-<span class="sd">         </span>
+
 <span class="sd">        :param parent_id:   (str) ID of the parent search/item object.</span>
-<span class="sd">         </span>
+
 <span class="sd">        :param meta:        (dict) Metadata about the parent object.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
 <span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.</span>
 
 <span class="sd">        :param show_unreachable: (bool) Show the hidden assets that DataPoint has determined are currently unreachable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parent_id</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">hash_id</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">hash_id</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_local_only</span> <span class="o">=</span> <span class="n">local_only</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_selection</span> <span class="o">=</span> <span class="n">data_selection</span>
@@ -576,15 +582,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span> <span class="o">=</span> <span class="n">meta</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="s2">&quot;products&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;String representation of this class&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;DataPointCluster: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s1"> (Datasets: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">)</span><span class="si">}</span><span class="s1">)&gt;&#39;</span>
-    
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;DataPointCluster: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s2"> (Datasets: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">)</span><span class="si">}</span><span class="s2">)&gt;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Index this object to obtain a DataPointCloudProduct </span>
+<span class="sd">        Index this object to obtain a DataPointCloudProduct</span>
 <span class="sd">        by ID or position in the cluster.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -592,25 +598,27 @@
             <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">index</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; not found in available products.&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; not found in available products.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">products</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataPointCloudProduct</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;List of products contained within this cluster&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s1">&#39;unreachable&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_unreachable</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">v</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s2">&quot;unreachable&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_unreachable</span>
+        <span class="p">]</span>
 
 <div class="viewcode-block" id="DataPointCluster.help">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.help">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">help</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function - lists methods that can be utilised for this class&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DataPointCluster Help:&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.info() - basic cluster information&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &gt; cluster.open_dataset(index/id) - open a specific dataset in xarray&#39;</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCluster</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">])</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DataPointCluster Help:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &gt; cluster.info() - basic cluster information&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &gt; cluster.open_dataset(index/id) - open a specific dataset in xarray&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataPointCluster</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">help</span><span class="p">(</span><span class="n">additionals</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;products&quot;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DataPointCluster.info">
@@ -622,60 +630,57 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Notebooks representation of this class&quot;&quot;&quot;</span>
-        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Products:&#39;</span><span class="p">)</span>
+        <span class="nb">repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Products:&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
-                <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">cloud_format</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">visibility</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">visibility</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+                <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">cloud_format</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">visibility</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39; - </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">cloud_format</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
-    
+                <span class="nb">repr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">cloud_format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+
 <div class="viewcode-block" id="DataPointCluster.open_dataset">
 <a class="viewcode-back" href="../../../core_cloud.html#ceda_datapoint.core.cloud.DataPointCluster.open_dataset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">open_dataset</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="nb">id</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">,</span>
-            <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">,</span>
+        <span class="n">local_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Open a dataset from within this cluster&#39;s cloud products. A </span>
-<span class="sd">        dataset can be indexed either by id or position within this </span>
-<span class="sd">        cluster&#39;s set of datasets. </span>
-<span class="sd">        </span>
+<span class="sd">        Open a dataset from within this cluster&#39;s cloud products. A</span>
+<span class="sd">        dataset can be indexed either by id or position within this</span>
+<span class="sd">        cluster&#39;s set of datasets.</span>
+
 <span class="sd">        :param id:      (str) The ID or index of the dataset in the resulting cluster.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param local_only:  (bool) Switch to using local-only files - DataPoint will</span>
 <span class="sd">            convert all hrefs and internal Kerchunk links to use local paths.&quot;&quot;&quot;</span>
-            
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;xarray&#39;</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;xarray&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s1">&#39;Only &quot;xarray&quot; mode currently implemented - cf-python is a future option&#39;</span>
             <span class="p">)</span>
-        
+
         <span class="n">local_only</span> <span class="o">=</span> <span class="n">local_only</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_only</span>
-        
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="nb">id</span><span class="p">]</span>
-        
+
         <span class="k">if</span> <span class="nb">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">&quot; not found in available datasets.&#39;</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s1">&quot; not found in available datasets.&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
-        
+
         <span class="n">product</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">product</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">local_only</span><span class="o">=</span><span class="n">local_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">open_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s1">&#39;&quot;Combine&quot; feature has not yet been implemented&#39;</span>
-        <span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&quot;Combine&quot; feature has not yet been implemented&#39;</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_zarr_kwargs_default</span><span class="p">(</span><span class="n">add_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -684,16 +689,17 @@
     <span class="n">add_kwargs</span> <span class="o">=</span> <span class="n">add_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;consolidated&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;consolidated&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">defaults</span> <span class="o">|</span> <span class="n">add_kwargs</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_kerchunk_make_local</span><span class="p">(</span><span class="n">href</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetch a kerchunk file, open as json content and do find/replace</span>
 <span class="sd">    to access local files only.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">href_local</span> <span class="o">=</span> <span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">href_local</span> <span class="o">=</span> <span class="n">href</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dap.ceda.ac.uk&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">href_local</span><span class="p">):</span>
         <span class="n">attempts</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
@@ -704,22 +710,21 @@
             <span class="n">attempts</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">attempts</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s1">: Download unsuccessful - &#39;</span>
-                <span class="s1">&#39;could not download the file successfully (tried 3 times)&#39;</span>
+                <span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s2">: Download unsuccessful - &quot;</span>
+                <span class="s2">&quot;could not download the file successfully (tried 3 times)&quot;</span>
             <span class="p">)</span>
         <span class="n">refs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">href_local</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">refs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">[</span><span class="s1">&#39;refs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">refs</span><span class="p">[</span><span class="s1">&#39;refs&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">[</span><span class="s2">&quot;refs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">refs</span><span class="p">[</span><span class="s2">&quot;refs&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="c1"># First character</span>
-            <span class="k">if</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="n">refs</span><span class="p">[</span><span class="s1">&#39;refs&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://dap.ceda.ac.uk/&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="c1"># First character</span>
+            <span class="k">if</span> <span class="s2">&quot;https://&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">refs</span><span class="p">[</span><span class="s2">&quot;refs&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;https://dap.ceda.ac.uk/&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">refs</span>
-
 </pre></div>
 
            </div>
