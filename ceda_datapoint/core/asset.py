@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Union
+from typing import Any
+
 import pandas as pd
 
 from ceda_datapoint.mixins import PropertiesMixin
@@ -9,8 +10,10 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
 
+
 class DataPointMapper:
     """Mapper object for calling specific properties of an item"""
+
     def __init__(self, mappings: dict = None, id: str = None) -> None:
         self._mappings = mappings or {}
         self._id = id
@@ -18,8 +21,10 @@ class DataPointMapper:
     @classmethod
     def help(cls):
         """Display public methods for this object."""
-        print('DataPointMapper Help:')
-        print(' > mapper.get() - Get a key from a given stac object using this reference mapper.')
+        print("DataPointMapper Help:")
+        print(
+            " > mapper.get() - Get a key from a given stac object using this reference mapper."
+        )
 
     def set_id(self, id: str) -> None:
         """Set the ID for this mapper - cosmetic only"""
@@ -30,30 +35,26 @@ class DataPointMapper:
         Mapper.index('assets',stac_object)
         """
 
-        def access(
-                k: str, 
-                stac_obj: object, 
-                chain: bool = True
-            ) -> str:
+        def access(k: str, stac_obj: object, chain: bool = True) -> str:
             """
-            Error-accepting 'get' operation for an attribute from a STAC object - 
+            Error-accepting 'get' operation for an attribute from a STAC object -
             with chain or otherwise."""
             try:
-                if hasattr(stac_obj,k):
+                if hasattr(stac_obj, k):
                     return getattr(stac_obj, k)
                 else:
                     return stac_obj[k]
             except (KeyError, ValueError, AttributeError, TypeError):
                 if chain:
                     logger.debug(
-                        f'Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}'
+                        f"Chain for accessing attribute {key}:{self._mappings[key]} failed at {k}"
                     )
                 else:
                     logger.debug(f'Property "{k}" for {self._id} is undefined.')
                 return None
 
         if key in self._mappings:
-            keychain = self._mappings[key].split('.')
+            keychain = self._mappings[key].split(".")
             so = access(keychain[0], stac_object)
             for k in keychain[1:]:
                 so = access(k, so)
@@ -62,6 +63,7 @@ class DataPointMapper:
         else:
             so = access(key, stac_object, chain=False)
         return so
+
 
 class BasicAsset(PropertiesMixin):
     """
@@ -76,23 +78,22 @@ class BasicAsset(PropertiesMixin):
         properties: dict = None,
         mapper: DataPointMapper = None,
     ) -> None:
-        
         """
         Initialise a single contained asset. The asset has identical
-        properties and attributes to the parent item, but now represents a single 
+        properties and attributes to the parent item, but now represents a single
         asset.
-        
+
         :param asset_stac:  (dict) The asset as presented in the stac index.
-        
+
         :param id:          (str) Identifier for this cloud product.
-        
+
         :param meta:        (dict) DataPoint metadata relating to parent objects.
-        
+
         :param stac_attrs:  (dict) Attributes of the item outside the ``properties``.
-        
+
         :param properties:  (dict) Properties of the item in the ``properties`` field.
         """
-        
+
         self._id = id
 
         self._mapper = mapper or DataPointMapper(id)
@@ -101,10 +102,10 @@ class BasicAsset(PropertiesMixin):
 
         self._asset_stac = asset_stac
         self._meta = meta | {
-            'asset_id': id,
+            "asset_id": id,
         }
-        
-        self._asset_type = asset_stac.get('type',None)
+
+        self._asset_type = asset_stac.get("type", None)
 
         self._stac_attrs = stac_attrs
         self._properties = properties
@@ -112,37 +113,32 @@ class BasicAsset(PropertiesMixin):
     @classmethod
     def help(cls, additionals=None):
         """Display public methods for this object."""
-        #print('BasicAsset Help:')
-        #print(' > asset.open_asset() - Not implemented for v0.5')
+        # print('BasicAsset Help:')
+        # print(' > asset.open_asset() - Not implemented for v0.5')
         super(BasicAsset, cls).help(additionals=additionals)
 
     @property
     def href(self) -> str:
         """Read-only href property"""
-        return self._mapper.get('href',self._asset_stac)
+        return self._mapper.get("href", self._asset_stac)
 
     def __str__(self):
         """String representation of the asset"""
-        return f'<DataPointAsset: {self._id}>'
+        return f"<DataPointAsset: {self._id}>"
 
-    def open_asset(
-            self,
-            open_as: str = None,
-            **kwargs
-        ) -> Any:
+    def open_asset(self, open_as: str = None, **kwargs) -> Any:
         """
         Open different asset files with the correct implementation
         """
 
-        if self._asset_type == 'text/csv' or open_as == 'csv':
+        if self._asset_type == "text/csv" or open_as == "csv":
             return pd.read_csv(self.href, **kwargs)
 
         raise NotImplementedError(
-            'This feature is not yet implemented for datapoint v0.5'
+            "This feature is not yet implemented for datapoint v0.5"
         )
 
-        if self._asset_type == 'application/netcdf':
+        if self._asset_type == "application/netcdf":
             return None
             # Open as netcdf - h5netcdf for cloud?
             # Skipped feature for v1.0
-        
