@@ -1,4 +1,4 @@
-name: Automatic Test
+name: Quality and Linting
 # Specify which GitHub events will trigger a CI build
 
 on: push
