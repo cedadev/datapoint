@@ -298,55 +298,31 @@ class DataPointCloudProduct(BasicAsset):
                 fl = cf.read(self)
             if self._cloud_format == 'kerchunk':
                 # Parse kwargs
-                mapper_kwargs = {}   ###mapper_kwargs or {}
+                mapper_kwargs = {}
                 mapper_kwargs = self._mapper.get(
                     'mapper_kwargs',self._asset_stac) or mapper_kwargs
                 open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
 
-                # Open kerchunk to cf
+                # Local or remote HREF
                 href = self.href
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>LOCAL HREF IS", href)
 
-                print("HREF IS", type(href))
-                fsspec.config.conf["asynchronous"] = False
-
+                # Create the filesystem
                 fs = fsspec.filesystem(
-                    "reference", fo=href,
-                    #anon=True,
-                    #asynchronous=False,
-                    target_options={"asynchronous": False, "anon": True},
-                    remote_options={"asynchronous": False, "anon": True},
-                    #client_kwargs={"allow_redirects": True},
-                    #target_protocol="https",
+                    "reference",
+                    fo=href,
+                    remote_protocol="https",
+                    # Important: need BOTH of these to be set True else get
+                    # (a)sync inconsistency issues.
+                    remote_options={"asynchronous": True},
+                    asynchronous=True,
                 )
-                print(fs.asynchronous)
-                kerchunk = fs.get_mapper()  ###"")
+                kerchunk = fs.get_mapper()
 
-                # TODO process kwargs
-                open_zarr_kwargs = self._mapper.get(
-                    'open_zarr_kwargs', self._asset_stac) or {}
-
-                print("KERCHUNK IS", type(href), fs, kerchunk)
-                print("SELF IS", self, self.__dir__())
-                print(
-                    "OTHERS", self._asset_stac, self.attributes,
-                    self._mapper.get('open_zarr_kwargs', self._asset_stac),
-                )
-                print("ATTRIUTES ARE", self.attributes)
-
-                # fl = cf.read(kerchunk)
-                # Produces this error, assumes it is UM file type:
-                #
-                #
-                # But this works in cfdm!:
-                import cfdm
-                print("ZARR KWARGS", open_zarr_kwargs)
-                fl = cf.read(kerchunk)  ###, **open_zarr_kwargs)  ###, dataset_type="Kerchunk")  ###, **open_zarr_kwargs)
-                print("FL IS", fl)
-                # zarr:
-                # ValueError: Reference-FS's target filesystem must have
-                # same value of asynchronous
+                # Finally read from the filesystem mapper
+                fl = cf.read(kerchunk)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
@@ -395,6 +371,8 @@ class DataPointCloudProduct(BasicAsset):
         if local_only:
             href = _fetch_kerchunk_make_local(href)
 
+        #print(">>>>>>>>>>>HREF",
+        #      href, "OPEN_ZARR_KAWRGS", open_zarr_kwargs)
         return xr.open_dataset(href, engine='kerchunk',**open_zarr_kwargs)
 
     def _open_cfa(
