@@ -305,15 +305,18 @@ class DataPointCloudProduct(BasicAsset):
 
                 # Local or remote HREF
                 href = self.href
+
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>LOCAL HREF IS", href)
+                    remote_protocol="file"
+                else:
+                    remote_protocol="https"
 
-                # Create the filesystem
+                # Create the filesystem and mapping object
                 fs = fsspec.filesystem(
                     "reference",
                     fo=href,
-                    remote_protocol="https",
+                    remote_protocol=remote_protocol,
                     # Important: need BOTH of these to be set True else get
                     # (a)sync inconsistency issues.
                     remote_options={"asynchronous": True},
@@ -322,7 +325,8 @@ class DataPointCloudProduct(BasicAsset):
                 kerchunk = fs.get_mapper()
 
                 # Finally read from the filesystem mapper
-                fl = cf.read(kerchunk)
+                import cfdm  # TODO SLB dev
+                fl = cfdm.read(kerchunk)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
@@ -371,8 +375,6 @@ class DataPointCloudProduct(BasicAsset):
         if local_only:
             href = _fetch_kerchunk_make_local(href)
 
-        #print(">>>>>>>>>>>HREF",
-        #      href, "OPEN_ZARR_KAWRGS", open_zarr_kwargs)
         return xr.open_dataset(href, engine='kerchunk',**open_zarr_kwargs)
 
     def _open_cfa(
@@ -691,15 +693,19 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
     Fetch a kerchunk file, open as json content and do find/replace
     to access local files only.
     """
-    href_local = href.replace('https://dap.ceda.ac.uk','')
+    ceda_dap_prefix = 'https://dap.ceda.ac.uk'
+    href_local = href.replace(ceda_dap_prefix, '')
+
     if not os.path.isfile(href_local):
         attempts = 0
         success = False
+
         while attempts < 3 and not success:
             resp = requests.get(href)
             if resp.status_code == 200:
                 success = True
             attempts += 1
+
         if attempts >= 3 and not success:
             raise ValueError(
                 f'File {href}: Download unsuccessful - '
@@ -715,6 +721,28 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
         if isinstance(v, list) and len(v) == 3:
             # First character
             if 'https://' in v[0]:
-                refs['refs'][key][0] = v[0].replace('https://dap.ceda.ac.uk/','/')
+                refs['refs'][key][0] = v[0].replace(ceda_dap_prefix + '/', '/')
+
+    # for key, v in refs.get("refs", {}).items():
+    #     if isinstance(v, list) and len(v) == 3:
+    #         url = v[0]
+
+    #         if isinstance(url, str) and url.startswith(prefix):
+    #             # Map URL → local path
+    #             local_path = url.replace(prefix, "/")
+
+    #             # Normalize path
+    #             local_path = os.path.abspath(local_path)
+
+    #             # Validate existence (critical for local_only mode)
+    #             if not os.path.exists(local_path):
+    #                 raise FileNotFoundError(
+    #                     f"Missing local file for kerchunk reference:\n"
+    #                     f"{url}\n→ {local_path}"
+    #                 )
+
+    #             # Convert to proper file URI
+    #             refs["refs"][key][0] = f"file://{local_path}"
+
     return refs
 
