@@ -31,8 +31,6 @@ def setup_cluster(query, collection, verbose=False):
             search_basic.items,
         )
 
-    # search_basic._load_asset_set()  # debug
-
     cluster = search_basic.collect_cloud_assets()
     if verbose:
         print(
@@ -57,8 +55,8 @@ class TestDataPointIntegration(unittest.TestCase):
         collection = "cmip6"
         query = [
             "cmip6:experiment_id=ssp585",
-            # "cmip6:activity_id=ScenarioMIP",
-            # "cmip6:institution_id=KIOST",
+            "cmip6:activity_id=ScenarioMIP",
+            "cmip6:institution_id=KIOST",
         ]
         cls.client, cls.search_basic, cls.cluster = setup_cluster(
             query, collection, verbose=cls.verbose
@@ -69,8 +67,58 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(self.cluster)
         # TODO further assertions
 
+    def test_product_open_with_xarray(self):
+        """Test opening datasets from a product in 'xarray' mode."""
+        prod = self.cluster[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        ds = prod.open_dataset(mode="xarray")
+        self.assertIsNotNone(ds)
+
+        print("XARRAY DATA IS:", ds)
+        # TODO further assertions
+
+    def test_product_open_with_xarray_local_only(self):
+        """Test opening local-only datasets from a product in 'xarray' mode."""
+        prod = self.cluster[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        ds = prod.open_dataset(mode="xarray", local_only=True)
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
     def test_cluster_open_with_xarray(self):
         """Test opening datasets from a cluster in 'xarray' mode."""
+        cluster = self.cluster
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+                cluster.attributes,
+            )
+
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=0, mode="xarray")
+        self.assertIsNotNone(ds)
+
+        print("XARRAY DATA IS:", ds)
+        # TODO further assertions
+
+    def test_cluster_open_with_xarray_local_only(self):
+        """Test opening local-only datasets from a cluster in 'xarray' mode."""
         cluster = self.cluster
         if self.verbose:
             print(
@@ -80,7 +128,37 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=0, mode="xarray")
+        ds = cluster.open_dataset(id=0, mode="xarray", local_only=True)
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_product_open_with_cf(self):
+        """Test opening datasets from a product in 'cf' mode."""
+        prod = self.cluster[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        ds = prod.open_dataset(mode="cf")
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_product_open_with_cf_local_only(self):
+        """Test opening local-only datasets from a product in 'cf' mode."""
+        prod = self.cluster[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        ds = prod.open_dataset(mode="cf", local_only=True)
         self.assertIsNotNone(ds)
         # TODO further assertions
 
@@ -95,38 +173,26 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         # TODO test with loop over various products (not just id=0 case)
-        fl = cluster.open_dataset(id=0, mode="cf")
-        self.assertIsNotNone(fl)
-        # TODO further assertions
-
-    def test_product_open_with_xarray(self):
-        """Test opening datasets from a product in 'xarray' mode."""
-        # TODO test with loop over various products (not just 0 index case)
-        prod = self.cluster[0]
-        if self.verbose:
-            print(
-                prod,
-                prod.info(),
-                prod.help(),
-            )
-
-        ds = prod.open_dataset(id=0, mode="xarray")
+        ds = cluster.open_dataset(id=0, mode="cf")
         self.assertIsNotNone(ds)
         # TODO further assertions
 
-    def test_product_open_with_cf(self):
-        """Test opening datasets from a product in 'cf' mode."""
-        # TODO test with loop over various products (not just 0 index case)
-        prod = self.cluster[0]
+    def test_cluster_open_with_cf_local_only(self):
+        """Test opening local-only datasets from a cluster in 'cf' mode."""
+        cluster = self.cluster
         if self.verbose:
             print(
-                prod,
-                prod.info(),
-                prod.help(),
+                cluster,
+                cluster.info(),
+                cluster.help(),
             )
 
-        fl = prod.open_dataset(mode="cf")
-        self.assertIsNotNone(fl)
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=0, mode="cf", local_only=True)
+        self.assertIsNotNone(ds)
+
+        print("\nCF FIELDLIST IS:\n", fl)
+        print("\nFIRST FIELD IS:\n", fl[0])
         # TODO further assertions
 
 
