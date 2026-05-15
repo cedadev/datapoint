@@ -716,33 +716,28 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
         with open(href_local) as f:
             refs = json.load(f)
 
-    for key in refs['refs'].keys():
-        v = refs['refs'][key]
+    for key, v in refs.items():
         if isinstance(v, list) and len(v) == 3:
-            # First character
-            if 'https://' in v[0]:
-                refs['refs'][key][0] = v[0].replace(ceda_dap_prefix + '/', '/')
+            url = v[0]
 
-    # for key, v in refs.get("refs", {}).items():
-    #     if isinstance(v, list) and len(v) == 3:
-    #         url = v[0]
+            if isinstance(url, str) and url.startswith(ceda_dap_prefix + '/'):
+                # Map URL to local path
+                local_path = url.replace(ceda_dap_prefix + '/', "/")
 
-    #         if isinstance(url, str) and url.startswith(prefix):
-    #             # Map URL → local path
-    #             local_path = url.replace(prefix, "/")
+                # Normalize path
+                local_path = os.path.abspath(local_path)
 
-    #             # Normalize path
-    #             local_path = os.path.abspath(local_path)
+                # Validate existence (critical for local_only mode)
+                if not os.path.exists(local_path):
+                    raise FileNotFoundError(
+                        f"Missing local file for kerchunk reference: "
+                        f"{url} expected at: {local_path}"
+                    )
 
-    #             # Validate existence (critical for local_only mode)
-    #             if not os.path.exists(local_path):
-    #                 raise FileNotFoundError(
-    #                     f"Missing local file for kerchunk reference:\n"
-    #                     f"{url}\n→ {local_path}"
-    #                 )
-
-    #             # Convert to proper file URI
-    #             refs["refs"][key][0] = f"file://{local_path}"
+                # Convert to proper file URI
+                refs["refs"][key][0] = f"file://{local_path}"
+                # TOOD SLB DEV
+                # print("NEW REFS IS:", v[0].replace(ceda_dap_prefix + '/', '/'))
 
     return refs
 
