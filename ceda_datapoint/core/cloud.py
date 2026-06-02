@@ -196,7 +196,7 @@ class DataPointCloudProduct(BasicAsset):
             local_only: bool = False,
             prepare_data: bool = True,
             **kwargs
-        ):  # TODO type hint?
+        ) -> xr.Dataset | cf.FieldList:
         """
         Open the dataset for this product.
 
@@ -308,6 +308,7 @@ class DataPointCloudProduct(BasicAsset):
 
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
+                    print("Specs are", fsspec.available_protocols())
                     remote_protocol="file"
                 else:
                     remote_protocol="https"
@@ -737,7 +738,7 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
                 # Convert to proper file URI
                 refs["refs"][key][0] = f"file://{local_path}"
                 # TOOD SLB DEV
-                # print("NEW REFS IS:", v[0].replace(ceda_dap_prefix + '/', '/'))
+                print("NEW REFS IS:", v[0].replace(ceda_dap_prefix + '/', '/'))
 
     return refs
 
