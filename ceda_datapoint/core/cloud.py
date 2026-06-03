@@ -7,7 +7,6 @@ import logging
 import os
 from typing import Any, Union
 
-import cf
 import fsspec
 import requests
 import rioxarray as rxr
@@ -292,6 +291,10 @@ class DataPointCloudProduct(BasicAsset):
 
         TODO detailed docs.
         """
+        # Import internally to avoid a hard dependency - have set in
+        # packaging (pyproject.toml) as 'cf-output' install extra category
+        import cf
+
         try:
             if self._cloud_format == 'zarr':
                 # Open Zarr to cf
@@ -326,7 +329,7 @@ class DataPointCloudProduct(BasicAsset):
                 kerchunk = fs.get_mapper()
 
                 # Finally read from the filesystem mapper
-                import cfdm  # TODO SLB dev
+                import cfdm  # TODO SLB dev - remove later for cf import at top
                 fl = cfdm.read(kerchunk)
             elif self._cloud_format == 'CFA':
                 # Open CFA

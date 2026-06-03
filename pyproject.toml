@@ -21,6 +21,11 @@ dependencies = [
     "rioxarray (>=0.15.0)"
 ]
 
+[project.optional-dependencies]
+cf-output = [
+    "cf-python>=3.20.0"
+]
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
