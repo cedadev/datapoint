@@ -1,7 +1,9 @@
 """Intergration test for opening datasets using CEDA Datapoint."""
 
 import unittest
+import ceda_datapoint
 from ceda_datapoint import DataPointClient
+
 
 
 def setup_cluster(query, collection, verbose=False):
@@ -45,6 +47,19 @@ def setup_cluster(query, collection, verbose=False):
 
 class TestDataPointIntegration(unittest.TestCase):
     """Integration test for opening STAC datasets."""
+
+    def check_local_only(self, product):
+        """Check HREF is a local case."""
+        # Only kerchunk is valid for local_only case
+        self.assertEqual(
+            product._cloud_format,
+            "kerchunk",
+            "local_only behaviour is only valid for kerchunk datasets"
+        )
+
+        refs = ceda_datapoint.core.cloud._fetch_kerchunk_make_local(
+            product.href)
+        self.assertIn("file://", str(refs))
 
     @classmethod
     def setUpClass(cls):
@@ -93,14 +108,9 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        ds = prod.open_dataset(mode="xarray", local_only=True)
+        self.check_local_only(prod)
 
-        # Only kerchunk is valid for local_only case
-        self.assertEqual(
-            prod._cloud_format,
-            "kerchunk",
-            "local_only behaviour is only valid for kerchunk datasets"
-        )
+        ds = prod.open_dataset(mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
 
@@ -133,15 +143,11 @@ class TestDataPointIntegration(unittest.TestCase):
                 cluster.help(),
             )
 
-        # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=0, mode="xarray", local_only=True)
+        product_id = 0
+        self.check_local_only(cluster[product_id])
 
-        # Only kerchunk is valid for local_only case
-        self.assertEqual(
-            cluster.products[0]._cloud_format,
-            "kerchunk",
-            "local_only behaviour is only valid for kerchunk datasets"
-        )
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
         # TODO further assertions
@@ -175,14 +181,9 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        fl = prod.open_dataset(mode="cf", local_only=True)
+        self.check_local_only(prod)
 
-        # Only kerchunk is valid for local_only case
-        self.assertEqual(
-            prod._cloud_format,
-            "kerchunk",
-            "local_only behaviour is only valid for kerchunk datasets"
-        )
+        fl = prod.open_dataset(mode="cf", local_only=True)
 
         self.assertIsNotNone(fl)
 
@@ -215,15 +216,11 @@ class TestDataPointIntegration(unittest.TestCase):
                 cluster.help(),
             )
 
-        # TODO test with loop over various products (not just id=0 case)
-        fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
+        product_id = 0
+        self.check_local_only(cluster[product_id])
 
-        # Only kerchunk is valid for local_only case
-        self.assertEqual(
-            cluster.products[0]._cloud_format,
-            "kerchunk",
-            "local_only behaviour is only valid for kerchunk datasets"
-        )
+        # TODO test with loop over various products (not just id=0 case)
+        fl = cluster.open_dataset(id=product_id, mode="cf", local_only=True)
 
         self.assertIsNotNone(fl)
         # TODO further assertions
