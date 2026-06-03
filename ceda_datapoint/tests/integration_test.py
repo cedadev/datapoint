@@ -80,8 +80,6 @@ class TestDataPointIntegration(unittest.TestCase):
 
         ds = prod.open_dataset(mode="xarray")
         self.assertIsNotNone(ds)
-
-        print("XARRAY DATA IS:", ds)
         # TODO further assertions
 
     def test_product_open_with_xarray_local_only(self):
@@ -96,7 +94,17 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         ds = prod.open_dataset(mode="xarray", local_only=True)
+
+        # Only kerchunk is valid for local_only case
+        self.assertEqual(
+            prod._cloud_format,
+            "kerchunk",
+            "local_only behaviour is only valid for kerchunk datasets"
+        )
+
         self.assertIsNotNone(ds)
+
+        print("\nXR LOCAL ONLY DATASET IS:\n", ds)
         # TODO further assertions
 
     def test_cluster_open_with_xarray(self):
@@ -113,8 +121,6 @@ class TestDataPointIntegration(unittest.TestCase):
         # TODO test with loop over various products (not just id=0 case)
         ds = cluster.open_dataset(id=0, mode="xarray")
         self.assertIsNotNone(ds)
-
-        print("XARRAY DATA IS:", ds)
         # TODO further assertions
 
     def test_cluster_open_with_xarray_local_only(self):
@@ -129,6 +135,14 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # TODO test with loop over various products (not just id=0 case)
         ds = cluster.open_dataset(id=0, mode="xarray", local_only=True)
+
+        # Only kerchunk is valid for local_only case
+        self.assertEqual(
+            cluster.products[0]._cloud_format,
+            "kerchunk",
+            "local_only behaviour is only valid for kerchunk datasets"
+        )
+
         self.assertIsNotNone(ds)
         # TODO further assertions
 
@@ -143,8 +157,11 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        ds = prod.open_dataset(mode="cf")
-        self.assertIsNotNone(ds)
+        fl = prod.open_dataset(mode="cf")
+        self.assertIsNotNone(fl)
+
+        #print("\nCF FIELDLIST IS:\n", fl)
+        #print("\nFIRST FIELD IS:\n", fl[0])
         # TODO further assertions
 
     def test_product_open_with_cf_local_only(self):
@@ -158,8 +175,19 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        ds = prod.open_dataset(mode="cf", local_only=True)
-        self.assertIsNotNone(ds)
+        fl = prod.open_dataset(mode="cf", local_only=True)
+
+        # Only kerchunk is valid for local_only case
+        self.assertEqual(
+            prod._cloud_format,
+            "kerchunk",
+            "local_only behaviour is only valid for kerchunk datasets"
+        )
+
+        self.assertIsNotNone(fl)
+
+        print("\nCF LOCAL ONLY FIELDLIST IS:\n", fl)
+        print("\nFIRST LOCAL ONLY FIELD IS:\n", fl[0])
         # TODO further assertions
 
     def test_cluster_open_with_cf(self):
@@ -173,8 +201,8 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=0, mode="cf")
-        self.assertIsNotNone(ds)
+        fl = cluster.open_dataset(id=0, mode="cf")
+        self.assertIsNotNone(fl)
         # TODO further assertions
 
     def test_cluster_open_with_cf_local_only(self):
@@ -188,11 +216,16 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=0, mode="cf", local_only=True)
-        self.assertIsNotNone(ds)
+        fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
 
-        print("\nCF FIELDLIST IS:\n", fl)
-        print("\nFIRST FIELD IS:\n", fl[0])
+        # Only kerchunk is valid for local_only case
+        self.assertEqual(
+            cluster.products[0]._cloud_format,
+            "kerchunk",
+            "local_only behaviour is only valid for kerchunk datasets"
+        )
+
+        self.assertIsNotNone(fl)
         # TODO further assertions
 
 
