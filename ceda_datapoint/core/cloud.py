@@ -311,16 +311,12 @@ class DataPointCloudProduct(BasicAsset):
 
                 if local_only:
                     href = _fetch_kerchunk_make_local(href)
-                    print("Specs are", fsspec.available_protocols())
-                    remote_protocol="file"
-                else:
-                    remote_protocol="https"
 
                 # Create the filesystem and mapping object
                 fs = fsspec.filesystem(
                     "reference",
                     fo=href,
-                    remote_protocol=remote_protocol,
+                    remote_protocol="https",
                     # Important: need BOTH of these to be set True else get
                     # (a)sync inconsistency issues.
                     remote_options={"asynchronous": True},
