@@ -204,7 +204,8 @@ class DataPointCloudProduct(BasicAsset):
         input.
 
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
-            convert all hrefs and internal Kerchunk links to use local paths.
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
         """
         if not self._cloud_format:
             raise ValueError(
@@ -220,6 +221,11 @@ class DataPointCloudProduct(BasicAsset):
             raise ValueError(
                 'Href not reachable via https, please use `local_only=True` '
                 'to open this dataset.'
+            )
+
+        if local_only and mode == 'cf':
+            raise ValueError(
+                "'local_only' is not supported in 'cf' mode."
             )
 
         if mode == 'xarray':
@@ -646,7 +652,9 @@ class DataPointCluster(UIMixin):
         :param mode:    (str) The type of dataset to be returned: 'xarray' or 'cf'.
         
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
-            convert all hrefs and internal Kerchunk links to use local paths."""
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
+        """
 
         if mode not in ('xarray', 'cf'):
             raise NotImplementedError(
@@ -654,7 +662,12 @@ class DataPointCluster(UIMixin):
             )
 
         local_only = local_only or self._local_only
-        
+
+        if local_only and mode == 'cf':
+            raise ValueError(
+                "'local_only' is not supported in 'cf' mode."
+            )
+
         if isinstance(id, int):
             id = list(self._products.keys())[id]
         

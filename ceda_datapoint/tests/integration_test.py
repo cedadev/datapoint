@@ -59,7 +59,24 @@ class TestDataPointIntegration(unittest.TestCase):
 
         refs = ceda_datapoint.core.cloud._fetch_kerchunk_make_local(
             product.href)
-        self.assertIn("file://", str(refs))
+
+        txt = str(refs)
+
+        self.assertNotIn("file://", txt)
+        self.assertNotIn("https://", txt)
+        print("Contains file://", "file://" in txt)
+        print("Contains https://", "https://" in txt)
+        #print(type(refs))
+        #print(refs)
+
+        #for key in refs["refs"].items():
+        #    print("IS", refs["refs"][key])
+        #self.assertNotIn("https://", str(refs))
+        for k, v in refs["refs"].items():
+            if isinstance(v, list):
+                print("KEY:", k)
+                print("VALUE:", v)
+                break
 
     @classmethod
     def setUpClass(cls):
@@ -181,15 +198,9 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        self.check_local_only(prod)
-
-        fl = prod.open_dataset(mode="cf", local_only=True)
-
-        self.assertIsNotNone(fl)
-
-        print("\nCF LOCAL ONLY FIELDLIST IS:\n", fl)
-        print("\nFIRST LOCAL ONLY FIELD IS:\n", fl[0])
-        # TODO further assertions
+        # 'local_only' not supported for cf-python mode
+        with self.assertRaises(ValueError):
+            fl = prod.open_dataset(mode="cf", local_only=True)
 
     def test_cluster_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
@@ -216,14 +227,9 @@ class TestDataPointIntegration(unittest.TestCase):
                 cluster.help(),
             )
 
-        product_id = 0
-        self.check_local_only(cluster[product_id])
-
-        # TODO test with loop over various products (not just id=0 case)
-        fl = cluster.open_dataset(id=product_id, mode="cf", local_only=True)
-
-        self.assertIsNotNone(fl)
-        # TODO further assertions
+        # 'local_only' not supported for cf-python mode
+        with self.assertRaises(ValueError):
+            fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
 
 
 if __name__ == "__main__":
