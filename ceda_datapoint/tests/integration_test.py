@@ -62,21 +62,19 @@ class TestDataPointIntegration(unittest.TestCase):
 
         txt = str(refs)
 
-        self.assertNotIn("file://", txt)
-        self.assertNotIn("https://", txt)
-        print("Contains file://", "file://" in txt)
-        print("Contains https://", "https://" in txt)
-        #print(type(refs))
-        #print(refs)
+        # Prevent whole kerchunk ref text spamming terminal for failure cases
+        self.longMessage = False
 
-        #for key in refs["refs"].items():
-        #    print("IS", refs["refs"][key])
-        #self.assertNotIn("https://", str(refs))
-        for k, v in refs["refs"].items():
-            if isinstance(v, list):
-                print("KEY:", k)
-                print("VALUE:", v)
-                break
+        self.assertNotIn(
+            "file://",
+            txt,
+            msg="Kerchunk reference contains 'file://' but should not",
+        )
+        self.assertNotIn(
+            "https://",
+            txt,
+            msg="Kerchunk reference contains 'https://' but should not",
+        )
 
     @classmethod
     def setUpClass(cls):
