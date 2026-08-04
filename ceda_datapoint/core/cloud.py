@@ -292,7 +292,7 @@ class DataPointCloudProduct(BasicAsset):
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
 
-            return self._prepare_dataset_xr(ds, prepare_data=prepare_data)
+            return self._prepare_dataset_xr(ds)
 
         except ValueError as err:
             raise err
@@ -368,7 +368,7 @@ class DataPointCloudProduct(BasicAsset):
                     '"zarr") for opening in the "cf" mode.'
                 )
 
-            return _prepare_dataset_cf(fl)
+            return self._prepare_dataset_cf(fl)
 
         except ValueError as err:
             raise err
@@ -539,8 +539,67 @@ class DataPointCloudProduct(BasicAsset):
             field: cf.FieldList,
         ) -> cf.FieldList:
         """Perform any dataset subspaces here."""
+        import cf
+
+        # Get relevant search terms
+        intersects = self._meta['search_terms'].get('intersects',None)
+        datetime = self._meta['search_terms'].get('datetime',None)
+        query = self._meta['search_terms'].get('query',[])
+
+        # Get data selection choices
+        vq = None
+        for ql in query:
+            if 'variables' in ql:
+                vq = ql.split('=')[-1]
+
+        variables = self._data_selection.get('variables',None) or vq
+        sel = self._data_selection.get('sel',None)
+        isel = self._data_selection.get('isel',None)
+
+        # Filter the FieldList to the requested variables
+        if variables is not None:
+
+            if isinstance(variables,str):
+                variables = [variables]
+
+            keep_vars = []
+            all_vars = list(ds.variables)
+
+            # TODO report possible warnings/errors
+            logger.warning(
+                'Variable selection could not be applied - ',
+                f'no "{v}" variable present.'
+            )
+
+            raise ValueError(
+                f'No variables kept in current selection - {variables}'
+            )
+
+        # Determine spatial dimensions
         # TODO
-        return
+
+        # Create output FieldList
+        out = cf.FieldList()
+
+        # Apply collapses on the fields invididually, but at the end
+        # we aggregate in case we can simplify.
+        for field in fl:
+
+            # Apply polygon selection
+            # TODO
+
+            # Apply datetime selection
+            # TODO
+
+            # Apply subspaces
+            # TODO
+
+            out.append(field)
+
+        # Re-aggregate/simplify the result
+        out = out.aggregate(...)
+
+        return out
 
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
