@@ -22,7 +22,7 @@ logger.propagate = False
 
 def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
     """
-    Decode GeoJSON Polygon to Xarray Selection.
+    Decode GeoJSON Polygon to xarray Selection.
     """
     selects = {}
     for i, dim in enumerate(spatial_dims):
@@ -253,11 +253,15 @@ class DataPointCloudProduct(BasicAsset):
             **kwargs
         ) -> xr.Dataset:
         """
-        Open the dataset for this product with cf-python.
+        Open the dataset for this product with xarray.
 
-        Returns a cf.FieldList object of one or more cf.Field objects.
+        Returns a `xr.Dataset` object representing the dataset.
 
-        TODO detailed docs.
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param prepare_data:  (bool) TODO
+
         """
         try:
             if self._cloud_format == 'kerchunk':
@@ -293,9 +297,14 @@ class DataPointCloudProduct(BasicAsset):
         """
         Open the dataset for this product with cf-python.
 
-        Returns a cf.FieldList object of one or more cf.Field objects.
+        Returns a cf.FieldList object of one or more cf.Field objects
+        representing the dataset.
 
-        TODO detailed docs.
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param prepare_data:  (bool) TODO
+
         """
         # Import internally to avoid a hard dependency - have set in
         # packaging (pyproject.toml) as 'cf-output' install extra category
@@ -331,8 +340,7 @@ class DataPointCloudProduct(BasicAsset):
                 kerchunk = fs.get_mapper()
 
                 # Finally read from the filesystem mapper
-                import cfdm  # TODO SLB dev - remove later for cf import at top
-                fl = cfdm.read(kerchunk)
+                fl = cf.read(kerchunk)
             elif self._cloud_format == 'CFA':
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
@@ -680,10 +688,8 @@ class DataPointCluster(UIMixin):
         product = self._products[id]
 
         if mode == 'xarray':
-            print("MODE XARRAY")
             return product.open_dataset_with_xr(local_only=local_only, **kwargs)
         elif mode == 'cf':
-            print("MODE CF")
             return product.open_dataset_with_cf(local_only=local_only, **kwargs)
 
     def open_datasets(self):
@@ -692,7 +698,7 @@ class DataPointCluster(UIMixin):
         )
 
 def _zarr_kwargs_default(add_kwargs: dict = None) -> dict:
-    """Add any default kwargs for specific requests"""
+    """Add any default kwargs for specific requests."""
 
     add_kwargs = add_kwargs or {}
 
@@ -749,8 +755,6 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
 
                 # Convert to proper file URI
                 refs["refs"][key][0] = f"file://{local_path}"
-                # TOOD SLB DEV
-                print("NEW REFS IS:", v[0].replace(ceda_dap_prefix + '/', '/'))
 
     return refs
 
