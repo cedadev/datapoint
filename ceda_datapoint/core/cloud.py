@@ -536,7 +536,7 @@ class DataPointCloudProduct(BasicAsset):
 
     def _prepare_dataset_cf(
             self,
-            field: cf.FieldList,
+            fl: cf.FieldList,
         ) -> cf.FieldList:
         """Perform any dataset subspaces here."""
         import cf
@@ -556,50 +556,55 @@ class DataPointCloudProduct(BasicAsset):
         sel = self._data_selection.get('sel',None)
         isel = self._data_selection.get('isel',None)
 
+        print(
+            "FILTERING ON:", intersects, datetime, query, variables,
+            sel, isel,
+        )
+
         # Filter the FieldList to the requested variables
+        fl_selection = fl
         if variables is not None:
+            print("------- Have variables selection of:", variables)
+            fl_selection = fl.select_by_ncvar(variables)
 
-            if isinstance(variables,str):
-                variables = [variables]
-
-            keep_vars = []
-            all_vars = list(ds.variables)
-
-            # TODO report possible warnings/errors
+            # Returns empty fieldlist if no fields captured by selection
+            if not fl_selection:
+                logger.warning(
+                    "Variable selection could not be applied."
+                )
+        else:
             logger.warning(
-                'Variable selection could not be applied - ',
-                f'no "{v}" variable present.'
+                "No variable selection provided."
             )
-
-            raise ValueError(
-                f'No variables kept in current selection - {variables}'
-            )
+        print("END STAGE 1", fl_selection)
 
         # Determine spatial dimensions
-        # TODO
+        # TODO 2
 
         # Create output FieldList
         out = cf.FieldList()
 
         # Apply collapses on the fields invididually, but at the end
         # we aggregate in case we can simplify.
-        for field in fl:
+        for field in fl_selection:
 
             # Apply polygon selection
-            # TODO
+            # TODO 3
 
             # Apply datetime selection
-            # TODO
+            # TODO 4
+            print("END STAGE 4", field)
 
             # Apply subspaces
-            # TODO
+            # TODO 5
+            print("END STAGE 5", field)
 
             out.append(field)
 
-        # Re-aggregate/simplify the result
-        out = out.aggregate(...)
+        print("END OVERALL", out)
 
-        return out
+        # Re-aggregate to potentially simplify the result
+        return cf.aggregate(out)
 
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
