@@ -570,7 +570,8 @@ class DataPointCloudProduct(BasicAsset):
             # Returns empty fieldlist if no fields captured by selection
             if not fl_selection:
                 logger.warning(
-                    "Variable selection could not be applied."
+                    "Variable selection could not be applied: "
+                    f"no such variables in FieldList: {variables}"
                 )
         else:
             logger.warning(
@@ -591,8 +592,20 @@ class DataPointCloudProduct(BasicAsset):
             # Apply polygon selection
             # TODO 3
 
-            # Apply datetime selection
-            # TODO 4
+            # Apply datetime selection if requested
+            if datetime is not None:
+                if not field.coordinate("time"):
+                    logger.warning(
+                        "Time selection could not be applied to "
+                        f"{field}: field has no time coordinate."
+                    )
+
+                if isinstance(datetime, str):
+                    dt_query = cf.dt(datetime)
+                else:  # is a tuple representing start and end datetime
+                    dt_query = cf.wi(datetime[0], datetime[1])
+
+                    field = field.subspace(T=dt_query)
             print("END STAGE 4", field)
 
             # Apply subspaces
