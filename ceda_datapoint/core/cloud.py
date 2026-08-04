@@ -292,7 +292,7 @@ class DataPointCloudProduct(BasicAsset):
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
 
-            return self._prepare_dataset(ds, prepare_data=prepare_data)
+            return self._prepare_dataset_xr(ds, prepare_data=prepare_data)
 
         except ValueError as err:
             raise err
@@ -368,7 +368,7 @@ class DataPointCloudProduct(BasicAsset):
                     '"zarr") for opening in the "cf" mode.'
                 )
 
-            return fl
+            return _prepare_dataset_cf(fl)
 
         except ValueError as err:
             raise err
@@ -447,7 +447,7 @@ class DataPointCloudProduct(BasicAsset):
 
         return rxr.open_rasterio(self.href, **open_cog_kwargs)
 
-    def _prepare_dataset(
+    def _prepare_dataset_xr(
             self, 
             ds: xr.Dataset, 
             prepare_data: bool = True
@@ -534,7 +534,16 @@ class DataPointCloudProduct(BasicAsset):
             ds = ds.isel(**isel)
 
         return ds
-                
+
+    def _prepare_dataset_cf(
+            self,
+            field: cf.FieldList,
+            prepare_data: bool = True
+        ) -> cf.FieldList:
+        """Perform any dataset subspaces here."""
+        # TODO
+        return
+
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
 
