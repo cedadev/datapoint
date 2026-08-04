@@ -523,7 +523,7 @@ class DataPointCloudProduct(BasicAsset):
                 raise ValueError(
                     f'No variables kept in current selection - {variables}'
                 )
-            
+
             drop_vars = list(set(all_vars).difference(set(keep_vars)))
             ds = ds.drop_vars(drop_vars)
 
@@ -608,8 +608,15 @@ class DataPointCloudProduct(BasicAsset):
                     field = field.subspace(T=dt_query)
             print("END STAGE 4", field)
 
-            # Apply subspaces
-            # TODO 5
+            # Apply spatial subspaces
+            if sel is not None:
+                # Note sel args are directly compatible with cf-python
+                # subspace method
+                field = field.subspace()
+            if isel is not None:
+                # Process isel args -> cf-python subspacing via indices
+                indices = field.indices(**isel)
+                field = field[indices]
             print("END STAGE 5", field)
 
             out.append(field)
