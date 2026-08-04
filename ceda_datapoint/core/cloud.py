@@ -111,7 +111,7 @@ class DataPointCloudProduct(BasicAsset):
         
         :param order:       (int) Unused property relating to priority.
         
-        :param mode:        (str) Method to use for opening dataset.
+        :param mode:        (str) Library to use for opening dataset.
         
         :param meta:        (dict) DataPoint metadata relating to parent objects.
         
@@ -186,6 +186,13 @@ class DataPointCloudProduct(BasicAsset):
         ) -> Any:
         """
         Override for basic asset get function.
+
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
+
+        :param prepare_data:  (bool) Apply dataset selections after opening.
+
         """
         return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
 
@@ -203,9 +210,16 @@ class DataPointCloudProduct(BasicAsset):
         the method should be determined by internal values not user
         input.
 
+        :param mode:  (str) Library to use for opening datasets. Can be either
+            'xarray', returning a `xr.Dataset` object, or 'cf', returning a
+            `cf.FieldList` object.
+
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths. Note
             that local_only is only available for the 'xarray' mode.
+
+        :param prepare_data:  (bool) Apply dataset selections after opening.
+
         """
         if not self._cloud_format:
             raise ValueError(
@@ -260,7 +274,7 @@ class DataPointCloudProduct(BasicAsset):
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
 
-        :param prepare_data:  (bool) TODO
+        :param prepare_data:  (bool) Apply dataset selections after opening.
 
         """
         try:
@@ -297,13 +311,14 @@ class DataPointCloudProduct(BasicAsset):
         """
         Open the dataset for this product with cf-python.
 
-        Returns a cf.FieldList object of one or more cf.Field objects
+        Returns a `cf.FieldList` object of one or more `cf.Field` objects
         representing the dataset.
 
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths.
 
-        :param prepare_data:  (bool) TODO
+        :param prepare_data:  (bool) Apply dataset selections ('subspaces'
+            in 'cf-python' terminology) after opening.
 
         """
         # Import internally to avoid a hard dependency - have set in
@@ -655,13 +670,16 @@ class DataPointCluster(UIMixin):
         dataset can be indexed either by id or position within this 
         cluster's set of datasets. 
         
-        :param id:      (str) The ID or index of the dataset in the resulting cluster.
-        
-        :param mode:    (str) The type of dataset to be returned: 'xarray' or 'cf'.
-        
+        :param id:  (str) The ID or index of the dataset in the resulting cluster.
+
+        :param mode:  (str) Library to use for opening datasets. Can be either
+            'xarray', returning a `xr.Dataset` object, or 'cf', returning a
+            `cf.FieldList` object.
+
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
             convert all hrefs and internal Kerchunk links to use local paths. Note
             that local_only is only available for the 'xarray' mode.
+
         """
 
         if mode not in ('xarray', 'cf'):
