@@ -449,8 +449,7 @@ class DataPointCloudProduct(BasicAsset):
 
     def _prepare_dataset_xr(
             self, 
-            ds: xr.Dataset, 
-            prepare_data: bool = True
+            ds: xr.Dataset,
         ) -> Union[xr.Dataset, xr.DataArray]:
         """Perform any dataset selections here."""
 
@@ -538,7 +537,6 @@ class DataPointCloudProduct(BasicAsset):
     def _prepare_dataset_cf(
             self,
             field: cf.FieldList,
-            prepare_data: bool = True
         ) -> cf.FieldList:
         """Perform any dataset subspaces here."""
         # TODO
