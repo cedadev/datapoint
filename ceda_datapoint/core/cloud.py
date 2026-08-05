@@ -579,18 +579,37 @@ class DataPointCloudProduct(BasicAsset):
             )
         print("END STAGE 1", fl_selection)
 
-        # Determine spatial dimensions
-        # TODO 2
-
         # Create output FieldList
         out = cf.FieldList()
 
         # Apply collapses on the fields invididually, but at the end
         # we aggregate in case we can simplify.
         for field in fl_selection:
+            # Apply polygon selection on spatial dimensions
+            # Check for horizontal X coordinate and horizontal X coordinate
+            x = field.dimension_coordinate("X", default=None)
+            y = field.dimension_coordinate("Y", default=None)
 
-            # Apply polygon selection
-            # TODO 3
+            if y is not None and x is not None:
+                if intersects is not None:
+                    if intersects["type"] == "Polygon":
+                        coords = intersects["coordinates"]
+                        if len(coords) == 1:
+                            coords = coords[0]
+
+                        lons = [c[0] for c in coords]
+                        lats = [c[1] for c in coords]
+
+                        field = field.subspace(
+                            X=cf.wi(min(lons), max(lons)),
+                            Y=cf.wi(min(lats), max(lats)),
+                        )
+                    else:
+                        logger.warning(
+                            "Unsupported intersection type for Single Search "
+                            "Selection - AOI not applied."
+                        )
+            print("END STAGE 3", field)
 
             # Apply datetime selection if requested
             if datetime is not None:
@@ -605,14 +624,14 @@ class DataPointCloudProduct(BasicAsset):
                 else:  # is a tuple representing start and end datetime
                     dt_query = cf.wi(datetime[0], datetime[1])
 
-                    field = field.subspace(T=dt_query)
+                field = field.subspace(T=dt_query)
             print("END STAGE 4", field)
 
             # Apply spatial subspaces
             if sel is not None:
                 # Note sel args are directly compatible with cf-python
                 # subspace method
-                field = field.subspace()
+                field = field.subspace(**sel)
             if isel is not None:
                 # Process isel args -> cf-python subspacing via indices
                 indices = field.indices(**isel)
