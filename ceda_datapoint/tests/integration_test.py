@@ -72,23 +72,27 @@ class TestDataPointIntegration(unittest.TestCase):
 
 
         # A search requiring 'preparation' of the dataset
-        # Using example from docs at: https://cedadev.github.io/datapoint/index.html
+        # Search inputs based on example from docs at:
+        #     https://cedadev.github.io/datapoint/index.html
         compound_search_inputs = {
             "query": [
-                'cmip6:experiment_id=001',
-                'variables=clt',
+                'cmip6:activity_id=ScenarioMIP',
             ],
             "intersects": {
                 "type": "Polygon",
-                "coordinates": [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],
+                "coordinates": [[
+                    [6, 53], [7, 53], [7, 54], [6, 54], [6, 53]
+                ]],
             },
-            "datetime": '2025-01-01/2025-12-31',
-            "data_selection": {
-                'variables': ['clt'],
-                'sel':{
-                    'nv': slice(0,5)
-                }
-            },
+            #"datetime": '2201-01-01/2210-01-01',
+            #
+            # "data_selection": {
+            #     'variables': ['tasmin'],
+            #      #'sel':{
+            #      #    'nv': slice(0,5)
+            #      #}
+            # },
+            # },
             "max_items": 10,
         }
         _, cls.search_compound, cls.cluster_compound = setup_cluster(
@@ -129,7 +133,9 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(self.cluster)
         # TODO further assertions
 
-    def test_product_open_with_xarray(self):
+    # Simple search tests below
+
+    def test_product_simple_open_with_xarray(self):
         """Test opening datasets from a product in 'xarray' mode."""
         prod = self.cluster[0]
         if self.verbose:
@@ -250,6 +256,141 @@ class TestDataPointIntegration(unittest.TestCase):
     def test_cluster_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
         cluster = self.cluster
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+            )
+
+        # 'local_only' not supported for cf-python mode
+        with self.assertRaises(ValueError):
+            fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
+
+
+    # Compound search tests below
+
+    def test_product_compound_open_with_xarray(self):
+        """Test opening datasets from a product in 'xarray' mode."""
+        prod = self.cluster_compound[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        ds = prod.open_dataset(mode="xarray")
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_product_compound_open_with_xarray_local_only(self):
+        """Test opening local-only datasets from a product in 'xarray' mode."""
+        prod = self.cluster_compound[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        self.check_local_only(prod)
+
+        ds = prod.open_dataset(mode="xarray", local_only=True)
+
+        self.assertIsNotNone(ds)
+
+        print("\nXR LOCAL ONLY DATASET IS:\n", ds)
+        # TODO further assertions
+
+    def test_cluster_compound_open_with_xarray(self):
+        """Test opening datasets from a cluster in 'xarray' mode."""
+        cluster = self.cluster_compound
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+                cluster.attributes,
+            )
+
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=0, mode="xarray")
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_cluster_compound_open_with_xarray_local_only(self):
+        """Test opening local-only datasets from a cluster in 'xarray' mode."""
+        cluster = self.cluster_compound
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+            )
+
+        product_id = 0
+        self.check_local_only(cluster[product_id])
+
+        # TODO test with loop over various products (not just id=0 case)
+        ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
+
+        self.assertIsNotNone(ds)
+        # TODO further assertions
+
+    def test_product_compound_open_with_cf(self):
+        """Test opening datasets from a product in 'cf' mode."""
+        prod = self.cluster_compound[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        fl = prod.open_dataset(mode="cf")
+        self.assertIsNotNone(fl)
+
+        #print("\nCF FIELDLIST IS:\n", fl)
+        #print("\nFIRST FIELD IS:\n", fl[0])
+        # TODO further assertions
+
+    def test_product_compound_open_with_cf_local_only(self):
+        """Test opening local-only datasets from a product in 'cf' mode."""
+        prod = self.cluster_compound[0]
+        if self.verbose:
+            print(
+                prod,
+                prod.info(),
+                prod.help(),
+                prod.attributes,
+            )
+
+        # 'local_only' not supported for cf-python mode
+        with self.assertRaises(ValueError):
+            fl = prod.open_dataset(mode="cf", local_only=True)
+
+    def test_cluster_compound_open_with_cf(self):
+        """Test opening datasets from a cluster in 'cf' mode."""
+        cluster = self.cluster_compound
+        if self.verbose:
+            print(
+                cluster,
+                cluster.info(),
+                cluster.help(),
+            )
+
+        # TODO test with loop over various products (not just id=0 case)
+        fl = cluster.open_dataset(id=0, mode="cf")
+        self.assertIsNotNone(fl)
+        # TODO further assertions
+
+    def test_cluster_compound_open_with_cf_local_only(self):
+        """Test opening local-only datasets from a cluster in 'cf' mode."""
+        cluster = self.cluster_compound
         if self.verbose:
             print(
                 cluster,
