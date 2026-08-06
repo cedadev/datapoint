@@ -13,6 +13,7 @@ with the HPC architecture on which the archive resides (see the `JASMIN homepage
 This module serves as an access layer to the CEDA STAC catalogs, where the direct pathways to these cloud formats can be searched and accessed. It is possible to use any STAC API to 
 access our collection, but DataPoint is unique in that it is automatically configured to open cloud datasets given the configuration information in the STAC records that are searched.
 
+
 New for v0.5 - Single-Search Selections
 ---------------------------------------
 
@@ -33,7 +34,7 @@ Example search
          'variables=clt',
       ],
       data_selection={
-         'variables':['clt'] # Alternative variable search
+         'variables':['clt'],  # Alternative variable search
          'sel':{
             'nv':slice(0,5)
          }
@@ -50,7 +51,7 @@ The datapoint package can be installed via pip, and requires Python 3.8 or later
 
 .. code::
 
-   >>> pip install ceda-datapoint
+   $ pip install ceda-datapoint
 
 See the section on ``Inspiration`` if you would like to learn more about why ``datapoint`` was developed and how it benefits users of CEDA data.
 
