@@ -578,11 +578,12 @@ class DataPointCloudProduct(BasicAsset):
         # Filter the FieldList to the requested variables
         fl_selection = fl
         if variables is not None:
-            print("------- Have variables selection of:", variables)
-            #try:
-            fl_selection = fl.select_by_ncvar(variables)
-            #except:
-            #    fl_selection = fl.select_by_identity(*variables)
+            for field in fl_selection:
+                field.dump()
+
+            # 'variables' input is a list so unpack as arguments
+            # to select_by_ncvar
+            fl_selection = fl.select_by_ncvar(*variables)
 
             # Returns empty fieldlist if no fields captured by selection
             if not fl_selection:
