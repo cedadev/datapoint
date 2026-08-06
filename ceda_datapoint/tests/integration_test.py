@@ -1,4 +1,4 @@
-"""Intergration test for opening datasets using CEDA Datapoint."""
+"""Integration test for opening datasets using CEDA Datapoint."""
 
 import unittest
 import ceda_datapoint
@@ -6,9 +6,13 @@ from ceda_datapoint import DataPointClient
 
 
 
-def setup_cluster(query, collection, verbose=False):
+def setup_cluster(collection, search_query, verbose=False, use_client=False):
     """Set up and return a Datapoint client, search and cluster."""
-    client = DataPointClient(org="CEDA")
+    if use_client:
+        client = use_client  # use an existing client, not a new one
+    else:
+        client = DataPointClient(org="CEDA")
+
     if verbose:
         print(
             client,
@@ -18,22 +22,21 @@ def setup_cluster(query, collection, verbose=False):
             client.list_query_terms(collection=collection),
         )
 
-    search_basic = client.search(
+    search = client.search(
         collections=[collection],
-        query=query,
-        max_items=10
+        **search_query,
     )
     if verbose:
         print(
-            search_basic,
-            search_basic.info(),
-            search_basic.help(),
-            search_basic.display_assets(),
-            search_basic.display_cloud_assets(),
-            search_basic.items,
+            search,
+            search.info(),
+            search.help(),
+            search.display_assets(),
+            search.display_cloud_assets(),
+            search.items,
         )
 
-    cluster = search_basic.collect_cloud_assets()
+    cluster = search.collect_cloud_assets()
     if verbose:
         print(
             cluster,
@@ -42,11 +45,56 @@ def setup_cluster(query, collection, verbose=False):
             cluster.products,
         )
 
-    return client, search_basic, cluster
+    return client, search, cluster
 
 
 class TestDataPointIntegration(unittest.TestCase):
     """Integration test for opening STAC datasets."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up the test class."""
+        # Set True for more info / debugging
+        cls.verbose = False
+
+        collection = "cmip6"
+        basic_search_inputs = {
+            "query": [
+                "cmip6:experiment_id=ssp585",
+                "cmip6:activity_id=ScenarioMIP",
+                "cmip6:institution_id=KIOST"
+            ],
+            "max_items": 10,
+        }
+        cls.client, cls.search_basic, cls.cluster = setup_cluster(
+            collection, basic_search_inputs, verbose=cls.verbose
+        )
+
+
+        # A search requiring 'preparation' of the dataset
+        # Using example from docs at: https://cedadev.github.io/datapoint/index.html
+        compound_search_inputs = {
+            "query": [
+                'cmip6:experiment_id=001',
+                'variables=clt',
+            ],
+            "intersects": {
+                "type": "Polygon",
+                "coordinates": [[[6, 53], [7, 53], [7, 54], [6, 54], [6, 53]]],
+            },
+            "datetime": '2025-01-01/2025-12-31',
+            "data_selection": {
+                'variables': ['clt'],
+                'sel':{
+                    'nv': slice(0,5)
+                }
+            },
+            "max_items": 10,
+        }
+        _, cls.search_compound, cls.cluster_compound = setup_cluster(
+            collection, compound_search_inputs, verbose=cls.verbose,
+            use_client=cls.client,
+        )
 
     def check_local_only(self, product):
         """Check HREF is a local case."""
@@ -76,22 +124,6 @@ class TestDataPointIntegration(unittest.TestCase):
             msg="Kerchunk reference contains 'https://' but should not",
         )
 
-    @classmethod
-    def setUpClass(cls):
-        """Set up the test class."""
-        # Set True for more info / debugging
-        cls.verbose = False
-
-        collection = "cmip6"
-        query = [
-            "cmip6:experiment_id=ssp585",
-            "cmip6:activity_id=ScenarioMIP",
-            "cmip6:institution_id=KIOST",
-        ]
-        cls.client, cls.search_basic, cls.cluster = setup_cluster(
-            query, collection, verbose=cls.verbose
-        )
-
     def test_cluster_setup(self):
         """Test the setting up of a cluster."""
         self.assertIsNotNone(self.cluster)
@@ -112,7 +144,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
-    def test_product_open_with_xarray_local_only(self):
+    def test_product_simple_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a product in 'xarray' mode."""
         prod = self.cluster[0]
         if self.verbose:
@@ -132,7 +164,7 @@ class TestDataPointIntegration(unittest.TestCase):
         print("\nXR LOCAL ONLY DATASET IS:\n", ds)
         # TODO further assertions
 
-    def test_cluster_open_with_xarray(self):
+    def test_cluster_simple_open_with_xarray(self):
         """Test opening datasets from a cluster in 'xarray' mode."""
         cluster = self.cluster
         if self.verbose:
@@ -148,7 +180,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
-    def test_cluster_open_with_xarray_local_only(self):
+    def test_cluster_simple_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a cluster in 'xarray' mode."""
         cluster = self.cluster
         if self.verbose:
@@ -167,7 +199,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
-    def test_product_open_with_cf(self):
+    def test_product_simple_open_with_cf(self):
         """Test opening datasets from a product in 'cf' mode."""
         prod = self.cluster[0]
         if self.verbose:
@@ -185,7 +217,7 @@ class TestDataPointIntegration(unittest.TestCase):
         #print("\nFIRST FIELD IS:\n", fl[0])
         # TODO further assertions
 
-    def test_product_open_with_cf_local_only(self):
+    def test_product_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a product in 'cf' mode."""
         prod = self.cluster[0]
         if self.verbose:
@@ -200,7 +232,7 @@ class TestDataPointIntegration(unittest.TestCase):
         with self.assertRaises(ValueError):
             fl = prod.open_dataset(mode="cf", local_only=True)
 
-    def test_cluster_open_with_cf(self):
+    def test_cluster_simple_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
         cluster = self.cluster
         if self.verbose:
@@ -215,7 +247,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(fl)
         # TODO further assertions
 
-    def test_cluster_open_with_cf_local_only(self):
+    def test_cluster_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
         cluster = self.cluster
         if self.verbose:
