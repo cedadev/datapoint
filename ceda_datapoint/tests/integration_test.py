@@ -78,13 +78,13 @@ class TestDataPointIntegration(unittest.TestCase):
             "query": [
                 'cmip6:activity_id=ScenarioMIP',
             ],
-            "intersects": {
-                "type": "Polygon",
-                "coordinates": [[
-                    [6, 53], [7, 53], [7, 54], [6, 54], [6, 53]
-                ]],
-            },
-            #"datetime": '2201-01-01/2210-01-01',
+            # "intersects": {
+            #     "type": "Polygon",
+            #     "coordinates": [[
+            #         [6, 53], [7, 53], [7, 54], [6, 54], [6, 53]
+            #     ]],
+            # },
+            "datetime": '2201-01-01/2210-01-01',
             #
             # "data_selection": {
             #     'variables': ['tasmin'],

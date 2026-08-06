@@ -31,7 +31,7 @@ def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
         selects[dim] = dim_range
     return selects
 
-def _decode_datetime(datetime):
+def _decode_datetime_xr(datetime):
     """
     Decode pystac datetime to xarray select.
     """
@@ -42,6 +42,26 @@ def _decode_datetime(datetime):
         return dt[0]
     else:
         return dt
+
+def _decode_datetime_cf(datetime):
+    """
+    Decode pystac datetime to cf-python subspace.
+    """
+    import cf
+
+    if isinstance(datetime, str):
+        dt = datetime.split('/')
+
+    # Determine if a range or a single value for datetime and
+    # provide the appropriate cf query objcet to provide to the
+    # subspace method.
+    if len(dt) == 2:
+        return cf.wi(cf.dt(dt[0]), cf.dt(dt[1]))
+    elif len(dt) == 1:
+        return cf.isclose(cf.dt(dt[0]))
+    else:
+        raise ValueError(
+            f"Can't decode datetime specification: {datetime}")
 
 def _find_spatial_dims(ds) -> Union[list,None]:
     """
@@ -499,7 +519,7 @@ class DataPointCloudProduct(BasicAsset):
                 )
             else:
                 if isinstance(datetime, str):
-                    time_sel = _decode_datetime(datetime)
+                    time_sel = _decode_datetime_xr(datetime)
                 else:
                     time_sel = slice(datetime[0],datetime[1])
                 ds = ds.sel(time=time_sel)
@@ -619,12 +639,10 @@ class DataPointCloudProduct(BasicAsset):
                         f"{field}: field has no time coordinate."
                     )
 
-                if isinstance(datetime, str):
-                    dt_query = cf.dt(datetime)
-                else:  # is a tuple representing start and end datetime
-                    dt_query = cf.wi(datetime[0], datetime[1])
-
+                # Needs decoding from 'start/end' format
+                dt_query = _decode_datetime_cf(datetime)
                 field = field.subspace(T=dt_query)
+
             print("END STAGE 4", field)
 
             # Apply spatial subspaces
