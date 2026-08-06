@@ -78,21 +78,20 @@ class TestDataPointIntegration(unittest.TestCase):
             "query": [
                 'cmip6:activity_id=ScenarioMIP',
             ],
-            # "intersects": {
-            #     "type": "Polygon",
-            #     "coordinates": [[
-            #         [6, 53], [7, 53], [7, 54], [6, 54], [6, 53]
-            #     ]],
-            # },
+            "intersects": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [100, -45], [300, 45], [350, 45], [300, 90], [100, -45]
+                ]],
+            },
             "datetime": '2201-01-01/2210-01-01',
-            #
-            # "data_selection": {
-            #     'variables': ['tasmin'],
-            #      #'sel':{
-            #      #    'nv': slice(0,5)
-            #      #}
-            # },
-            # },
+            "data_selection": {
+                'variables': ['tasmin',],
+                 'sel':{
+                     'lon': slice(200, 300),
+                     'lat': slice(-30, 30)
+                 }
+            },
             "max_items": 10,
         }
         _, cls.search_compound, cls.cluster_compound = setup_cluster(

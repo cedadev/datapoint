@@ -380,9 +380,8 @@ class DataPointCloudProduct(BasicAsset):
                 # Open CFA
                 fl = cf.read(dataset, cfa="field")
             else:
-                # Note unlike xarray case, not supporting the 'cog' case -
-                # what to do about that since I don't think we support
-                # it in cf?
+                # Not supporting the 'cog' case here since this isn't
+                # supported by cf-python
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", '
                     '"zarr") for opening in the "cf" mode.'
@@ -392,11 +391,6 @@ class DataPointCloudProduct(BasicAsset):
 
         except ValueError as err:
             raise err
-        # except FileNotFoundError:
-        #     raise FileNotFoundError(
-        #         'The requested resource could not be located: '
-        #         f'{self.href}'
-        #     )
 
     def _open_kerchunk(
             self,
@@ -585,7 +579,10 @@ class DataPointCloudProduct(BasicAsset):
         fl_selection = fl
         if variables is not None:
             print("------- Have variables selection of:", variables)
+            #try:
             fl_selection = fl.select_by_ncvar(variables)
+            #except:
+            #    fl_selection = fl.select_by_identity(*variables)
 
             # Returns empty fieldlist if no fields captured by selection
             if not fl_selection:
