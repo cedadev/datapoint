@@ -98,6 +98,43 @@ def _find_spatial_dims(ds) -> Union[list,None]:
         return [lat, lon]
 
 
+def _convert_lat_lon_names(selection_args):
+    """Convert latitude/longitude dimension aliases to canonical names."""
+    formatted_selection_args = {}
+    aliases = {
+        "longitude": {
+            "longitude",
+            "lon",
+            "long",
+            "lng",
+            "x",
+        },
+        "latitude": {
+            "latitude",
+            "lat",
+            "y",
+        },
+    }
+
+    formatted_selection_args = {}
+    for name, value in selection_args.items():
+        key = str(name).strip().lower()
+
+        if key in aliases["latitude"]:
+            formatted_selection_args["latitude"] = value
+        elif key in aliases["longitude"]:
+            formatted_selection_args["longitude"] = value
+        else:
+            raise ValueError(
+                f"Unrecognised spatial dimension {name!r}. "
+                "Expected a latitude alias "
+                f"{sorted(aliases['latitude'])} or a longitude alias "
+                f"{sorted(aliases['longitude'])}."
+            )
+
+    return formatted_selection_args
+
+
 class DataPointCloudProduct(BasicAsset):
     """
     Object for storing and manipulating a single cloud product
@@ -607,6 +644,8 @@ class DataPointCloudProduct(BasicAsset):
             # Check for horizontal X coordinate and horizontal X coordinate
             x = field.dimension_coordinate("X", default=None)
             y = field.dimension_coordinate("Y", default=None)
+            print("%%%%%" * 20, "X Y IS:", x, y, x.__dir__(),
+                  x.standard_name)
 
             if y is not None and x is not None:
                 if intersects is not None:
@@ -647,8 +686,14 @@ class DataPointCloudProduct(BasicAsset):
             if sel is not None:
                 # Note sel args are directly compatible with cf-python
                 # subspace method
+                print("%%%" * 10, "BEFORE:", sel)
+                sel = _convert_lat_lon_names(sel)
+                print("%%%" * 10,"AFTER:", sel)
+
                 field = field.subspace(**sel)
             if isel is not None:
+                isel = _convert_lat_lon_names(isel)
+
                 # Process isel args -> cf-python subspacing via indices
                 indices = field.indices(**isel)
                 field = field[indices]

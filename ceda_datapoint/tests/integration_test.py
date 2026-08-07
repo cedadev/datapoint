@@ -88,8 +88,8 @@ class TestDataPointIntegration(unittest.TestCase):
             "data_selection": {
                 'variables': ['tasmin',],
                  'sel':{
-                     'longitude': slice(200, 300),
-                     'latitude': slice(-30, 30)
+                     'lon': slice(200, 300),
+                     'lat': slice(-30, 30)
                  }
             },
             "max_items": 10,
