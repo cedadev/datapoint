@@ -20,6 +20,23 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
 
+
+LATLON_ALIASES = {
+    "longitude": {
+        "longitude",
+        "lon",
+        "long",
+        "lng",
+        "x",
+    },
+    "latitude": {
+        "latitude",
+        "lat",
+        "y",
+    },
+}
+
+
 def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
     """
     Decode GeoJSON Polygon to xarray Selection.
@@ -30,6 +47,7 @@ def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
         dim_range = slice(min(corners),max(corners))
         selects[dim] = dim_range
     return selects
+
 
 def _decode_datetime_xr(datetime):
     """
@@ -42,6 +60,7 @@ def _decode_datetime_xr(datetime):
         return dt[0]
     else:
         return dt
+
 
 def _decode_datetime_cf(datetime):
     """
@@ -63,73 +82,48 @@ def _decode_datetime_cf(datetime):
         raise ValueError(
             f"Can't decode datetime specification: {datetime}")
 
-def _find_spatial_dims(ds) -> Union[list,None]:
-    """
-    Determine the names of the spatial dims.
-    """
 
-    accepted_lats = ['lat','latitude','Lat','Latitude']
-    accepted_lons = ['lon','longitude','Lon','Longitude']
+def _find_spatial_dims(ds) -> Union[list, None]:
+    """Determine the names of the spatial dimensions."""
+    lat = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["latitude"]), None)
+    lon = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["longitude"]), None)
 
-    convention = None
-
-    for convent in range(len(accepted_lats)):
-        lat = accepted_lats[convent]
-        lon = accepted_lons[convent]
-        if lat in ds.dims and lon in ds.dims:
-            convention = convent
-
-    if convention is None:
+    if lat is None or lon is None:
         logger.warning(
-            'Spatial AOI Skipped - Could not identify spatial dims. '
-            f'Accepted dimensions are {accepted_lats} and {accepted_lons}'
+            "Spatial AOI skipped - could not identify spatial dimensions. "
+            "Accepted latitude aliases are: "
+            f"{sorted(LATLON_ALIASES['latitude'])}; "
+            "accepted longitude aliases are: "
+            f"{sorted(LATLON_ALIASES['longitude'])}."
         )
         return None
-    
-    lat = accepted_lats[convention]
-    lon = accepted_lons[convention]
 
     # Determine lat/lon ordering in dataset.
-    lat_ind = list(ds.dims).index(lat)
-    lon_ind = list(ds.dims).index(lon)
-    if lat_ind > lon_ind:
-        return [lon, lat]
-    else:
+    dims = list(ds.dims)
+    if dims.index(lat) < dims.index(lon):
         return [lat, lon]
+    else:
+        return [lon, lat]
 
 
 def _convert_lat_lon_names(selection_args):
     """Convert latitude/longitude dimension aliases to canonical names."""
     formatted_selection_args = {}
-    aliases = {
-        "longitude": {
-            "longitude",
-            "lon",
-            "long",
-            "lng",
-            "x",
-        },
-        "latitude": {
-            "latitude",
-            "lat",
-            "y",
-        },
-    }
-
-    formatted_selection_args = {}
     for name, value in selection_args.items():
         key = str(name).strip().lower()
+        lat_names = LATLON_ALIASES["latitude"]
+        lon_names = LATLON_ALIASES["longitude"]
 
-        if key in aliases["latitude"]:
+        if key in lat_names:
             formatted_selection_args["latitude"] = value
-        elif key in aliases["longitude"]:
+        elif key in lon_names:
             formatted_selection_args["longitude"] = value
         else:
             raise ValueError(
                 f"Unrecognised spatial dimension {name!r}. "
                 "Expected a latitude alias "
-                f"{sorted(aliases['latitude'])} or a longitude alias "
-                f"{sorted(aliases['longitude'])}."
+                f"{sorted(lat_names)} or a longitude alias "
+                f"{sorted(lon_names)}."
             )
 
     return formatted_selection_args
@@ -946,4 +940,3 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
                 refs["refs"][key][0] = f"file://{local_path}"
 
     return refs
-
