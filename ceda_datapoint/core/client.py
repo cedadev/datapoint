@@ -32,6 +32,8 @@ class DataPointSearch(UIMixin):
         parent_id: str = None,
         data_selection: dict = None,
         collections: list = None,
+        base_collections: list = None,
+        collection_search_q: str = None
     ) -> None:
         """
         Initialise the search object - used by the DataPointClient
@@ -49,6 +51,9 @@ class DataPointSearch(UIMixin):
         self._search_terms = search_terms or {}
         self._data_selection = data_selection or None
         self._meta = meta or None
+
+        self._meta["collection_search_q"] = collection_search_q
+        self._meta["base_collections"] = base_collections
 
         self._mappings = mappings
 
@@ -333,8 +338,13 @@ class DataPointClient(UIMixin):
             raise ValueError("API URL could not be resolved")
         self._client = pystac_client.Client.open(self._url)
 
-        self._api_collection_search = self._client.has_conforms_to(
-            pystac_client.conformance.ConformanceClasses.COLLECTION_SEARCH)
+        try:
+            self._api_collection_search = self._client.has_conforms_to(
+                pystac_client.conformance.ConformanceClasses.COLLECTION_SEARCH)
+            logger.info(f'Blind collection search enabled for {self._url}')
+        except Exception as _:
+            logger.info(f'Blind collection search disabled for {self._url}')
+            self._api_collection_search = False
 
         self._meta = {"url": self._url, "organisation": self._org}
 
@@ -461,12 +471,16 @@ class DataPointClient(UIMixin):
 
         mappings = mappings or self._mappings
 
+        base_collections = list(collections)
+
         if collections:
             collections = self._nested_collections(collections, collection_search_q)
         elif collection_search_q:
             collections = self._collection_search(collection_search_q)
         else:
             raise ValueError('Must provide "Collections" or "Collection Search q" on search.')
+
+        logger.info(f'Searching collections: {collections}')
 
         search_terms = kwargs
         if not apply_search_to_xarray:
@@ -475,7 +489,9 @@ class DataPointClient(UIMixin):
         search = self._client.search(collections=collections, **kwargs)
         return DataPointSearch(
             search,
+            collection_search_q=collection_search_q,
             collections=collections,
+            base_collections=base_collections,
             search_terms=search_terms,
             meta=self._meta,
             parent_id=self._id,
@@ -507,8 +523,8 @@ class DataPointClient(UIMixin):
             is_all = True
             is_any = False
             for kw in kws:
-                is_all = is_all and kw in coll_data.get('keywords',[])
-                is_any = is_any or kw in coll_data.get('keywords',[])
+                is_all = is_all and kw in coll_data.keywords
+                is_any = is_any or kw in coll_data.keywords
 
             if (mode == '*' and is_all) or (mode == '|' and is_any):
                 collections = [collection]
@@ -521,5 +537,5 @@ class DataPointClient(UIMixin):
             if link.rel == "child":
                 if "collections" in link.target:
                     coll = link.target.split("collections/")[-1]
-                    collections += self._find_nested_collections(coll)
+                    collections += self._find_nested_collections(coll, search_q=search_q)
         return collections
