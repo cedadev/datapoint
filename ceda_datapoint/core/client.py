@@ -32,6 +32,8 @@ class DataPointSearch(UIMixin):
         parent_id: str = None,
         data_selection: dict = None,
         collections: list = None,
+        base_collections: list = None,
+        collection_search_q: str = None,
     ) -> None:
         """
         Initialise the search object - used by the DataPointClient
@@ -49,6 +51,9 @@ class DataPointSearch(UIMixin):
         self._search_terms = search_terms or {}
         self._data_selection = data_selection or None
         self._meta = meta or None
+
+        self._meta["collection_search_q"] = collection_search_q
+        self._meta["base_collections"] = base_collections
 
         self._mappings = mappings
 
@@ -333,6 +338,15 @@ class DataPointClient(UIMixin):
             raise ValueError("API URL could not be resolved")
         self._client = pystac_client.Client.open(self._url)
 
+        try:
+            self._api_collection_search = self._client.has_conforms_to(
+                pystac_client.conformance.ConformanceClasses.COLLECTION_SEARCH
+            )
+            logger.info(f"Blind collection search enabled for {self._url}")
+        except Exception as _:
+            logger.info(f"Blind collection search disabled for {self._url}")
+            self._api_collection_search = False
+
         self._meta = {"url": self._url, "organisation": self._org}
 
         self._id = self._org or ""
@@ -379,6 +393,16 @@ class DataPointClient(UIMixin):
         Public method for getting a collection from this client
         """
         return DataPointSearch(self.search(collections=[collection]))
+
+    def _collection_search(self, q: str) -> list:
+
+        if self._api_collection_search:
+            search = self._client.collection_search(q=q)
+            return [c.id for c in search.collections()]
+        else:
+            raise NotImplementedError(
+                f"Blind Collection Search not implemented on {self._url}"
+            )
 
     def list_query_terms(self, collection: str) -> Union[list, None]:
         """
@@ -437,9 +461,10 @@ class DataPointClient(UIMixin):
 
     def search(
         self,
-        collections: list,
-        mappings: dict = None,
-        data_selection: dict = None,
+        collection_search_q: str | None = None,
+        collections: list | None = None,
+        mappings: dict | None = None,
+        data_selection: dict | None = None,
         apply_search_to_xarray: bool = True,
         **kwargs,
     ) -> DataPointSearch:
@@ -449,7 +474,18 @@ class DataPointClient(UIMixin):
 
         mappings = mappings or self._mappings
 
-        collections = self._nested_collections(collections)
+        base_collections = list(collections)
+
+        if collections:
+            collections = self._nested_collections(collections, collection_search_q)
+        elif collection_search_q:
+            collections = self._collection_search(collection_search_q)
+        else:
+            raise ValueError(
+                'Must provide "Collections" or "Collection Search q" on search.'
+            )
+
+        logger.info(f"Searching collections: {collections}")
 
         search_terms = kwargs
         if not apply_search_to_xarray:
@@ -458,7 +494,9 @@ class DataPointClient(UIMixin):
         search = self._client.search(collections=collections, **kwargs)
         return DataPointSearch(
             search,
+            collection_search_q=collection_search_q,
             collections=collections,
+            base_collections=base_collections,
             search_terms=search_terms,
             meta=self._meta,
             parent_id=self._id,
@@ -466,26 +504,45 @@ class DataPointClient(UIMixin):
             data_selection=data_selection,
         )
 
-    def _nested_collections(self, collections: list):
+    def _nested_collections(self, collections: list, collection_search_q: str):
         """
         Find all nested collections for the set of collections given here.
         """
         collection_set = []
         for coll in collections:
-            collection_set += self._find_nested_collections(coll)
+            collection_set += self._find_nested_collections(coll, collection_search_q)
 
         # Remove duplicates
         return list(set(collection_set))
 
-    def _find_nested_collections(self, collection: str):
+    def _find_nested_collections(self, collection: str, search_q: str):
         """
         Recursive function to find all nested collections for a specific collection.
         """
+        coll_data = self._client.get_collection(collection)
 
-        collections = [collection]
-        for link in self._client.get_collection(collection).links:
+        if search_q:
+            kws = search_q.split(" ")[1:]
+            mode = search_q.split(" ")[0]
+
+            is_all = True
+            is_any = False
+            for kw in kws:
+                is_all = is_all and kw in coll_data.keywords
+                is_any = is_any or kw in coll_data.keywords
+
+            if (mode == "*" and is_all) or (mode == "|" and is_any):
+                collections = [collection]
+            else:
+                collections = []
+        else:
+            collections = [collection]
+
+        for link in coll_data.links:
             if link.rel == "child":
                 if "collections" in link.target:
                     coll = link.target.split("collections/")[-1]
-                    collections += self._find_nested_collections(coll)
+                    collections += self._find_nested_collections(
+                        coll, search_q=search_q
+                    )
         return collections
