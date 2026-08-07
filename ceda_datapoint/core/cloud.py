@@ -601,11 +601,6 @@ class DataPointCloudProduct(BasicAsset):
         sel = self._data_selection.get('sel',None)
         isel = self._data_selection.get('isel',None)
 
-        print(
-            "FILTERING ON:", intersects, datetime, query, variables,
-            sel, isel,
-        )
-
         # Filter the FieldList to the requested variables
         fl_selection = fl
         if variables is not None:
@@ -626,7 +621,6 @@ class DataPointCloudProduct(BasicAsset):
             logger.warning(
                 "No variable selection provided."
             )
-        print("END STAGE 1", fl_selection)
 
         # Create output FieldList
         out = cf.FieldList()
@@ -638,8 +632,6 @@ class DataPointCloudProduct(BasicAsset):
             # Check for horizontal X coordinate and horizontal X coordinate
             x = field.dimension_coordinate("X", default=None)
             y = field.dimension_coordinate("Y", default=None)
-            print("%%%%%" * 20, "X Y IS:", x, y, x.__dir__(),
-                  x.standard_name)
 
             if y is not None and x is not None:
                 if intersects is not None:
@@ -660,7 +652,6 @@ class DataPointCloudProduct(BasicAsset):
                             "Unsupported intersection type for Single Search "
                             "Selection - AOI not applied."
                         )
-            print("END STAGE 3", field)
 
             # Apply datetime selection if requested
             if datetime is not None:
@@ -674,16 +665,11 @@ class DataPointCloudProduct(BasicAsset):
                 dt_query = _decode_datetime_cf(datetime)
                 field = field.subspace(T=dt_query)
 
-            print("END STAGE 4", field)
-
             # Apply spatial subspaces
             if sel is not None:
                 # Note sel args are directly compatible with cf-python
                 # subspace method
-                print("%%%" * 10, "BEFORE:", sel)
                 sel = _convert_lat_lon_names(sel)
-                print("%%%" * 10,"AFTER:", sel)
-
                 field = field.subspace(**sel)
             if isel is not None:
                 isel = _convert_lat_lon_names(isel)
@@ -691,11 +677,8 @@ class DataPointCloudProduct(BasicAsset):
                 # Process isel args -> cf-python subspacing via indices
                 indices = field.indices(**isel)
                 field = field[indices]
-            print("END STAGE 5", field)
 
             out.append(field)
-
-        print("END OVERALL", out)
 
         # Re-aggregate to potentially simplify the result
         return cf.aggregate(out)

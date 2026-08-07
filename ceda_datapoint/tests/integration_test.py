@@ -166,7 +166,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
         self.assertIsNotNone(ds)
 
-        print("\nXR LOCAL ONLY DATASET IS:\n", ds)
+        # print("\nXR LOCAL ONLY DATASET IS:\n", ds)
         # TODO further assertions
 
     def test_cluster_simple_open_with_xarray(self):
@@ -217,9 +217,6 @@ class TestDataPointIntegration(unittest.TestCase):
 
         fl = prod.open_dataset(mode="cf")
         self.assertIsNotNone(fl)
-
-        #print("\nCF FIELDLIST IS:\n", fl)
-        #print("\nFIRST FIELD IS:\n", fl[0])
         # TODO further assertions
 
     def test_product_simple_open_with_cf_local_only(self):
@@ -300,8 +297,6 @@ class TestDataPointIntegration(unittest.TestCase):
         ds = prod.open_dataset(mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
-
-        print("\nXR LOCAL ONLY DATASET IS:\n", ds)
         # TODO further assertions
 
     def test_cluster_compound_open_with_xarray(self):
@@ -352,9 +347,6 @@ class TestDataPointIntegration(unittest.TestCase):
 
         fl = prod.open_dataset(mode="cf")
         self.assertIsNotNone(fl)
-
-        #print("\nCF FIELDLIST IS:\n", fl)
-        #print("\nFIRST FIELD IS:\n", fl[0])
         # TODO further assertions
 
     def test_product_compound_open_with_cf_local_only(self):
