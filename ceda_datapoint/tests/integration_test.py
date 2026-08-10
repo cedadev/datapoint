@@ -1,11 +1,13 @@
 """Integration test for opening datasets using CEDA Datapoint."""
 
+from contextlib import contextmanager
 import os
 import unittest
 import unittest.mock  # not provided in above general import by default
+
 import ceda_datapoint
 from ceda_datapoint import DataPointClient
-from contextlib import contextmanager
+import numpy as np
 
 
 def setup_cluster(collection, search_query, verbose=False, use_client=False):
@@ -143,6 +145,83 @@ class TestDataPointIntegration(unittest.TestCase):
                 msg="Kerchunk reference still contains a CEDA URL",
             )
 
+    def check_prsn_dataset_xr(self, ds):
+        """Check that a dataset matches the expected CMIP6 'prsn' field."""
+        # Dataset dimensions
+        self.assertEqual(
+            dict(ds.sizes),
+            {
+                "lat": 96,
+                "bnds": 2,
+                "lon": 192,
+                "time": 1032,
+            },
+        )
+
+        # Coordinates
+        self.assertEqual(
+            set(ds.coords),
+            {"lat", "lon", "time"},
+        )
+
+        self.assertEqual(ds["lat"].dims, ("lat",))
+        self.assertEqual(ds["lon"].dims, ("lon",))
+        self.assertEqual(ds["time"].dims, ("time",))
+
+        self.assertEqual(ds["lat"].dtype, np.dtype("float64"))
+        self.assertEqual(ds["lon"].dtype, np.dtype("float64"))
+
+        # Coordinate values
+        self.assertAlmostEqual(float(ds["lat"].values[0]), -89.0625)
+        self.assertAlmostEqual(float(ds["lat"].values[-1]), 89.0625)
+
+        self.assertAlmostEqual(float(ds["lon"].values[0]), 0.9375)
+        self.assertAlmostEqual(float(ds["lon"].values[-1]), 359.0625)
+
+        # Data variables
+        self.assertEqual(
+            set(ds.data_vars),
+            {
+                "lat_bnds",
+                "lon_bnds",
+                "prsn",
+                "time_bnds",
+            },
+        )
+
+        self.assertEqual(ds["lat_bnds"].dims, ("lat", "bnds"))
+        self.assertEqual(ds["lon_bnds"].dims, ("lon", "bnds"))
+        self.assertEqual(ds["prsn"].dims, ("time", "lat", "lon"))
+        self.assertEqual(ds["time_bnds"].dims, ("time", "bnds"))
+
+        # Variable dtypes
+        self.assertEqual(ds["lat_bnds"].dtype, np.dtype("float64"))
+        self.assertEqual(ds["lon_bnds"].dtype, np.dtype("float64"))
+        self.assertEqual(ds["prsn"].dtype, np.dtype("float32"))
+
+        # Time coverage
+        self.assertEqual(ds["time"].values[0].year, 2015)
+        self.assertEqual(ds["time"].values[0].month, 1)
+        self.assertEqual(ds["time"].values[0].day, 17)
+
+        self.assertEqual(ds["time"].values[-1].year, 2100)
+        self.assertEqual(ds["time"].values[-1].month, 12)
+        self.assertEqual(ds["time"].values[-1].day, 17)
+
+        # Dataset metadata
+        self.assertEqual(ds.attrs["activity_id"], "ScenarioMIP")
+        self.assertEqual(ds.attrs["table_id"], "Amon")
+        self.assertEqual(ds.attrs["variable_id"], "prsn")
+        self.assertEqual(ds.attrs["variant_label"], "r1i1p1f1")
+        self.assertEqual(
+            ds.attrs["title"],
+            "KIOST-ESM output prepared for CMIP6",
+        )
+        self.assertEqual(
+            ds.attrs["Conventions"],
+            "CF-1.7 CMIP-6.2",
+        )
+
     def test_cluster_setup(self):
         """Test the setting up of a cluster."""
         self.assertIsNotNone(self.cluster)
@@ -162,8 +241,12 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         ds = prod.open_dataset(mode="xarray")
+
+        # Dataset was successfully opened
         self.assertIsNotNone(ds)
-        # TODO further assertions
+
+        # Then check the Dataset is as expected
+        self.check_prsn_dataset_xr(ds)
 
     @requires_ceda_filesystem
     def test_product_simple_open_with_xarray_local_only(self):
@@ -180,10 +263,11 @@ class TestDataPointIntegration(unittest.TestCase):
         with self.check_local_only():
             ds = prod.open_dataset(mode="xarray", local_only=True)
 
+        # Dataset was successfully opened
         self.assertIsNotNone(ds)
 
-        # print("\nXR LOCAL ONLY DATASET IS:\n", ds)
-        # TODO further assertions
+        # Then check the Dataset is as expected
+        self.check_prsn_dataset_xr(ds)
 
     def test_cluster_simple_open_with_xarray(self):
         """Test opening datasets from a cluster in 'xarray' mode."""
@@ -198,8 +282,12 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # TODO test with loop over various products (not just id=0 case)
         ds = cluster.open_dataset(id=0, mode="xarray")
+
+        # Dataset was successfully opened
         self.assertIsNotNone(ds)
-        # TODO further assertions
+
+        # Then check the Dataset is as expected
+        self.check_prsn_dataset_xr(ds)
 
     @requires_ceda_filesystem
     def test_cluster_simple_open_with_xarray_local_only(self):
@@ -217,8 +305,11 @@ class TestDataPointIntegration(unittest.TestCase):
             # TODO test with loop over various products (not just id=0 case)
             ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
 
+        # Dataset was successfully opened
         self.assertIsNotNone(ds)
-        # TODO further assertions
+
+        # Then check the Dataset is as expected
+        self.check_prsn_dataset_xr(ds)
 
     def test_product_simple_open_with_cf(self):
         """Test opening datasets from a product in 'cf' mode."""
