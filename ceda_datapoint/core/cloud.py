@@ -901,7 +901,7 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
         with open(href_local) as f:
             refs = json.load(f)
 
-    for key, v in refs.items():
+    for key, v in refs["refs"].items():
         if isinstance(v, list) and len(v) == 3:
             url = v[0]
 
