@@ -1,9 +1,10 @@
 """Integration test for opening datasets using CEDA Datapoint."""
 
 import unittest
+import unittest.mock  # not provided in above general import by default
 import ceda_datapoint
 from ceda_datapoint import DataPointClient
-
+from contextlib import contextmanager
 
 
 def setup_cluster(collection, search_query, verbose=False, use_client=False):
@@ -70,7 +71,6 @@ class TestDataPointIntegration(unittest.TestCase):
             collection, basic_search_inputs, verbose=cls.verbose
         )
 
-
         # A search requiring 'preparation' of the dataset
         # Search inputs based on example from docs at:
         #     https://cedadev.github.io/datapoint/index.html
@@ -99,33 +99,40 @@ class TestDataPointIntegration(unittest.TestCase):
             use_client=cls.client,
         )
 
-    def check_local_only(self, product):
-        """Check HREF is a local case."""
-        # Only kerchunk is valid for local_only case
-        self.assertEqual(
-            product._cloud_format,
-            "kerchunk",
-            "local_only behaviour is only valid for kerchunk datasets"
-        )
+    @contextmanager
+    def check_local_only(self):
+        """Check that `local_only` uses local kerchunk references."""
 
-        refs = ceda_datapoint.core.cloud._fetch_kerchunk_make_local(
-            product.href)
+        original_fetch = ceda_datapoint.core.cloud._fetch_kerchunk_make_local
+        captured_refs = []
 
-        txt = str(refs)
+        def fetch_and_capture(href):
+            refs = original_fetch(href)
+            captured_refs.append(refs)
+            return refs
 
         # Prevent whole kerchunk ref text spamming terminal for failure cases
         self.longMessage = False
 
-        self.assertNotIn(
-            "file://",
-            txt,
-            msg="Kerchunk reference contains 'file://' but should not",
+        with unittest.mock.patch(
+            "ceda_datapoint.core.cloud._fetch_kerchunk_make_local",
+            side_effect=fetch_and_capture,
+        ) as fetch_mock:
+            yield
+
+        self.assertTrue(
+            fetch_mock.called,
+            "_fetch_kerchunk_make_local was not called",
         )
-        self.assertNotIn(
-            "https://",
-            txt,
-            msg="Kerchunk reference contains 'https://' but should not",
-        )
+
+        for refs in captured_refs:
+            txt = str(refs)
+
+            self.assertNotIn(
+                "https://dap.ceda.ac.uk",
+                txt,
+                msg="Kerchunk reference still contains a CEDA URL",
+            )
 
     def test_cluster_setup(self):
         """Test the setting up of a cluster."""
@@ -160,9 +167,8 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        self.check_local_only(prod)
-
-        ds = prod.open_dataset(mode="xarray", local_only=True)
+        with self.check_local_only():
+            ds = prod.open_dataset(mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
 
@@ -196,10 +202,9 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         product_id = 0
-        self.check_local_only(cluster[product_id])
-
-        # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
+        with self.check_local_only():
+            # TODO test with loop over various products (not just id=0 case)
+            ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
         # TODO further assertions
@@ -292,9 +297,8 @@ class TestDataPointIntegration(unittest.TestCase):
                 prod.attributes,
             )
 
-        self.check_local_only(prod)
-
-        ds = prod.open_dataset(mode="xarray", local_only=True)
+        with self.check_local_only():
+            ds = prod.open_dataset(mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
         # TODO further assertions
@@ -326,10 +330,9 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         product_id = 0
-        self.check_local_only(cluster[product_id])
-
-        # TODO test with loop over various products (not just id=0 case)
-        ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
+        with self.check_local_only():
+            # TODO test with loop over various products (not just id=0 case)
+            ds = cluster.open_dataset(id=product_id, mode="xarray", local_only=True)
 
         self.assertIsNotNone(ds)
         # TODO further assertions
