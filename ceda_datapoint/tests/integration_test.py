@@ -1,5 +1,6 @@
 """Integration test for opening datasets using CEDA Datapoint."""
 
+import os
 import unittest
 import unittest.mock  # not provided in above general import by default
 import ceda_datapoint
@@ -47,6 +48,14 @@ def setup_cluster(collection, search_query, verbose=False, use_client=False):
         )
 
     return client, search, cluster
+
+
+def requires_ceda_filesystem(test):
+    """Test to enable skipping tests requiring the CEDA filesystem."""
+    return unittest.skipUnless(
+        os.path.isdir("/badc"),
+        "Requires CEDA filesystem mounted at /badc",
+    )(test)
 
 
 class TestDataPointIntegration(unittest.TestCase):
@@ -156,6 +165,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_product_simple_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a product in 'xarray' mode."""
         prod = self.cluster[0]
@@ -191,6 +201,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_cluster_simple_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a cluster in 'xarray' mode."""
         cluster = self.cluster
@@ -224,6 +235,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(fl)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_product_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a product in 'cf' mode."""
         prod = self.cluster[0]
@@ -254,6 +266,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(fl)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_cluster_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
         cluster = self.cluster
@@ -286,6 +299,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_product_compound_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a product in 'xarray' mode."""
         prod = self.cluster_compound[0]
@@ -319,6 +333,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(ds)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_cluster_compound_open_with_xarray_local_only(self):
         """Test opening local-only datasets from a cluster in 'xarray' mode."""
         cluster = self.cluster_compound
@@ -352,6 +367,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(fl)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_product_compound_open_with_cf_local_only(self):
         """Test opening local-only datasets from a product in 'cf' mode."""
         prod = self.cluster_compound[0]
@@ -382,6 +398,7 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertIsNotNone(fl)
         # TODO further assertions
 
+    @requires_ceda_filesystem
     def test_cluster_compound_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
         cluster = self.cluster_compound
