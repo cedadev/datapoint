@@ -7,6 +7,7 @@ import unittest.mock  # not provided in above general import by default
 
 import ceda_datapoint
 from ceda_datapoint import DataPointClient
+import cf
 import numpy as np
 
 
@@ -146,7 +147,7 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
     def check_prsn_dataset_xr(self, ds):
-        """Check that a dataset matches the expected CMIP6 'prsn' field."""
+        """Check data matches expected CMIP6 'prsn' field with xarray."""
         # Dataset dimensions
         self.assertEqual(
             dict(ds.sizes),
@@ -220,6 +221,194 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertEqual(
             ds.attrs["Conventions"],
             "CF-1.7 CMIP-6.2",
+        )
+
+    def check_prsn_dataset_cf(self, field):
+        """Check data matches expected CMIP6 'prsn' field with cf-python."""
+        # Field identity and data
+        self.assertEqual(
+            field.nc_get_variable(),
+            "prsn",
+        )
+        self.assertEqual(
+            field.get_property("standard_name"),
+            "snowfall_flux",
+        )
+        self.assertEqual(
+            field.get_property("long_name"),
+            "Snowfall Flux",
+        )
+        self.assertEqual(
+            field.get_property("units"),
+            "kg m-2 s-1",
+        )
+        self.assertEqual(
+            field.shape,
+            (1032, 96, 192),
+        )
+        self.assertEqual(
+            field.ndim,
+            3,
+        )
+
+        # Field properties
+        expected_properties = {
+            "activity_id": "ScenarioMIP",
+            "experiment_id": "ssp585",
+            "frequency": "mon",
+            "grid_label": "gr1",
+            "institution_id": "KIOST",
+            "mip_era": "CMIP6",
+            "source_id": "KIOST-ESM",
+            "table_id": "Amon",
+            "variable_id": "prsn",
+            "variant_label": "r1i1p1f1",
+        }
+        for name, expected in expected_properties.items():
+            self.assertEqual(
+                field.get_property(name),
+                expected,
+                msg=f"Unexpected value for field property {name!r}",
+            )
+
+        # Cell methods
+        cell_methods = field.cell_methods()
+
+        self.assertEqual(
+            len(cell_methods),
+            1,
+        )
+
+        cell_method = cell_methods["cellmethod0"]
+        self.assertEqual(
+            cell_method.get_method(),
+            "mean",
+        )
+        self.assertEqual(
+            cell_method.get_axes(),
+            ("area", "domainaxis0"),
+        )
+        print(field.constructs(), field.construct("time", key=True))
+
+        # Dimension coordinates
+        time = field.coordinate("T")
+        latitude = field.coordinate("Y")
+        longitude = field.coordinate("X")
+
+        self.assertEqual(
+            time.identity(),
+            "time",
+        )
+        self.assertEqual(
+            latitude.identity(),
+            "latitude",
+        )
+        self.assertEqual(
+            longitude.identity(),
+            "longitude",
+        )
+        self.assertEqual(
+            time.shape,
+            (1032,),
+        )
+        self.assertEqual(
+            latitude.shape,
+            (96,),
+        )
+        self.assertEqual(
+            longitude.shape,
+            (192,),
+        )
+
+        # Time coordinate
+        self.assertEqual(
+            time.get_property("standard_name"),
+            "time",
+        )
+        self.assertEqual(
+            time.get_property("long_name"),
+            "time",
+        )
+        self.assertEqual(
+            time.get_property("units"),
+            "days since 1850-01-01",
+        )
+        self.assertEqual(
+            time.get_property("calendar"),
+            "365_day",
+        )
+        self.assertEqual(
+            time.get_property("axis"),
+            "T",
+        )
+
+        # Time bounds
+        time_bounds = time.get_bounds()
+
+        self.assertIsNotNone(time_bounds)
+        self.assertEqual(
+            time_bounds.shape,
+            (1032, 2),
+        )
+        self.assertEqual(
+            time_bounds.get_property("calendar"),
+            "365_day",
+        )
+        self.assertEqual(
+            time_bounds.get_property("units"),
+            "days since 1850-01-01",
+        )
+
+        # Latitude coordinate
+        self.assertEqual(
+            latitude.get_property("standard_name"),
+            "latitude",
+        )
+        self.assertEqual(
+            latitude.get_property("long_name"),
+            "Latitude",
+        )
+        self.assertEqual(
+            latitude.get_property("units"),
+            "degrees_north",
+        )
+        self.assertEqual(
+            latitude.get_property("axis"),
+            "Y",
+        )
+        self.assertEqual(
+            latitude.get_bounds().shape,
+            (96, 2),
+        )
+        self.assertEqual(
+            latitude.get_bounds().get_property("units"),
+            "degrees_north",
+        )
+
+        # Longitude coordinate
+        self.assertEqual(
+            longitude.get_property("standard_name"),
+            "longitude",
+        )
+        self.assertEqual(
+            longitude.get_property("long_name"),
+            "Longitude",
+        )
+        self.assertEqual(
+            longitude.get_property("units"),
+            "degrees_east",
+        )
+        self.assertEqual(
+            longitude.get_property("axis"),
+            "X",
+        )
+        self.assertEqual(
+            longitude.get_bounds().shape,
+            (192, 2),
+        )
+        self.assertEqual(
+            longitude.get_bounds().get_property("units"),
+            "degrees_east",
         )
 
     def test_cluster_setup(self):
@@ -323,8 +512,16 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         fl = prod.open_dataset(mode="cf")
+
+        # Data was successfully opened and converted to a CF FieldList
         self.assertIsNotNone(fl)
-        # TODO further assertions
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_prsn_dataset_cf(f)
 
     @requires_ceda_filesystem
     def test_product_simple_open_with_cf_local_only(self):
@@ -342,6 +539,16 @@ class TestDataPointIntegration(unittest.TestCase):
         with self.assertRaises(ValueError):
             fl = prod.open_dataset(mode="cf", local_only=True)
 
+        # Data was successfully opened and converted to a CF FieldList
+        self.assertIsNotNone(fl)
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_prsn_dataset_cf(f)
+
     def test_cluster_simple_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
         cluster = self.cluster
@@ -354,8 +561,16 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # TODO test with loop over various products (not just id=0 case)
         fl = cluster.open_dataset(id=0, mode="cf")
+
+        # Data was successfully opened and converted to a CF FieldList
         self.assertIsNotNone(fl)
-        # TODO further assertions
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_prsn_dataset_cf(f)
 
     @requires_ceda_filesystem
     def test_cluster_simple_open_with_cf_local_only(self):
@@ -372,6 +587,15 @@ class TestDataPointIntegration(unittest.TestCase):
         with self.assertRaises(ValueError):
             fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
 
+        # Data was successfully opened and converted to a CF FieldList
+        self.assertIsNotNone(fl)
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_prsn_dataset_cf(f)
 
     # Compound search tests below
 
