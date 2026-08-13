@@ -628,6 +628,11 @@ class DataPointCloudProduct(BasicAsset):
         # Apply collapses on the fields invididually, but at the end
         # we aggregate in case we can simplify.
         for field in fl_selection:
+            # Handle any empty or size one axes - see cf.Field.squeeze
+            # (ncas-cms.github.io/cf-python/method/cf.Field.squeeze.html)
+            # for details
+            field.squeeze(inplace=True)
+
             # Apply polygon selection on spatial dimensions
             # Check for horizontal X coordinate and horizontal X coordinate
             x = field.dimension_coordinate("X", default=None)
@@ -643,6 +648,7 @@ class DataPointCloudProduct(BasicAsset):
                         lons = [c[0] for c in coords]
                         lats = [c[1] for c in coords]
 
+                        # Min/max needs to account for the cyclicty? TODO
                         field = field.subspace(
                             X=cf.wi(min(lons), max(lons)),
                             Y=cf.wi(min(lats), max(lats)),
