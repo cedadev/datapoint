@@ -147,7 +147,7 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
     def check_prsn_dataset_xr(self, ds):
-        """Check data matches expected CMIP6 'prsn' field with xarray."""
+        """Check data matches expected CMIP6 'prsn' Dataset with xarray."""
         # Dataset dimensions
         self.assertEqual(
             dict(ds.sizes),
@@ -224,7 +224,7 @@ class TestDataPointIntegration(unittest.TestCase):
         )
 
     def check_prsn_dataset_cf(self, field):
-        """Check data matches expected CMIP6 'prsn' field with cf-python."""
+        """Check data matches expected CMIP6 'prsn' Field with cf-python."""
         # Field identity and data
         self.assertEqual(
             field.nc_get_variable(),
@@ -288,7 +288,6 @@ class TestDataPointIntegration(unittest.TestCase):
             cell_method.get_axes(),
             ("area", "domainaxis0"),
         )
-        print(field.constructs(), field.construct("time", key=True))
 
         # Dimension coordinates
         time = field.coordinate("T")
@@ -409,6 +408,247 @@ class TestDataPointIntegration(unittest.TestCase):
         self.assertEqual(
             longitude.get_bounds().get_property("units"),
             "degrees_east",
+        )
+
+    def check_tasmin_dataset_xr(self, ds):
+        """Check data matches expected CMIP6 'tasmin' Dataset with xarray."""
+        # TODO
+        pass
+
+    def check_tasmin_dataset_cf(self, field):
+        """Check data matches expected CMIP6 'tasmin' Field with cf-python."""
+        # Field identity and data
+        self.assertEqual(
+            field.nc_get_variable(),
+            "tasmin",
+        )
+        self.assertEqual(
+            field.get_property("standard_name"),
+            "air_temperature",
+        )
+        self.assertEqual(
+            field.get_property("long_name"),
+            "Daily Minimum Near-Surface Air Temperature",
+        )
+        self.assertEqual(
+            field.get_property("units"),
+            "K",
+        )
+        self.assertEqual(
+            field.shape,
+            (108, 30, 33),
+        )
+        self.assertEqual(
+            field.ndim,
+            3,
+        )
+
+        # Field properties
+        expected_properties = {
+            "activity_id": "ScenarioMIP",
+            "experiment_id": "ssp585",
+            "frequency": "mon",
+            "grid_label": "gn",
+            "institution_id": "CSIRO",
+            "mip_era": "CMIP6",
+            "source_id": "ACCESS-ESM1-5",
+            "table_id": "Amon",
+            "variable_id": "tasmin",
+            "variant_label": "r1i1p1f1",
+        }
+        for name, expected in expected_properties.items():
+            self.assertEqual(
+                field.get_property(name),
+                expected,
+                msg=f"Unexpected value for field property {name!r}",
+            )
+
+        # Cell methods
+        cell_methods = field.cell_methods()
+
+        self.assertEqual(
+            len(cell_methods),
+            3,
+        )
+
+        self.assertEqual(
+            cell_methods["cellmethod0"].get_method(),
+            "mean",
+        )
+        self.assertEqual(
+            cell_methods["cellmethod0"].get_axes(),
+            ("area",),
+        )
+
+        self.assertEqual(
+            cell_methods["cellmethod1"].get_method(),
+            "minimum",
+        )
+        self.assertEqual(
+            cell_methods["cellmethod1"].get_axes(),
+            ("domainaxis0",),
+        )
+
+        self.assertEqual(
+            cell_methods["cellmethod2"].get_method(),
+            "mean",
+        )
+        self.assertEqual(
+            cell_methods["cellmethod2"].get_axes(),
+            ("domainaxis0",),
+        )
+
+        # Dimension coordinates
+        time = field.coordinate("T")
+        latitude = field.coordinate("Y")
+        longitude = field.coordinate("X")
+        height = field.coordinate("Z")
+
+        self.assertEqual(
+            time.identity(),
+            "time",
+        )
+        self.assertEqual(
+            latitude.identity(),
+            "latitude",
+        )
+        self.assertEqual(
+            longitude.identity(),
+            "longitude",
+        )
+        self.assertEqual(
+            height.identity(),
+            "height",
+        )
+
+        self.assertEqual(
+            time.shape,
+            (108,),
+        )
+        self.assertEqual(
+            latitude.shape,
+            (30,),
+        )
+        self.assertEqual(
+            longitude.shape,
+            (33,),
+        )
+        self.assertEqual(
+            height.shape,
+            (1,),
+        )
+
+        # Time coordinate
+        self.assertEqual(
+            time.get_property("standard_name"),
+            "time",
+        )
+        self.assertEqual(
+            time.get_property("long_name"),
+            "time",
+        )
+        self.assertEqual(
+            time.get_property("units"),
+            "days since 1850-01-01",
+        )
+        self.assertEqual(
+            time.get_property("calendar"),
+            "proleptic_gregorian",
+        )
+        self.assertEqual(
+            time.get_property("axis"),
+            "T",
+        )
+
+        # Time bounds
+        time_bounds = time.get_bounds()
+
+        self.assertIsNotNone(time_bounds)
+        self.assertEqual(
+            time_bounds.shape,
+            (108, 2),
+        )
+        self.assertEqual(
+            time_bounds.get_property("calendar"),
+            "proleptic_gregorian",
+        )
+        self.assertEqual(
+            time_bounds.get_property("units"),
+            "days since 1850-01-01",
+        )
+
+        # Latitude coordinate
+        self.assertEqual(
+            latitude.get_property("standard_name"),
+            "latitude",
+        )
+        self.assertEqual(
+            latitude.get_property("long_name"),
+            "Latitude",
+        )
+        self.assertEqual(
+            latitude.get_property("units"),
+            "degrees_north",
+        )
+        self.assertEqual(
+            latitude.get_property("axis"),
+            "Y",
+        )
+        self.assertEqual(
+            latitude.get_bounds().shape,
+            (30, 2),
+        )
+        self.assertEqual(
+            latitude.get_bounds().get_property("units"),
+            "degrees_north",
+        )
+
+        # Longitude coordinate
+        self.assertEqual(
+            longitude.get_property("standard_name"),
+            "longitude",
+        )
+        self.assertEqual(
+            longitude.get_property("long_name"),
+            "Longitude",
+        )
+        self.assertEqual(
+            longitude.get_property("units"),
+            "degrees_east",
+        )
+        self.assertEqual(
+            longitude.get_property("axis"),
+            "X",
+        )
+        self.assertEqual(
+            longitude.get_bounds().shape,
+            (33, 2),
+        )
+        self.assertEqual(
+            longitude.get_bounds().get_property("units"),
+            "degrees_east",
+        )
+
+        # Height coordinate
+        self.assertEqual(
+            height.get_property("standard_name"),
+            "height",
+        )
+        self.assertEqual(
+            height.get_property("long_name"),
+            "height",
+        )
+        self.assertEqual(
+            height.get_property("units"),
+            "m",
+        )
+        self.assertEqual(
+            height.get_property("axis"),
+            "Z",
+        )
+        self.assertEqual(
+            height.get_property("positive"),
+            "up",
         )
 
     def test_cluster_setup(self):
@@ -613,6 +853,8 @@ class TestDataPointIntegration(unittest.TestCase):
         ds = prod.open_dataset(mode="xarray")
         self.assertIsNotNone(ds)
         # TODO further assertions
+        print("X IS")
+        print(ds)
 
     @requires_ceda_filesystem
     def test_product_compound_open_with_xarray_local_only(self):
@@ -679,8 +921,16 @@ class TestDataPointIntegration(unittest.TestCase):
             )
 
         fl = prod.open_dataset(mode="cf")
+
+        # Data was successfully opened and converted to a CF FieldList
         self.assertIsNotNone(fl)
-        # TODO further assertions
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_tasmin_dataset_cf(f)
 
     @requires_ceda_filesystem
     def test_product_compound_open_with_cf_local_only(self):
@@ -710,8 +960,16 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # TODO test with loop over various products (not just id=0 case)
         fl = cluster.open_dataset(id=0, mode="cf")
+
+        # Data was successfully opened and converted to a CF FieldList
         self.assertIsNotNone(fl)
-        # TODO further assertions
+        self.assertIsInstance(fl, cf.FieldList)
+        self.assertEqual(len(fl), 1)
+        f = fl[0]  # only one Field in FieldList, unpack it
+        self.assertIsInstance(f, cf.Field)
+
+        # Then check the one Field is as expected
+        self.check_tasmin_dataset_cf(f)
 
     @requires_ceda_filesystem
     def test_cluster_compound_open_with_cf_local_only(self):
