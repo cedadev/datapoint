@@ -648,7 +648,10 @@ class DataPointCloudProduct(BasicAsset):
                         lons = [c[0] for c in coords]
                         lats = [c[1] for c in coords]
 
-                        # Min/max needs to account for the cyclicty? TODO
+                        # The X case may only work assuming the field has
+                        # appropriate cyclicity for the longitude, but the
+                        # cyclicity should be determined automatically by
+                        # cf-python and hence it should be OK.
                         field = field.subspace(
                             X=cf.wi(min(lons), max(lons)),
                             Y=cf.wi(min(lats), max(lats)),

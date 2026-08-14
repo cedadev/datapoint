@@ -87,29 +87,32 @@ class TestDataPointIntegration(unittest.TestCase):
         # Search inputs based on example from docs at:
         #     https://cedadev.github.io/datapoint/index.html
         #
-        # The coordinate bounding selection here is chosen to be TODO
-        # document choice
+        # The coordinate bounding selection here is chosen so that the
+        # Polygon selection/subspacing covers a larger space than the
+        # further data selection selection/subspacing and therefore with
+        # both applied we should end up with the smaller data selection
+        # space while being able to monitor easily that the Polygon subspace
+        # works too.
         compound_search_inputs = {
             "query": [
                 'cmip6:activity_id=ScenarioMIP',
             ],
+            # There is a bug for the original (i.e. including xarray open) code
+            # such that this results in empty Dataset lats/lons!
             # "intersects": {
             #     "type": "Polygon",
             #     "coordinates": [[
-            #         [140, -30],
-            #         [170, -30],
-            #         [170, -10],
-            #         [140, -10],
-            #         [140, -30],
+            #         [135, -35],
+            #         [175, -35],
+            #         [175, -5],
+            #         [135, -5],
+            #         [135, -35],
             #     ]],
             # },
             "datetime": '2201-01-01/2210-01-01',
             "data_selection": {
                 'variables': ['tasmin',],
                  'sel':{
-                     # TODO there is a cyclicity issue since e.g. 300, 330
-                     # not working? Anything 180-360 leads to errors despite
-                     # original Dataset being defined on 0-360???
                      'lon': slice(140, 170),
                      'lat': slice(-30, -10)
                  }
