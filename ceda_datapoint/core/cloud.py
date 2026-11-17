@@ -261,7 +261,7 @@ class DataPointCloudProduct(BasicAsset):
             local_only: bool = False,
             prepare_data: bool = True,
             **kwargs
-        ) -> xr.Dataset | cf.FieldList:
+        ) -> xr.Dataset | FieldList:
         """
         Open the dataset for this product.
 

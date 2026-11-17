@@ -7,8 +7,15 @@ import unittest.mock  # not provided in above general import by default
 
 import ceda_datapoint
 from ceda_datapoint import DataPointClient
-import cf
 import numpy as np
+
+try:
+    import cf
+    from cf import FieldList, Field
+except ImportError:
+    cf = None
+    FieldList = None
+    Field = None
 
 
 def setup_cluster(collection, search_query, verbose=False, use_client=False):
@@ -812,6 +819,9 @@ class TestDataPointIntegration(unittest.TestCase):
 
     def test_product_simple_open_with_cf(self):
         """Test opening datasets from a product in 'cf' mode."""
+        if cf is None:
+            return
+    
         prod = self.cluster[0]
         if self.verbose:
             print(
@@ -836,6 +846,8 @@ class TestDataPointIntegration(unittest.TestCase):
     @requires_ceda_filesystem
     def test_product_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a product in 'cf' mode."""
+        if cf is None:
+            return
         prod = self.cluster[0]
         if self.verbose:
             print(
@@ -851,6 +863,8 @@ class TestDataPointIntegration(unittest.TestCase):
 
     def test_cluster_simple_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
+        if cf is None:
+            return
         cluster = self.cluster
         if self.verbose:
             print(
@@ -875,6 +889,8 @@ class TestDataPointIntegration(unittest.TestCase):
     @requires_ceda_filesystem
     def test_cluster_simple_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
+        if cf is None:
+            return
         cluster = self.cluster
         if self.verbose:
             print(
@@ -961,6 +977,8 @@ class TestDataPointIntegration(unittest.TestCase):
 
     def test_product_compound_open_with_cf(self):
         """Test opening datasets from a product in 'cf' mode."""
+        if cf is None:
+            return
         prod = self.cluster_compound[0]
         if self.verbose:
             print(
@@ -988,6 +1006,8 @@ class TestDataPointIntegration(unittest.TestCase):
     @requires_ceda_filesystem
     def test_product_compound_open_with_cf_local_only(self):
         """Test opening local-only datasets from a product in 'cf' mode."""
+        if cf is None:
+            return
         prod = self.cluster_compound[0]
         if self.verbose:
             print(
@@ -1003,6 +1023,8 @@ class TestDataPointIntegration(unittest.TestCase):
 
     def test_cluster_compound_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
+        if cf is None:
+            return
         cluster = self.cluster_compound
         if self.verbose:
             print(
@@ -1027,6 +1049,8 @@ class TestDataPointIntegration(unittest.TestCase):
     @requires_ceda_filesystem
     def test_cluster_compound_open_with_cf_local_only(self):
         """Test opening local-only datasets from a cluster in 'cf' mode."""
+        if cf is None:
+            return
         cluster = self.cluster_compound
         if self.verbose:
             print(
