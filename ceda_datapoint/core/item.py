@@ -305,12 +305,12 @@ class DataPointItem(PropertiesMixin):
             print(f"{i[0]}: {i[1]}")
 
     def load_single_cloud_asset(
-            self,
-            asset_id,
-            cloudf: str | None = None,
-            order: int = 0,
-            asset_mappings: dict | None = None,
-            ) -> DataPointCloudProduct:
+        self,
+        asset_id,
+        cloudf: str | None = None,
+        order: int = 0,
+        asset_mappings: dict | None = None,
+    ) -> DataPointCloudProduct:
         """
         Load a single cloud asset - without construction of a cluster.
         """
@@ -323,13 +323,21 @@ class DataPointItem(PropertiesMixin):
             asset_id = self._cloud_assets[asset_id][0]
 
         plain_asset = self._assets[asset_id]
-        cloudf = cloudf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
+        cloudf = cloudf or identify_cloud_type(
+            asset_id, plain_asset, asset_mapper=mapper
+        )
 
         return DataPointCloudProduct(
-            plain_asset.to_dict(), 
-            id=asset_id, cloudf=cloudf, meta=self._meta, order=order,
-            stac_attrs=self._stac_attrs, properties=self._properties,
-            mapper=mapper, data_selection=self._data_selection)
+            plain_asset.to_dict(),
+            id=asset_id,
+            cloudf=cloudf,
+            meta=self._meta,
+            order=order,
+            stac_attrs=self._stac_attrs,
+            properties=self._properties,
+            mapper=mapper,
+            data_selection=self._data_selection,
+        )
 
     def _identify_cloud_assets(self) -> None:
         """
@@ -372,13 +380,12 @@ class DataPointItem(PropertiesMixin):
 
         asset_list = []
         for id, cloudf in self._cloud_assets:
-            
+
             if cloudf in priority:
                 order = priority.index(cloudf)
 
                 a = self.load_single_cloud_asset(
-                    id, cloudf=cloudf,
-                    order=order, asset_mappings=asset_mappings
+                    id, cloudf=cloudf, order=order, asset_mappings=asset_mappings
                 )
                 if show_unreachable or a.visibility != "unreachable":
                     asset_list.append(a)
@@ -400,11 +407,11 @@ class DataPointItem(PropertiesMixin):
 
 
 def identify_cloud_type(
-        id: str, 
-        asset,
-        cloudflabel: str = 'cloud_format',
-        asset_mapper: Union[DataPointMapper,None] = None,
-    ) -> str:
+    id: str,
+    asset,
+    cloudflabel: str = "cloud_format",
+    asset_mapper: Union[DataPointMapper, None] = None,
+) -> str:
     """
     Identify the type of cloud format
     to which this asset conforms.
@@ -423,12 +430,12 @@ def identify_cloud_type(
     # Try getting the correct property
     if hasattr(asset, cloudflabel):
         return getattr(asset, cloudflabel)
-    
-    if asset.to_dict().get(cloudflabel,None):
+
+    if asset.to_dict().get(cloudflabel, None):
         return asset.to_dict().get(cloudflabel)
-    
+
     # Otherwise identify from known methods
     if id in rf_titles:
         return method_format[id]
-    
+
     return None

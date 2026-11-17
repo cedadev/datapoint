@@ -14,8 +14,8 @@ LATLON_ALIASES = {
 }
 
 PAIRS_ONLY = [
-    'y',
-    'x',
+    "y",
+    "x",
 ]
 
-CEDA_DAP_PREFIX = 'https://dap.ceda.ac.uk'
+CEDA_DAP_PREFIX = "https://dap.ceda.ac.uk"

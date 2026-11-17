@@ -1,17 +1,18 @@
 """Integration test for opening datasets using CEDA Datapoint."""
 
-from contextlib import contextmanager
 import os
 import unittest
 import unittest.mock  # not provided in above general import by default
+from contextlib import contextmanager
+
+import numpy as np
 
 import ceda_datapoint
 from ceda_datapoint import DataPointClient
-import numpy as np
 
 try:
     import cf
-    from cf import FieldList, Field
+    from cf import Field, FieldList
 except ImportError:
     cf = None
     FieldList = None
@@ -82,7 +83,7 @@ class TestDataPointIntegration(unittest.TestCase):
             "query": [
                 "cmip6:experiment_id=ssp585",
                 "cmip6:activity_id=ScenarioMIP",
-                "cmip6:institution_id=KIOST"
+                "cmip6:institution_id=KIOST",
             ],
             "max_items": 10,
         }
@@ -102,7 +103,7 @@ class TestDataPointIntegration(unittest.TestCase):
         # works too.
         compound_search_inputs = {
             "query": [
-                'cmip6:activity_id=ScenarioMIP',
+                "cmip6:activity_id=ScenarioMIP",
             ],
             # There is a bug for the original (i.e. including xarray open) code
             # such that this results in empty Dataset lats/lons!
@@ -116,18 +117,19 @@ class TestDataPointIntegration(unittest.TestCase):
             #         [135, -35],
             #     ]],
             # },
-            "datetime": '2201-01-01/2210-01-01',
+            "datetime": "2201-01-01/2210-01-01",
             "data_selection": {
-                'variables': ['tasmin',],
-                 'sel':{
-                     'lon': slice(140, 170),
-                     'lat': slice(-30, -10)
-                 }
+                "variables": [
+                    "tasmin",
+                ],
+                "sel": {"lon": slice(140, 170), "lat": slice(-30, -10)},
             },
             "max_items": 10,
         }
         _, cls.search_compound, cls.cluster_compound = setup_cluster(
-            collection, compound_search_inputs, verbose=cls.verbose,
+            collection,
+            compound_search_inputs,
+            verbose=cls.verbose,
             use_client=cls.client,
         )
 
@@ -821,7 +823,7 @@ class TestDataPointIntegration(unittest.TestCase):
         """Test opening datasets from a product in 'cf' mode."""
         if cf is None:
             return
-    
+
         prod = self.cluster[0]
         if self.verbose:
             print(
@@ -859,7 +861,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # 'local_only' not supported for cf-python mode
         with self.assertRaises(ValueError):
-            fl = prod.open_dataset(mode="cf", local_only=True)
+            _ = prod.open_dataset(mode="cf", local_only=True)
 
     def test_cluster_simple_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
@@ -901,7 +903,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # 'local_only' not supported for cf-python mode
         with self.assertRaises(ValueError):
-            fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
+            _ = cluster.open_dataset(id=0, mode="cf", local_only=True)
 
     # Compound search tests below
 
@@ -1019,7 +1021,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # 'local_only' not supported for cf-python mode
         with self.assertRaises(ValueError):
-            fl = prod.open_dataset(mode="cf", local_only=True)
+            _ = prod.open_dataset(mode="cf", local_only=True)
 
     def test_cluster_compound_open_with_cf(self):
         """Test opening datasets from a cluster in 'cf' mode."""
@@ -1061,7 +1063,7 @@ class TestDataPointIntegration(unittest.TestCase):
 
         # 'local_only' not supported for cf-python mode
         with self.assertRaises(ValueError):
-            fl = cluster.open_dataset(id=0, mode="cf", local_only=True)
+            _ = cluster.open_dataset(id=0, mode="cf", local_only=True)
 
 
 if __name__ == "__main__":
