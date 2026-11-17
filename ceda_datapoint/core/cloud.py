@@ -148,7 +148,7 @@ class DataPointCloudProduct(BasicAsset):
         self,
         asset_stac: dict,
         id: str = None,
-        cf: str = None,
+        cloudf: str = None,
         order: int = None,
         mode: str = "xarray",
         meta: dict = None,
@@ -195,11 +195,11 @@ class DataPointCloudProduct(BasicAsset):
         )
 
         self._order = order
-        self._cloud_format = cf
+        self._cloud_format = cloudf
 
         self._data_selection = data_selection or {}
 
-        self._meta["cloud_format"] = cf
+        self._meta["cloud_format"] = cloudf
 
         self.visibility = "all"
 
