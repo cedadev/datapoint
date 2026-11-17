@@ -15,26 +15,18 @@ import xarray as xr
 from ceda_datapoint.core.asset import BasicAsset, DataPointMapper
 from ceda_datapoint.mixins import PropertiesMixin, UIMixin
 from ceda_datapoint.utils import hash_id, logstream
+from ceda_datapoint.aliases import LATLON_ALIASES, PAIRS_ONLY, CEDA_DAP_PREFIX
+
+try:
+    import cf
+    from cf import FieldList
+except ImportError:
+    cf = None
+    FieldList = None
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
 logger.propagate = False
-
-
-LATLON_ALIASES = {
-    "longitude": {
-        "longitude",
-        "lon",
-        "long",
-        "lng",
-        "x",
-    },
-    "latitude": {
-        "latitude",
-        "lat",
-        "y",
-    },
-}
 
 
 def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
@@ -66,7 +58,8 @@ def _decode_datetime_cf(datetime):
     """
     Decode pystac datetime to cf-python subspace.
     """
-    import cf
+    if cf is None:
+        raise ImportError('Package "cf-python" not installed')
 
     if isinstance(datetime, str):
         dt = datetime.split('/')
@@ -88,7 +81,15 @@ def _find_spatial_dims(ds) -> Union[list, None]:
     lat = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["latitude"]), None)
     lon = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["longitude"]), None)
 
+    warn_skip_spatial = False
+    if lat in PAIRS_ONLY:
+        if lon != PAIRS_ONLY[-PAIRS_ONLY.index(lat)]:
+            warn_skip_spatial = True
+
     if lat is None or lon is None:
+        warn_skip_spatial = True
+
+    if warn_skip_spatial:
         logger.warning(
             "Spatial AOI skipped - could not identify spatial dimensions. "
             "Accepted latitude aliases are: "
@@ -124,6 +125,14 @@ def _convert_lat_lon_names(selection_args):
                 "Expected a latitude alias "
                 f"{sorted(lat_names)} or a longitude alias "
                 f"{sorted(lon_names)}."
+            )
+    if formatted_selection_args['latitude'] in PAIRS_ONLY:
+        lo = formatted_selection_args["longitude"]
+        la = formatted_selection_args["latitude"]
+        if lo != PAIRS_ONLY[-PAIRS_ONLY.index(la)]:
+            raise ValueError(
+                f'Mismatching lat/lon dimension names: {la}, {lo}',
+                f' - pairing is enforced on the labels: "{PAIRS_ONLY}"'
             )
 
     return formatted_selection_args
@@ -342,6 +351,8 @@ class DataPointCloudProduct(BasicAsset):
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
+            if not prepare_data:
+                return ds
 
             return self._prepare_dataset_xr(ds)
 
@@ -358,7 +369,7 @@ class DataPointCloudProduct(BasicAsset):
             local_only: bool = False,
             prepare_data: bool = True,
             **kwargs
-        ) -> cf.FieldList:
+        ) -> FieldList:
         """
         Open the dataset for this product with cf-python.
 
@@ -374,54 +385,64 @@ class DataPointCloudProduct(BasicAsset):
         """
         # Import internally to avoid a hard dependency - have set in
         # packaging (pyproject.toml) as 'cf-output' install extra category
-        import cf
+        if cf is None:
+            raise ImportError('Package "cf-python" not installed')
 
-        try:
-            if self._cloud_format == 'zarr':
-                # Open Zarr to cf
-                fl = cf.read(self)
-            if self._cloud_format == 'kerchunk':
-                # Parse kwargs
-                mapper_kwargs = {}
-                mapper_kwargs = self._mapper.get(
-                    'mapper_kwargs',self._asset_stac) or mapper_kwargs
-                open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
+        if self._cloud_format == 'zarr':
+            # Open Zarr to cf
+            fl = cf.read(self)
+        if self._cloud_format == 'kerchunk':
+            fl = self._open_kerchunk_cf(local_only=local_only)
+        elif self._cloud_format == 'CFA':
+            # Open CFA
+            fl = cf.read(self.href, cfa="field")
+        else:
+            # Not supporting the 'cog' case here since this isn't
+            # supported by cf-python
+            raise ValueError(
+                'Cloud format not recognised - must be one of ("kerchunk", "CFA", '
+                '"zarr") for opening in the "cf" mode.'
+            )
 
-                # Local or remote HREF
-                href = self.href
+        if not prepare_data:
+            return fl
 
-                if local_only:
-                    href = _fetch_kerchunk_make_local(href)
+        return self._prepare_dataset_cf(fl)
 
-                # Create the filesystem and mapping object
-                fs = fsspec.filesystem(
-                    "reference",
-                    fo=href,
-                    remote_protocol="https",
-                    # Important: need BOTH of these to be set True else get
-                    # (a)sync inconsistency issues.
-                    remote_options={"asynchronous": True},
-                    asynchronous=True,
-                )
-                kerchunk = fs.get_mapper()
+    def _open_kerchunk_cf(
+            self,
+            local_only: bool = False):
 
-                # Finally read from the filesystem mapper
-                fl = cf.read(kerchunk)
-            elif self._cloud_format == 'CFA':
-                # Open CFA
-                fl = cf.read(dataset, cfa="field")
-            else:
-                # Not supporting the 'cog' case here since this isn't
-                # supported by cf-python
-                raise ValueError(
-                    'Cloud format not recognised - must be one of ("kerchunk", "CFA", '
-                    '"zarr") for opening in the "cf" mode.'
-                )
+        # Parse kwargs
+        mapper_kwargs = {}
+        mapper_kwargs = self._mapper.get(
+            'mapper_kwargs',self._asset_stac) or mapper_kwargs
+        open_zarr_kwargs = self._mapper.get('open_zarr_kwargs', self._asset_stac) or {}
 
-            return self._prepare_dataset_cf(fl)
+        # Local or remote HREF
+        href = self.href
 
-        except ValueError as err:
-            raise err
+        if local_only:
+            href = _fetch_kerchunk_make_local(href)
+
+        # Important: need BOTH of these to be set True else get
+        # (a)sync inconsistency issues.
+        zarr_kwargs = {
+            'remote_options': {"asynchronous": True},
+            'asynchronous':True
+        } | open_zarr_kwargs
+
+        # Create the filesystem and mapping object
+        fs = fsspec.filesystem(
+            "reference",
+            fo=href,
+            remote_protocol="https",
+            **zarr_kwargs
+        )
+        kerchunk = fs.get_mapper()
+
+        # Finally read from the filesystem mapper
+        return cf.read(kerchunk)
 
     def _open_kerchunk(
             self,
@@ -559,7 +580,7 @@ class DataPointCloudProduct(BasicAsset):
             for v in variables:
                 if v not in ds:
                     logger.warning(
-                        'Variable selection could not be applied - ',
+                        'Variable selection could not be applied - '
                         f'no "{v}" variable present.'
                     )
                 else:
@@ -581,10 +602,11 @@ class DataPointCloudProduct(BasicAsset):
 
     def _prepare_dataset_cf(
             self,
-            fl: cf.FieldList,
-        ) -> cf.FieldList:
+            fl: FieldList,
+        ) -> FieldList:
         """Perform any dataset subspaces here."""
-        import cf
+        if cf is None:
+            raise ImportError('Package "cf-python" not installed')
 
         # Get relevant search terms
         intersects = self._meta['search_terms'].get('intersects',None)
@@ -638,29 +660,28 @@ class DataPointCloudProduct(BasicAsset):
             x = field.dimension_coordinate("X", default=None)
             y = field.dimension_coordinate("Y", default=None)
 
-            if y is not None and x is not None:
-                if intersects is not None:
-                    if intersects["type"] == "Polygon":
-                        coords = intersects["coordinates"]
-                        if len(coords) == 1:
-                            coords = coords[0]
+            if y is not None and x is not None and intersects is not None:
+                if intersects.get("type",None) == "Polygon":
+                    coords = intersects["coordinates"]
+                    if len(coords) == 1:
+                        coords = coords[0]
 
-                        lons = [c[0] for c in coords]
-                        lats = [c[1] for c in coords]
+                    lons = [c[0] for c in coords]
+                    lats = [c[1] for c in coords]
 
-                        # The X case may only work assuming the field has
-                        # appropriate cyclicity for the longitude, but the
-                        # cyclicity should be determined automatically by
-                        # cf-python and hence it should be OK.
-                        field = field.subspace(
-                            X=cf.wi(min(lons), max(lons)),
-                            Y=cf.wi(min(lats), max(lats)),
-                        )
-                    else:
-                        logger.warning(
-                            "Unsupported intersection type for Single Search "
-                            "Selection - AOI not applied."
-                        )
+                    # The X case may only work assuming the field has
+                    # appropriate cyclicity for the longitude, but the
+                    # cyclicity should be determined automatically by
+                    # cf-python and hence it should be OK.
+                    field = field.subspace(
+                        X=cf.wi(min(lons), max(lons)),
+                        Y=cf.wi(min(lats), max(lats)),
+                    )
+                else:
+                    logger.warning(
+                        "Unsupported intersection type for Single Search "
+                        "Selection - AOI not applied."
+                    )
 
             # Apply datetime selection if requested
             if datetime is not None:
@@ -887,8 +908,7 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
     Fetch a kerchunk file, open as json content and do find/replace
     to access local files only.
     """
-    ceda_dap_prefix = 'https://dap.ceda.ac.uk'
-    href_local = href.replace(ceda_dap_prefix, '')
+    href_local = href.replace(CEDA_DAP_PREFIX, '')
 
     if not os.path.isfile(href_local):
         attempts = 0

@@ -281,8 +281,8 @@ class DataPointItem(PropertiesMixin):
             return data_list
 
         for id, asset in self._assets.items():
-            cf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
-            if cf is None:
+            cloudf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
+            if cloudf is None:
                 data_list.append(asset.href)
         return data_list
 
@@ -302,9 +302,9 @@ class DataPointItem(PropertiesMixin):
     def load_single_cloud_asset(
             self,
             asset_id,
-            cf: str = None,
+            cloudf: str | None = None,
             order: int = 0,
-            asset_mappings: dict = None,
+            asset_mappings: dict | None = None,
             ) -> DataPointCloudProduct:
         """
         Load a single cloud asset - without construction of a cluster.
@@ -318,11 +318,11 @@ class DataPointItem(PropertiesMixin):
             asset_id = self._cloud_assets[asset_id][0]
 
         plain_asset = self._assets[asset_id]
-        cf = cf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
+        cloudf = cloudf or identify_cloud_type(asset_id, plain_asset, asset_mapper=mapper)
 
         return DataPointCloudProduct(
             plain_asset.to_dict(), 
-            id=asset_id, cf=cf, meta=self._meta, order=order,
+            id=asset_id, cloudf=cloudf, meta=self._meta, order=order,
             stac_attrs=self._stac_attrs, properties=self._properties,
             mapper=mapper, data_selection=self._data_selection)
 
@@ -339,9 +339,9 @@ class DataPointItem(PropertiesMixin):
             return cloud_list
 
         for id, asset in self._assets.items():
-            cf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
-            if cf is not None:
-                cloud_list.append((id, cf))
+            cloudf = identify_cloud_type(id, asset, asset_mapper=self._mapper)
+            if cloudf is not None:
+                cloud_list.append((id, cloudf))
 
         # Pointer to cloud assets in the main assets list.
         return cloud_list
@@ -367,14 +367,13 @@ class DataPointItem(PropertiesMixin):
         priority = priority or file_formats
 
         asset_list = []
-        for id, cf in self._cloud_assets:
+        for id, cloudf in self._cloud_assets:
             
-            if cf in priority:
-                order = priority.index(cf)
-                asset_id = f'{self._id}-{id}'
+            if cloudf in priority:
+                order = priority.index(cloudf)
 
                 a = self.load_single_cloud_asset(
-                    id, cf=cf,
+                    id, cloudf=cloudf,
                     order=order, asset_mappings=asset_mappings
                 )
                 if show_unreachable or a.visibility != 'unreachable':
@@ -401,7 +400,7 @@ class DataPointItem(PropertiesMixin):
 def identify_cloud_type(
         id: str, 
         asset,
-        cflabel: str = 'cloud_format',
+        cloudflabel: str = 'cloud_format',
         asset_mapper: Union[DataPointMapper,None] = None,
     ) -> str:
     """
@@ -409,22 +408,22 @@ def identify_cloud_type(
     to which this asset conforms.
     """
 
-    cf = None
+    cloudf = None
     # Try using the mapper tool
     if asset_mapper is not None:
-        cf = asset_mapper.get(cflabel, asset)
+        cloudf = asset_mapper.get(cloudflabel, asset)
 
-    if cf is not None:
-        return cf
+    if cloudf is not None:
+        return cloudf
 
     rf_titles = list(method_format.keys())
 
     # Try getting the correct property
-    if hasattr(asset, cflabel):
-        return getattr(asset, cflabel)
+    if hasattr(asset, cloudflabel):
+        return getattr(asset, cloudflabel)
     
-    if asset.to_dict().get(cflabel,None):
-        return asset.to_dict().get(cflabel)
+    if asset.to_dict().get(cloudflabel,None):
+        return asset.to_dict().get(cloudflabel)
     
     # Otherwise identify from known methods
     if id in rf_titles:
