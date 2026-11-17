@@ -4435,5 +4435,5 @@ cf-output = ["cf-python"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.11,<4"
-content-hash = "f4a298ef6ff9968dd15eb7cc11c825f11aa94537e29b09e7d5add008200ea0d0"
+python-versions = ">=3.11,<3.14"
+content-hash = "823c4dac3eb31b49fa0a3abeae13ebbd9d0b06f332245dd3896bb39de61ec1c7"
