@@ -1,13 +1,13 @@
 [project]
 name = "ceda-datapoint"
-version = "0.6.0"
+version = "0.7.0"
 description = "Datapoint provides python-based search/access tools for using data primarily from the CEDA Archive."
 authors = [
     {name = "Daniel Westwood",email = "daniel.westwood@stfc.ac.uk"}
 ]
 license = {text = "BSD 3"}
 readme = "README.md"
-requires-python = ">=3.9,<4"
+requires-python = ">=3.11,<4"
 dependencies = [
     "fsspec (>=2024.9.0)",
     "xarray (>=2024.6.0)",
