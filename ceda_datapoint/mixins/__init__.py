@@ -1,2 +1,2 @@
-from .general import UIMixin
-from .properties import PropertiesMixin
+from .general import UIMixin as UIMixin
+from .properties import PropertiesMixin as PropertiesMixin

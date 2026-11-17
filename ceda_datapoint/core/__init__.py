@@ -1,1 +1,1 @@
-from .client import DataPointClient
+from .client import DataPointClient as DataPointClient
