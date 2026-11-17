@@ -20,6 +20,9 @@ method_format = {
     "reference_file_2": "CFA",
     "cog": "cog",
     "zstore": "zarr",
+    'kerchunk':'kerchunk',
+    'CFA':'CFA',
+    'zarr':'zarr'
 }
 
 
