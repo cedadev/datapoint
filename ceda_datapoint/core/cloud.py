@@ -7,13 +7,22 @@ import logging
 import os
 from typing import Any, Union
 
+import fsspec
 import requests
 import rioxarray as rxr
 import xarray as xr
 
+from ceda_datapoint.aliases import CEDA_DAP_PREFIX, LATLON_ALIASES, PAIRS_ONLY
 from ceda_datapoint.core.asset import BasicAsset, DataPointMapper
 from ceda_datapoint.mixins import UIMixin
 from ceda_datapoint.utils import hash_id, logstream
+
+try:
+    import cf
+    from cf import FieldList
+except ImportError:
+    cf = None
+    FieldList = None
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logstream)
@@ -22,7 +31,7 @@ logger.propagate = False
 
 def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
     """
-    Decode GeoJSON Polygon to Xarray Selection.
+    Decode GeoJSON Polygon to xarray Selection.
     """
     selects = {}
     for i, dim in enumerate(spatial_dims):
@@ -32,7 +41,7 @@ def _decode_polygon(spatial_dims: list, coordinates: list) -> dict:
     return selects
 
 
-def _decode_datetime(datetime):
+def _decode_datetime_xr(datetime):
     """
     Decode pystac datetime to xarray select.
     """
@@ -45,39 +54,87 @@ def _decode_datetime(datetime):
         return dt
 
 
+def _decode_datetime_cf(datetime):
+    """
+    Decode pystac datetime to cf-python subspace.
+    """
+    if cf is None:
+        raise ImportError('Package "cf-python" not installed')
+
+    if isinstance(datetime, str):
+        dt = datetime.split("/")
+
+    # Determine if a range or a single value for datetime and
+    # provide the appropriate cf query objcet to provide to the
+    # subspace method.
+    if len(dt) == 2:
+        return cf.wi(cf.dt(dt[0]), cf.dt(dt[1]))
+    elif len(dt) == 1:
+        return cf.isclose(cf.dt(dt[0]))
+    else:
+        raise ValueError(f"Can't decode datetime specification: {datetime}")
+
+
 def _find_spatial_dims(ds) -> Union[list, None]:
-    """
-    Determine the names of the spatial dims.
-    """
+    """Determine the names of the spatial dimensions."""
+    lat = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["latitude"]), None)
+    lon = next((d for d in ds.dims if d.lower() in LATLON_ALIASES["longitude"]), None)
 
-    accepted_lats = ["lat", "latitude", "Lat", "Latitude"]
-    accepted_lons = ["lon", "longitude", "Lon", "Longitude"]
+    warn_skip_spatial = False
+    if lat in PAIRS_ONLY:
+        if lon != PAIRS_ONLY[-PAIRS_ONLY.index(lat)]:
+            warn_skip_spatial = True
 
-    convention = None
+    if lat is None or lon is None:
+        warn_skip_spatial = True
 
-    for convent in range(len(accepted_lats)):
-        lat = accepted_lats[convent]
-        lon = accepted_lons[convent]
-        if lat in ds.dims and lon in ds.dims:
-            convention = convent
-
-    if convention is None:
+    if warn_skip_spatial:
         logger.warning(
-            "Spatial AOI Skipped - Could not identify spatial dims. "
-            f"Accepted dimensions are {accepted_lats} and {accepted_lons}"
+            "Spatial AOI skipped - could not identify spatial dimensions. "
+            "Accepted latitude aliases are: "
+            f"{sorted(LATLON_ALIASES['latitude'])}; "
+            "accepted longitude aliases are: "
+            f"{sorted(LATLON_ALIASES['longitude'])}."
         )
         return None
 
-    lat = accepted_lats[convention]
-    lon = accepted_lons[convention]
-
     # Determine lat/lon ordering in dataset.
-    lat_ind = list(ds.dims).index(lat)
-    lon_ind = list(ds.dims).index(lon)
-    if lat_ind > lon_ind:
-        return [lon, lat]
-    else:
+    dims = list(ds.dims)
+    if dims.index(lat) < dims.index(lon):
         return [lat, lon]
+    else:
+        return [lon, lat]
+
+
+def _convert_lat_lon_names(selection_args):
+    """Convert latitude/longitude dimension aliases to canonical names."""
+    formatted_selection_args = {}
+    for name, value in selection_args.items():
+        key = str(name).strip().lower()
+        lat_names = LATLON_ALIASES["latitude"]
+        lon_names = LATLON_ALIASES["longitude"]
+
+        if key in lat_names:
+            formatted_selection_args["latitude"] = value
+        elif key in lon_names:
+            formatted_selection_args["longitude"] = value
+        else:
+            raise ValueError(
+                f"Unrecognised spatial dimension {name!r}. "
+                "Expected a latitude alias "
+                f"{sorted(lat_names)} or a longitude alias "
+                f"{sorted(lon_names)}."
+            )
+    if formatted_selection_args["latitude"] in PAIRS_ONLY:
+        lo = formatted_selection_args["longitude"]
+        la = formatted_selection_args["latitude"]
+        if lo != PAIRS_ONLY[-PAIRS_ONLY.index(la)]:
+            raise ValueError(
+                f"Mismatching lat/lon dimension names: {la}, {lo}",
+                f' - pairing is enforced on the labels: "{PAIRS_ONLY}"',
+            )
+
+    return formatted_selection_args
 
 
 class DataPointCloudProduct(BasicAsset):
@@ -90,7 +147,7 @@ class DataPointCloudProduct(BasicAsset):
         self,
         asset_stac: dict,
         id: str = None,
-        cf: str = None,
+        cloudf: str = None,
         order: int = None,
         mode: str = "xarray",
         meta: dict = None,
@@ -121,10 +178,11 @@ class DataPointCloudProduct(BasicAsset):
         :param properties:  (dict) Properties of the item in the ``properties`` field.
         """
 
-        if mode != "xarray":
+        if mode not in ("xarray", "cf"):
             raise NotImplementedError(
-                'Only "xarray" mode currently implemented - cf-python is a future option'
+                f'Bad mode value {mode}: only "xarray" and "cf" are valid modes.'
             )
+        self.mode = mode
 
         super().__init__(
             asset_stac,
@@ -136,11 +194,11 @@ class DataPointCloudProduct(BasicAsset):
         )
 
         self._order = order
-        self._cloud_format = cf
+        self._cloud_format = cloudf
 
         self._data_selection = data_selection or {}
 
-        self._meta["cloud_format"] = cf
+        self._meta["cloud_format"] = cloudf
 
         self.visibility = "all"
 
@@ -186,6 +244,13 @@ class DataPointCloudProduct(BasicAsset):
     ) -> Any:
         """
         Override for basic asset get function.
+
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
+
+        :param prepare_data:  (bool) Apply dataset selections after opening.
+
         """
         return self.open_dataset(local_only=local_only, prepare_data=prepare_data)
 
@@ -195,15 +260,24 @@ class DataPointCloudProduct(BasicAsset):
         local_only: bool = False,
         prepare_data: bool = True,
         **kwargs,
-    ) -> xr.Dataset:
+    ) -> xr.Dataset | FieldList:
         """
-        Open the dataset for this product (in xarray).
+        Open the dataset for this product.
+
         Specific methods to open cloud formats are private since
         the method should be determined by internal values not user
         input.
 
+        :param mode:  (str) Library to use for opening datasets. Can be either
+            'xarray', returning a `xr.Dataset` object, or 'cf', returning a
+            `cf.FieldList` object.
+
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
-            convert all hrefs and internal Kerchunk links to use local paths.
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
+
+        :param prepare_data:  (bool) Apply dataset selections after opening.
+
         """
         if mode != "xarray":
             raise NotImplementedError(
@@ -222,6 +296,40 @@ class DataPointCloudProduct(BasicAsset):
                 "to open this dataset."
             )
 
+        if local_only and mode == "cf":
+            raise ValueError("'local_only' is not supported in 'cf' mode.")
+
+        if mode == "xarray":
+            return self.open_dataset_with_xr(
+                local_only=local_only,
+                prepare_data=prepare_data,
+                **kwargs,
+            )
+        elif mode == "cf":
+            return self.open_dataset_with_cf(
+                local_only=local_only,
+                prepare_data=prepare_data,
+                **kwargs,
+            )
+        else:
+            raise NotImplementedError(
+                f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
+            )
+
+    def open_dataset_with_xr(
+        self, local_only: bool = False, prepare_data: bool = True, **kwargs
+    ) -> xr.Dataset:
+        """
+        Open the dataset for this product with xarray.
+
+        Returns a `xr.Dataset` object representing the dataset.
+
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param prepare_data:  (bool) Apply dataset selections after opening.
+
+        """
         try:
             if self._cloud_format == "kerchunk":
                 ds = self._open_kerchunk(local_only=local_only, **kwargs)
@@ -235,8 +343,10 @@ class DataPointCloudProduct(BasicAsset):
                 raise ValueError(
                     'Cloud format not recognised - must be one of ("kerchunk", "CFA", "zarr", "cog")'
                 )
+            if not prepare_data:
+                return ds
 
-            return self._prepare_dataset(ds, prepare_data=prepare_data)
+            return self._prepare_dataset_xr(ds)
 
         except ValueError as err:
             raise err
@@ -244,6 +354,79 @@ class DataPointCloudProduct(BasicAsset):
             raise FileNotFoundError(
                 "The requested resource could not be located: " f"{self.href}"
             )
+
+    def open_dataset_with_cf(
+        self, local_only: bool = False, prepare_data: bool = True, **kwargs
+    ) -> FieldList:
+        """
+        Open the dataset for this product with cf-python.
+
+        Returns a `cf.FieldList` object of one or more `cf.Field` objects
+        representing the dataset.
+
+        :param local_only:  (bool) Switch to using local-only files - DataPoint will
+            convert all hrefs and internal Kerchunk links to use local paths.
+
+        :param prepare_data:  (bool) Apply dataset selections ('subspaces'
+            in 'cf-python' terminology) after opening.
+
+        """
+        # Import internally to avoid a hard dependency - have set in
+        # packaging (pyproject.toml) as 'cf-output' install extra category
+        if cf is None:
+            raise ImportError('Package "cf-python" not installed')
+
+        if self._cloud_format == "zarr":
+            # Open Zarr to cf
+            fl = cf.read(self)
+        if self._cloud_format == "kerchunk":
+            fl = self._open_kerchunk_cf(local_only=local_only)
+        elif self._cloud_format == "CFA":
+            # Open CFA
+            fl = cf.read(self.href, cfa="field")
+        else:
+            # Not supporting the 'cog' case here since this isn't
+            # supported by cf-python
+            raise ValueError(
+                'Cloud format not recognised - must be one of ("kerchunk", "CFA", '
+                '"zarr") for opening in the "cf" mode.'
+            )
+
+        if not prepare_data:
+            return fl
+
+        return self._prepare_dataset_cf(fl)
+
+    def _open_kerchunk_cf(self, local_only: bool = False):
+
+        # Parse kwargs
+        mapper_kwargs = {}
+        mapper_kwargs = (
+            self._mapper.get("mapper_kwargs", self._asset_stac) or mapper_kwargs
+        )
+        open_zarr_kwargs = self._mapper.get("open_zarr_kwargs", self._asset_stac) or {}
+
+        # Local or remote HREF
+        href = self.href
+
+        if local_only:
+            href = _fetch_kerchunk_make_local(href)
+
+        # Important: need BOTH of these to be set True else get
+        # (a)sync inconsistency issues.
+        zarr_kwargs = {
+            "remote_options": {"asynchronous": True},
+            "asynchronous": True,
+        } | open_zarr_kwargs
+
+        # Create the filesystem and mapping object
+        fs = fsspec.filesystem(
+            "reference", fo=href, remote_protocol="https", **zarr_kwargs
+        )
+        kerchunk = fs.get_mapper()
+
+        # Finally read from the filesystem mapper
+        return cf.read(kerchunk)
 
     def _open_kerchunk(
         self,
@@ -318,8 +501,9 @@ class DataPointCloudProduct(BasicAsset):
 
         return rxr.open_rasterio(self.href, **open_cog_kwargs)
 
-    def _prepare_dataset(
-        self, ds: xr.Dataset, prepare_data: bool = True
+    def _prepare_dataset_xr(
+        self,
+        ds: xr.Dataset,
     ) -> Union[xr.Dataset, xr.DataArray]:
         """Perform any dataset selections here."""
 
@@ -369,7 +553,7 @@ class DataPointCloudProduct(BasicAsset):
                 )
             else:
                 if isinstance(datetime, str):
-                    time_sel = _decode_datetime(datetime)
+                    time_sel = _decode_datetime_xr(datetime)
                 else:
                     time_sel = slice(datetime[0], datetime[1])
                 ds = ds.sel(time=time_sel)
@@ -403,6 +587,117 @@ class DataPointCloudProduct(BasicAsset):
             ds = ds.isel(**isel)
 
         return ds
+
+    def _prepare_dataset_cf(
+        self,
+        fl: FieldList,
+    ) -> FieldList:
+        """Perform any dataset subspaces here."""
+        if cf is None:
+            raise ImportError('Package "cf-python" not installed')
+
+        # Get relevant search terms
+        intersects = self._meta["search_terms"].get("intersects", None)
+        datetime = self._meta["search_terms"].get("datetime", None)
+        query = self._meta["search_terms"].get("query", [])
+
+        # Get data selection choices
+        vq = None
+        for ql in query:
+            if "variables" in ql:
+                vq = ql.split("=")[-1]
+
+        variables = self._data_selection.get("variables", None) or vq
+        sel = self._data_selection.get("sel", None)
+        isel = self._data_selection.get("isel", None)
+
+        # Filter the FieldList to the requested variables
+        fl_selection = fl
+        if variables is not None:
+            for field in fl_selection:
+                field.dump()
+
+            # 'variables' input is a list so unpack as arguments
+            # to select_by_ncvar
+            fl_selection = fl.select_by_ncvar(*variables)
+
+            # Returns empty fieldlist if no fields captured by selection
+            if not fl_selection:
+                logger.warning(
+                    "Variable selection could not be applied: "
+                    f"no such variables in FieldList: {variables}"
+                )
+        else:
+            logger.warning("No variable selection provided.")
+
+        # Create output FieldList
+        out = cf.FieldList()
+
+        # Apply collapses on the fields invididually, but at the end
+        # we aggregate in case we can simplify.
+        for field in fl_selection:
+            # Handle any empty or size one axes - see cf.Field.squeeze
+            # (ncas-cms.github.io/cf-python/method/cf.Field.squeeze.html)
+            # for details
+            field.squeeze(inplace=True)
+
+            # Apply polygon selection on spatial dimensions
+            # Check for horizontal X coordinate and horizontal X coordinate
+            x = field.dimension_coordinate("X", default=None)
+            y = field.dimension_coordinate("Y", default=None)
+
+            if y is not None and x is not None and intersects is not None:
+                if intersects.get("type", None) == "Polygon":
+                    coords = intersects["coordinates"]
+                    if len(coords) == 1:
+                        coords = coords[0]
+
+                    lons = [c[0] for c in coords]
+                    lats = [c[1] for c in coords]
+
+                    # The X case may only work assuming the field has
+                    # appropriate cyclicity for the longitude, but the
+                    # cyclicity should be determined automatically by
+                    # cf-python and hence it should be OK.
+                    field = field.subspace(
+                        X=cf.wi(min(lons), max(lons)),
+                        Y=cf.wi(min(lats), max(lats)),
+                    )
+                else:
+                    logger.warning(
+                        "Unsupported intersection type for Single Search "
+                        "Selection - AOI not applied."
+                    )
+
+            # Apply datetime selection if requested
+            if datetime is not None:
+                if not field.coordinate("time"):
+                    logger.warning(
+                        "Time selection could not be applied to "
+                        f"{field}: field has no time coordinate."
+                    )
+
+                # Needs decoding from 'start/end' format
+                dt_query = _decode_datetime_cf(datetime)
+                field = field.subspace(T=dt_query)
+
+            # Apply spatial subspaces
+            if sel is not None:
+                # Note sel args are directly compatible with cf-python
+                # subspace method
+                sel = _convert_lat_lon_names(sel)
+                field = field.subspace(**sel)
+            if isel is not None:
+                isel = _convert_lat_lon_names(isel)
+
+                # Process isel args -> cf-python subspacing via indices
+                indices = field.indices(**isel)
+                field = field[indices]
+
+            out.append(field)
+
+        # Re-aggregate to potentially simplify the result
+        return cf.aggregate(out)
 
     def _set_visibility(self) -> None:
         """Determine if this product is reachable"""
@@ -541,19 +836,27 @@ class DataPointCluster(UIMixin):
         dataset can be indexed either by id or position within this
         cluster's set of datasets.
 
-        :param id:      (str) The ID or index of the dataset in the resulting cluster.
+        :param id:  (str) The ID or index of the dataset in the resulting cluster.
 
-        :param mode:    (str) The type of dataset to be returned, currently only Xarray is supported (0.3.X)
+        :param mode:  (str) Library to use for opening datasets. Can be either
+            'xarray', returning a `xr.Dataset` object, or 'cf', returning a
+            `cf.FieldList` object.
 
         :param local_only:  (bool) Switch to using local-only files - DataPoint will
-            convert all hrefs and internal Kerchunk links to use local paths."""
+            convert all hrefs and internal Kerchunk links to use local paths. Note
+            that local_only is only available for the 'xarray' mode.
 
-        if mode != "xarray":
+        """
+
+        if mode not in ("xarray", "cf"):
             raise NotImplementedError(
-                'Only "xarray" mode currently implemented - cf-python is a future option'
+                f'Only "xarray" and "cf" are valid modes. Got mode of: {mode}'
             )
 
         local_only = local_only or self._local_only
+
+        if local_only and mode == "cf":
+            raise ValueError("'local_only' is not supported in 'cf' mode.")
 
         if isinstance(id, int):
             id = list(self._products.keys())[id]
@@ -563,14 +866,18 @@ class DataPointCluster(UIMixin):
             return None
 
         product = self._products[id]
-        return product.open_dataset(local_only=local_only, **kwargs)
+
+        if mode == "xarray":
+            return product.open_dataset_with_xr(local_only=local_only, **kwargs)
+        elif mode == "cf":
+            return product.open_dataset_with_cf(local_only=local_only, **kwargs)
 
     def open_datasets(self):
         raise NotImplementedError('"Combine" feature has not yet been implemented')
 
 
 def _zarr_kwargs_default(add_kwargs: dict = None) -> dict:
-    """Add any default kwargs for specific requests"""
+    """Add any default kwargs for specific requests."""
 
     add_kwargs = add_kwargs or {}
 
@@ -585,15 +892,18 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
     Fetch a kerchunk file, open as json content and do find/replace
     to access local files only.
     """
-    href_local = href.replace("https://dap.ceda.ac.uk", "")
+    href_local = href.replace(CEDA_DAP_PREFIX, "")
+
     if not os.path.isfile(href_local):
         attempts = 0
         success = False
+
         while attempts < 3 and not success:
             resp = requests.get(href)
             if resp.status_code == 200:
                 success = True
             attempts += 1
+
         if attempts >= 3 and not success:
             raise ValueError(
                 f"File {href}: Download unsuccessful - "
@@ -604,10 +914,25 @@ def _fetch_kerchunk_make_local(href: str) -> dict:
         with open(href_local) as f:
             refs = json.load(f)
 
-    for key in refs["refs"].keys():
-        v = refs["refs"][key]
+    for key, v in refs["refs"].items():
         if isinstance(v, list) and len(v) == 3:
-            # First character
-            if "https://" in v[0]:
-                refs["refs"][key][0] = v[0].replace("https://dap.ceda.ac.uk/", "/")
+            url = v[0]
+
+            if isinstance(url, str) and url.startswith(CEDA_DAP_PREFIX + "/"):
+                # Map URL to local path
+                local_path = url.replace(CEDA_DAP_PREFIX + "/", "/")
+
+                # Normalize path
+                local_path = os.path.abspath(local_path)
+
+                # Validate existence (critical for local_only mode)
+                if not os.path.exists(local_path):
+                    raise FileNotFoundError(
+                        f"Missing local file for kerchunk reference: "
+                        f"{url} expected at: {local_path}"
+                    )
+
+                # Convert to proper file URI
+                refs["refs"][key][0] = f"file://{local_path}"
+
     return refs

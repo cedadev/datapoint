@@ -376,7 +376,7 @@ Example query where the single-search selections will be applied:
          'variables=clt',
       ],
       data_selection={
-         'variables':['clt'] # Alternative variable search
+         'variables':['clt'], # Alternative variable search
          'sel':{
             'nv':slice(0,5)
          }
